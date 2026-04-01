@@ -131,10 +131,29 @@ enum WorkspaceCloner {
         try configurePathRemote(in: projectPath, name: remoteName, path: workspace.path)
         try runGitOrThrow(in: projectPath, args: ["fetch", remoteName, workspace.branch])
 
-        let (mergeOk, mergeOutput) = runGitSync(in: projectPath, args: ["merge", "--no-edit", "\(remoteName)/\(workspace.branch)"])
+        let ref = "\(remoteName)/\(workspace.branch)"
+
+        // Try fast-forward first to avoid unnecessary merge commits
+        let (ffOk, _) = runGitSync(in: projectPath, args: ["merge", "--ff-only", ref])
+        if ffOk {
+            return "Merged '\(workspace.name)' into '\(workspace.parentBranch)'"
+        }
+
+        // Branches diverged — rebase workspace commits onto the project branch then fast-forward
+        let tempBranch = "forge-rebase-\(workspace.name)"
+        defer { _ = runGitSync(in: projectPath, args: ["branch", "-D", tempBranch]) }
+
+        _ = runGitSync(in: projectPath, args: ["checkout", "-b", tempBranch, ref])
+        let (rebaseOk, rebaseOutput) = runGitSync(in: projectPath, args: ["rebase", workspace.parentBranch])
+        if !rebaseOk {
+            _ = runGitSync(in: projectPath, args: ["rebase", "--abort"])
+            _ = runGitSync(in: projectPath, args: ["checkout", workspace.parentBranch])
+            throw MergeError.conflict(rebaseOutput.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+
+        _ = runGitSync(in: projectPath, args: ["checkout", workspace.parentBranch])
+        let (mergeOk, mergeOutput) = runGitSync(in: projectPath, args: ["merge", "--ff-only", tempBranch])
         if !mergeOk {
-            // Abort the failed merge so the repo isn't left in a broken state
-            _ = runGitSync(in: projectPath, args: ["merge", "--abort"])
             throw MergeError.conflict(mergeOutput.trimmingCharacters(in: .whitespacesAndNewlines))
         }
 
