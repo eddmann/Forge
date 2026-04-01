@@ -448,6 +448,16 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
 
         // Cmd-modified keys: handle known terminal bindings, drop the rest (menu shortcuts)
         if flags.contains(.command) {
+            switch event.keyCode {
+            case 123: // Cmd+Left — move to beginning of line (send Ctrl+A)
+                sendInput("\u{01}")
+                return
+            case 124: // Cmd+Right — move to end of line (send Ctrl+E)
+                sendInput("\u{05}")
+                return
+            default:
+                break
+            }
             if let key = event.charactersIgnoringModifiers {
                 switch key {
                 case "\u{7F}": // Cmd+Delete — kill line (send Ctrl+U)
