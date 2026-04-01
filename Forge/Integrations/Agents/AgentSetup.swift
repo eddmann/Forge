@@ -15,7 +15,7 @@ class AgentSetup {
         installClaudeCodeHooks()
         installCodexHooks()
         installPiExtension()
-        // OpenCode: no disk setup needed — uses OPENCODE_CONFIG_CONTENT env var
+        installOpenCodePlugin()
     }
 
     // MARK: - Claude Code
@@ -245,5 +245,78 @@ class AgentSetup {
             try? extensionCode.write(toFile: extensionPath, atomically: true, encoding: .utf8)
         }
         // If file exists but doesn't contain FORGE_SOCKET, don't overwrite user's file
+    }
+
+    // MARK: - OpenCode
+
+    /// Drops forge-bridge.ts plugin into ~/.config/opencode/plugin/
+    private func installOpenCodePlugin() {
+        let configDir = NSHomeDirectory() + "/.config/opencode"
+        let pluginDir = configDir + "/plugin"
+        let pluginPath = pluginDir + "/forge-bridge.ts"
+        let fm = FileManager.default
+
+        // Only install if OpenCode config dir exists (or create plugin dir inside it)
+        // OpenCode uses ~/.config/opencode/ as its global config dir
+        if !fm.fileExists(atPath: configDir) {
+            try? fm.createDirectory(atPath: configDir, withIntermediateDirectories: true)
+        }
+        if !fm.fileExists(atPath: pluginDir) {
+            try? fm.createDirectory(atPath: pluginDir, withIntermediateDirectories: true)
+        }
+
+        let pluginCode = """
+        import * as net from "node:net";
+
+        export const server = async (ctx) => {
+          const socketPath = process.env.FORGE_SOCKET || `${process.env.HOME}/.forge/state/forge.sock`;
+          const session = process.env.FORGE_SESSION;
+
+          if (!process.env.FORGE_SOCKET && !process.env.FORGE_SESSION) return {};
+
+          function send(event, data = {}) {
+            try {
+              const sock = net.createConnection(socketPath, () => {
+                sock.end(JSON.stringify({
+                  command: "agent_event", session, agent: "opencode", event, data
+                }) + "\\n");
+              });
+              sock.on("error", () => {});
+            } catch {}
+          }
+
+          return {
+            event: async ({ event }) => {
+              const type = event?.type || "";
+              const props = event?.properties || event;
+
+              switch (type) {
+                case "session.status":
+                  const status = props?.status?.type || props?.status;
+                  if (status) send("status", { status });
+                  break;
+                case "permission.asked":
+                  send("permission", props);
+                  break;
+                case "permission.replied":
+                  send("permission_replied", props);
+                  break;
+                case "session.created":
+                case "session.updated":
+                  send("session_update", props);
+                  break;
+              }
+            }
+          };
+        };
+        """
+
+        // Write or update if Forge marker present
+        if let existing = try? String(contentsOfFile: pluginPath, encoding: .utf8),
+           existing.contains("FORGE_SOCKET") {
+            try? pluginCode.write(toFile: pluginPath, atomically: true, encoding: .utf8)
+        } else if !fm.fileExists(atPath: pluginPath) {
+            try? pluginCode.write(toFile: pluginPath, atomically: true, encoding: .utf8)
+        }
     }
 }

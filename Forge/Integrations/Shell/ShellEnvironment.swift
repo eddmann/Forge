@@ -40,11 +40,6 @@ enum ShellEnvironment {
         return "/bin/zsh"
     }
 
-    /// Path to the forge CLI bundled in the app.
-    static var forgeCLIPath: String? {
-        Bundle.main.resourceURL?
-            .appendingPathComponent("bin/forge").path
-    }
 
     // MARK: - Shell Integration (ZDOTDIR injection)
 
@@ -212,9 +207,9 @@ enum ShellEnvironment {
         env["FORGE_SOCKET"] = ForgeStore.shared.stateDir
             .appendingPathComponent("forge.sock").path
 
-        // OpenCode: inject config that auto-starts HTTP/SSE server alongside TUI
-        let openCodePort = OpenCodePortManager.shared.portForSession(sessionID: sessionID)
-        env["OPENCODE_CONFIG_CONTENT"] = "{\"server\":{\"port\":\(openCodePort)}}"
+        // OpenCode: register forge-bridge plugin via config content
+        let pluginPath = NSHomeDirectory() + "/.config/opencode/plugin/forge-bridge.ts"
+        env["OPENCODE_CONFIG_CONTENT"] = "{\"plugin\":[\"\(pluginPath)\"]}"
 
         if let sessionID {
             env["FORGE_SESSION"] = sessionID.uuidString

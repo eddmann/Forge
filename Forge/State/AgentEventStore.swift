@@ -18,30 +18,8 @@ class AgentEventStore: ObservableObject {
     /// Unread notification count per tab
     @Published private(set) var unreadCountByTab: [UUID: Int] = [:]
 
-    /// Active OpenCode SSE clients per tab
-    private var openCodeClients: [UUID: OpenCodeClient] = [:]
-
     var totalUnreadCount: Int {
         unreadCountByTab.values.reduce(0, +)
-    }
-
-    // MARK: - OpenCode SSE
-
-    /// Called when TerminalObserver detects or loses an opencode agent in a tab.
-    func updateOpenCodeConnection(tabID: UUID, agent: String?, sessionID: UUID?) {
-        if agent == "opencode" {
-            // Start SSE client if not already connected
-            if openCodeClients[tabID] == nil, let sessionID {
-                let port = OpenCodePortManager.shared.portForSession(sessionID: sessionID)
-                let client = OpenCodeClient(port: port, tabID: tabID)
-                openCodeClients[tabID] = client
-                client.connect()
-            }
-        } else {
-            // Agent is not opencode — disconnect if we had a client
-            openCodeClients[tabID]?.disconnect()
-            openCodeClients.removeValue(forKey: tabID)
-        }
     }
 
     // MARK: - Notifications
@@ -169,6 +147,11 @@ class AgentEventStore: ObservableObject {
                     let previousActivity = activityByTab[tabID]
                     activityByTab[tabID] = .idle
                     if previousActivity == .thinking || previousActivity == .toolExecuting {
+                        let agentName = AgentStore.shared.agents.first(where: { $0.command == agent })?.name ?? agent
+                        addNotification(tabID: tabID, sessionID: sessionID, title: agentName, body: "Task complete")
+                        if TerminalSessionManager.shared.activeTabID == tabID {
+                            markRead(tabID: tabID)
+                        }
                         if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
                             SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID)
                         }
@@ -278,8 +261,6 @@ class AgentEventStore: ObservableObject {
         notifications.removeAll { $0.tabID == tabID }
         activityByTab.removeValue(forKey: tabID)
         stateByTab.removeValue(forKey: tabID)
-        openCodeClients[tabID]?.disconnect()
-        openCodeClients.removeValue(forKey: tabID)
         if !ids.isEmpty {
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
         }
