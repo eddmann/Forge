@@ -73,6 +73,7 @@ Common commands:
 make                # Show all available targets
 make deps
 make project
+make test
 make build
 make format
 make lint

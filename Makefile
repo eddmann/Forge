@@ -12,7 +12,7 @@ GHOSTTY_ARCHIVE_SHA256 := 073ea7f8ee5f889b3208365942373b53fa9cd71d0406d4599f7f15
 GHOSTTY_XCFRAMEWORK := Dependencies/GhosttyKit.xcframework
 GHOSTTY_STAMP := $(GHOSTTY_XCFRAMEWORK)/.forge-$(GHOSTTY_RELEASE_TAG)
 
-.PHONY: help deps project build release lint format fmt clean can-release \
+.PHONY: help deps project test build release lint format fmt clean can-release \
 	_require-curl _require-shasum _require-tar _require-xcodebuild _require-xcodegen \
 	_require-swiftformat _require-swiftlint
 
@@ -54,8 +54,10 @@ project: $(GHOSTTY_STAMP) _require-xcodegen ## Regenerate the Xcode project from
 
 ##@ Development
 
-build: project _require-xcodebuild ## Build the app in Debug configuration
+test: project _require-xcodebuild ## Run current validation build (no XCTest bundle configured yet)
 	@$(XCODEBUILD) -configuration Debug build
+
+build: test ## Build the app in Debug configuration
 
 release: project _require-xcodebuild ## Build the release app into dist/
 	@echo "==> Building Release..."
@@ -83,7 +85,7 @@ format: _require-swiftformat ## Apply Swift formatting
 
 fmt: format ## Alias for format
 
-can-release: lint build release ## Run the full pre-release verification suite
+can-release: lint test release ## Run the full pre-release verification suite
 
 ##@ Help
 
