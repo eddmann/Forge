@@ -178,17 +178,17 @@ enum AgentCapabilityParser {
         // Instructions — collect ALL sources (user-level, project, rules, local)
         // User-level CLAUDE.md
         let userClaudeMd = (home as NSString).appendingPathComponent(".claude/CLAUDE.md")
-        if fm.fileExists(atPath: userClaudeMd) {
+        if fileHasContent(atPath: userClaudeMd) {
             instructions.append(AgentInstructions(fileName: "~/.claude/CLAUDE.md", filePath: userClaudeMd, exists: true))
         }
 
         // Project CLAUDE.md and .claude/CLAUDE.md (both can exist)
         let claudeMdRoot = (projectPath as NSString).appendingPathComponent("CLAUDE.md")
         let claudeMdNested = (projectPath as NSString).appendingPathComponent(".claude/CLAUDE.md")
-        if fm.fileExists(atPath: claudeMdRoot) {
+        if fileHasContent(atPath: claudeMdRoot) {
             instructions.append(AgentInstructions(fileName: "CLAUDE.md", filePath: claudeMdRoot, exists: true))
         }
-        if fm.fileExists(atPath: claudeMdNested) {
+        if fileHasContent(atPath: claudeMdNested) {
             instructions.append(AgentInstructions(fileName: ".claude/CLAUDE.md", filePath: claudeMdNested, exists: true))
         }
 
@@ -204,7 +204,7 @@ enum AgentCapabilityParser {
 
         // CLAUDE.local.md (private, gitignored)
         let claudeLocalMd = (projectPath as NSString).appendingPathComponent("CLAUDE.local.md")
-        if fm.fileExists(atPath: claudeLocalMd) {
+        if fileHasContent(atPath: claudeLocalMd) {
             instructions.append(AgentInstructions(fileName: "CLAUDE.local.md", filePath: claudeLocalMd, exists: true))
         }
 
@@ -273,11 +273,11 @@ enum AgentCapabilityParser {
 
         // Instructions — user-level
         let overrideMd = (codexHome as NSString).appendingPathComponent("AGENTS.override.md")
-        if fm.fileExists(atPath: overrideMd) {
+        if fileHasContent(atPath: overrideMd) {
             instructions.append(AgentInstructions(fileName: "~/.codex/AGENTS.override.md", filePath: overrideMd, exists: true))
         }
         let userAgentsMd = (codexHome as NSString).appendingPathComponent("AGENTS.md")
-        if fm.fileExists(atPath: userAgentsMd) {
+        if fileHasContent(atPath: userAgentsMd) {
             instructions.append(AgentInstructions(fileName: "~/.codex/AGENTS.md", filePath: userAgentsMd, exists: true))
         }
 
@@ -292,7 +292,7 @@ enum AgentCapabilityParser {
             }
             for dir in dirs.reversed() {
                 let agentsMd = (dir as NSString).appendingPathComponent("AGENTS.md")
-                if fm.fileExists(atPath: agentsMd), agentsMd != userAgentsMd {
+                if fileHasContent(atPath: agentsMd), agentsMd != userAgentsMd {
                     let displayName: String
                     if dir == projectPath {
                         displayName = "AGENTS.md"
@@ -378,11 +378,11 @@ enum AgentCapabilityParser {
 
         // Instructions — global
         let globalAgentsMd = (globalConfigDir as NSString).appendingPathComponent("AGENTS.md")
-        if fm.fileExists(atPath: globalAgentsMd) {
+        if fileHasContent(atPath: globalAgentsMd) {
             instructions.append(AgentInstructions(fileName: "~/.config/opencode/AGENTS.md", filePath: globalAgentsMd, exists: true))
         }
         let claudeGlobalMd = (home as NSString).appendingPathComponent(".claude/CLAUDE.md")
-        if fm.fileExists(atPath: claudeGlobalMd) {
+        if fileHasContent(atPath: claudeGlobalMd) {
             instructions.append(AgentInstructions(fileName: "~/.claude/CLAUDE.md", filePath: claudeGlobalMd, exists: true))
         }
 
@@ -420,11 +420,11 @@ enum AgentCapabilityParser {
 
         // Instructions — project-level .pi/ directory
         let piProjectAgentsMd = (projectPath as NSString).appendingPathComponent(".pi/AGENTS.md")
-        if fm.fileExists(atPath: piProjectAgentsMd) {
+        if fileHasContent(atPath: piProjectAgentsMd) {
             instructions.append(AgentInstructions(fileName: ".pi/AGENTS.md", filePath: piProjectAgentsMd, exists: true))
         }
         let piProjectClaudeMd = (projectPath as NSString).appendingPathComponent(".pi/CLAUDE.md")
-        if fm.fileExists(atPath: piProjectClaudeMd) {
+        if fileHasContent(atPath: piProjectClaudeMd) {
             instructions.append(AgentInstructions(fileName: ".pi/CLAUDE.md", filePath: piProjectClaudeMd, exists: true))
         }
 
@@ -434,22 +434,22 @@ enum AgentCapabilityParser {
 
         // Instructions — global
         let globalAgentsMd = (piAgentDir as NSString).appendingPathComponent("AGENTS.md")
-        if fm.fileExists(atPath: globalAgentsMd) {
+        if fileHasContent(atPath: globalAgentsMd) {
             instructions.append(AgentInstructions(fileName: "~/.pi/agent/AGENTS.md", filePath: globalAgentsMd, exists: true))
         }
         let globalClaudeMd = (piAgentDir as NSString).appendingPathComponent("CLAUDE.md")
-        if fm.fileExists(atPath: globalClaudeMd) {
+        if fileHasContent(atPath: globalClaudeMd) {
             instructions.append(AgentInstructions(fileName: "~/.pi/agent/CLAUDE.md", filePath: globalClaudeMd, exists: true))
         }
 
         // Instructions — SYSTEM.md and APPEND_SYSTEM.md
         for name in ["SYSTEM.md", "APPEND_SYSTEM.md"] {
             let projectPath_ = (projectPath as NSString).appendingPathComponent(".pi/\(name)")
-            if fm.fileExists(atPath: projectPath_) {
+            if fileHasContent(atPath: projectPath_) {
                 instructions.append(AgentInstructions(fileName: ".pi/\(name)", filePath: projectPath_, exists: true))
             }
             let globalPath = (piAgentDir as NSString).appendingPathComponent(name)
-            if fm.fileExists(atPath: globalPath) {
+            if fileHasContent(atPath: globalPath) {
                 instructions.append(AgentInstructions(fileName: "~/.pi/agent/\(name)", filePath: globalPath, exists: true))
             }
         }
@@ -616,6 +616,13 @@ enum AgentCapabilityParser {
         }
     }
 
+    /// Returns true if the file exists and has non-whitespace content.
+    private static func fileHasContent(atPath path: String) -> Bool {
+        guard let data = fm.contents(atPath: path),
+              let content = String(data: data, encoding: .utf8) else { return false }
+        return !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     /// Walk upward from `path` to find the nearest `.git` directory, returning the containing directory.
     private static func findGitRoot(from path: String) -> String? {
         var current = path
@@ -640,7 +647,7 @@ enum AgentCapabilityParser {
         while true {
             for name in names {
                 let filePath = (current as NSString).appendingPathComponent(name)
-                if fm.fileExists(atPath: filePath), !seen.contains(filePath) {
+                if fileHasContent(atPath: filePath), !seen.contains(filePath) {
                     seen.insert(filePath)
                     // Show path relative to startPath for nested files
                     let displayName: String
@@ -668,7 +675,9 @@ enum AgentCapabilityParser {
             let filePath = (dirPath as NSString).appendingPathComponent(relativePath)
             var isDir: ObjCBool = false
             guard fm.fileExists(atPath: filePath, isDirectory: &isDir), !isDir.boolValue else { continue }
-            if let content = try? String(contentsOfFile: filePath, encoding: .utf8) {
+            if let content = try? String(contentsOfFile: filePath, encoding: .utf8),
+               !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            {
                 let frontmatter = parseFrontmatter(content)
                 let name = frontmatter["name"] ?? String(relativePath.dropLast(3))
                 results.append(AgentSkillInfo(
