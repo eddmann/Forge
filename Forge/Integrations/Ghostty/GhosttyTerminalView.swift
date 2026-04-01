@@ -1,5 +1,6 @@
 import AppKit
 import QuartzCore
+import UniformTypeIdentifiers
 
 /// NSView subclass hosting a Ghostty terminal surface via CAMetalLayer.
 class GhosttyTerminalView: NSView, NSTextInputClient {
@@ -34,6 +35,7 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
         wantsLayer = true
         layer?.masksToBounds = true
         updateTrackingAreas()
+        registerForDraggedTypes([.fileURL])
     }
 
     // MARK: - Layer
@@ -697,6 +699,36 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
         else if momentum == .mayBegin { mods |= (6 << 1) }
 
         ghostty_surface_mouse_scroll(surface, x, y, mods)
+    }
+
+    // MARK: - Drag & Drop
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard sender.draggingPasteboard.canReadObject(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) else {
+            return []
+        }
+        return .copy
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let urls = sender.draggingPasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: [.urlReadingFileURLsOnly: true]
+        ) as? [URL], !urls.isEmpty else {
+            return false
+        }
+
+        let paths = urls.map { url in
+            let path = url.path
+            // Shell-escape paths containing spaces or special characters
+            if path.rangeOfCharacter(from: .init(charactersIn: " '\"\\$`!#&|;(){}[]<>?*~")) != nil {
+                return "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
+            }
+            return path
+        }
+
+        sendInput(paths.joined(separator: " "))
+        return true
     }
 
     // MARK: - Tracking Areas
