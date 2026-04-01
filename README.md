@@ -4,6 +4,9 @@
 
 # Forge
 
+> [!WARNING]
+> Prioritising features over polish — expect clanker slop underneath for now.
+
 A native macOS tool for managing local coding-agent workflows.
 
 <p align="center">
