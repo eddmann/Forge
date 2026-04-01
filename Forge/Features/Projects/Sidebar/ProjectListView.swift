@@ -10,6 +10,8 @@ struct ProjectListView: View {
     @ObservedObject private var sessionManager = TerminalSessionManager.shared
     @State private var searchText = ""
     @State private var errorMessage: String?
+    @State private var creatingWorkspaceForProject: Set<UUID> = []
+    @State private var deletingWorkspaceIDs: Set<UUID> = []
 
     private var sortedProjects: [Project] {
         store.projects.sorted {
@@ -113,6 +115,8 @@ struct ProjectListView: View {
                                     project: project,
                                     workspaces: store.workspaces(for: project.id),
                                     activeWorkspaceID: store.activeProjectID == project.id ? store.activeWorkspaceID : nil,
+                                    isCreatingWorkspace: creatingWorkspaceForProject.contains(project.id),
+                                    deletingWorkspaceIDs: deletingWorkspaceIDs,
                                     onSelectProject: { selectProject(project) },
                                     onSelectWorkspace: { selectWorkspace($0) },
                                     onCreateWorkspaceFromDefault: { createWorkspace(for: project, branch: project.defaultBranch) },
@@ -190,6 +194,7 @@ struct ProjectListView: View {
     }
 
     private func createWorkspace(for project: Project, branch: String) {
+        creatingWorkspaceForProject.insert(project.id)
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 let workspace = try WorkspaceCloner.createWorkspace(
@@ -199,12 +204,14 @@ struct ProjectListView: View {
                     parentBranch: branch
                 )
                 DispatchQueue.main.async {
+                    creatingWorkspaceForProject.remove(project.id)
                     store.addWorkspace(workspace)
                     store.activeProjectID = project.id
                     store.activeWorkspaceID = workspace.id
                 }
             } catch {
                 DispatchQueue.main.async {
+                    creatingWorkspaceForProject.remove(project.id)
                     errorMessage = error.localizedDescription
                 }
             }
@@ -212,8 +219,14 @@ struct ProjectListView: View {
     }
 
     private func deleteWorkspace(_ workspace: Workspace) {
-        WorkspaceCloner.deleteWorkspace(workspace)
-        store.deleteWorkspace(id: workspace.id)
+        deletingWorkspaceIDs.insert(workspace.id)
+        DispatchQueue.global(qos: .userInitiated).async {
+            WorkspaceCloner.deleteWorkspace(workspace)
+            DispatchQueue.main.async {
+                deletingWorkspaceIDs.remove(workspace.id)
+                store.deleteWorkspace(id: workspace.id)
+            }
+        }
     }
 
     private func mergeWorkspace(_ workspace: Workspace, projectPath: String) {
@@ -248,6 +261,8 @@ private struct ProjectSection: View {
     let project: Project
     let workspaces: [Workspace]
     let activeWorkspaceID: UUID?
+    let isCreatingWorkspace: Bool
+    let deletingWorkspaceIDs: Set<UUID>
     let onSelectProject: () -> Void
     let onSelectWorkspace: (Workspace) -> Void
     let onCreateWorkspaceFromDefault: () -> Void
@@ -270,6 +285,8 @@ private struct ProjectSection: View {
         project: Project,
         workspaces: [Workspace],
         activeWorkspaceID: UUID?,
+        isCreatingWorkspace: Bool,
+        deletingWorkspaceIDs: Set<UUID>,
         onSelectProject: @escaping () -> Void,
         onSelectWorkspace: @escaping (Workspace) -> Void,
         onCreateWorkspaceFromDefault: @escaping () -> Void,
@@ -282,6 +299,8 @@ private struct ProjectSection: View {
         self.project = project
         self.workspaces = workspaces
         self.activeWorkspaceID = activeWorkspaceID
+        self.isCreatingWorkspace = isCreatingWorkspace
+        self.deletingWorkspaceIDs = deletingWorkspaceIDs
         self.onSelectProject = onSelectProject
         self.onSelectWorkspace = onSelectWorkspace
         self.onCreateWorkspaceFromDefault = onCreateWorkspaceFromDefault
@@ -355,6 +374,7 @@ private struct ProjectSection: View {
                 .buttonStyle(.plain)
                 .help("New workspace from \(project.defaultBranch)")
                 .opacity(isHovered ? 1 : 0)
+                .disabled(isCreatingWorkspace)
 
                 // ... menu
                 Menu {
@@ -366,6 +386,7 @@ private struct ProjectSection: View {
                                 Button(branch) {
                                     onCreateWorkspaceFromBranch(branch)
                                 }
+                                .disabled(isCreatingWorkspace)
                             }
                         }
                     }
@@ -394,16 +415,30 @@ private struct ProjectSection: View {
             .onHover { isHovered = $0 }
 
             // Workspaces
-            if expanded {
+            if expanded || isCreatingWorkspace {
                 ForEach(workspaces) { workspace in
                     WorkspaceRow(
                         workspace: workspace,
                         isActive: activeWorkspaceID == workspace.id,
+                        isDeleting: deletingWorkspaceIDs.contains(workspace.id),
                         onSelect: { onSelectWorkspace(workspace) },
                         onMerge: { onMergeWorkspace(workspace) },
                         onDelete: { onDeleteWorkspace(workspace) },
                         onRename: { onRenameWorkspace(workspace, $0) }
                     )
+                }
+
+                if isCreatingWorkspace {
+                    HStack(spacing: 6) {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text("Creating workspace…")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(nsColor: .secondaryLabelColor))
+                    }
+                    .padding(.leading, 34)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 8)
                 }
             }
         }
@@ -452,6 +487,7 @@ private struct ProjectSection: View {
 private struct WorkspaceRow: View {
     let workspace: Workspace
     let isActive: Bool
+    let isDeleting: Bool
     let onSelect: () -> Void
     let onMerge: () -> Void
     let onDelete: () -> Void
@@ -575,6 +611,19 @@ private struct WorkspaceRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .opacity(isDeleting ? 0.4 : 1.0)
+        .overlay {
+            if isDeleting {
+                HStack(spacing: 6) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Deleting…")
+                        .font(.system(size: 13))
+                        .foregroundColor(Color(nsColor: .secondaryLabelColor))
+                }
+            }
+        }
+        .allowsHitTesting(!isDeleting)
         .contextMenu {
             if workspace.status == .active {
                 Button("Merge into Project") { onMerge() }
