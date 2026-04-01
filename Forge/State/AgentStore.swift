@@ -17,7 +17,7 @@ class AgentStore: ObservableObject {
         "gemini": "gemini \"Apply the code review found at $REVIEW_FILE\"",
         "amp": "amp \"Apply the code review found at $REVIEW_FILE\"",
         "pi": "pi \"Apply the code review found at $REVIEW_FILE\"",
-        "opencode": "opencode --yolo \"Apply the code review found at $REVIEW_FILE\""
+        "opencode": "OPENCODE_PERMISSION='{\"*\":\"allow\"}' opencode \"Apply the code review found at $REVIEW_FILE\""
     ]
 
     private func load() {
@@ -59,8 +59,9 @@ class AgentStore: ObservableObject {
                         reviewCommand: "amp \"Apply the code review found at $REVIEW_FILE\""),
             AgentConfig(name: "Pi", command: "pi", args: [],
                         reviewCommand: "pi \"Apply the code review found at $REVIEW_FILE\""),
-            AgentConfig(name: "OpenCode", command: "opencode", args: ["--yolo"],
-                        reviewCommand: "opencode --yolo \"Apply the code review found at $REVIEW_FILE\"")
+            AgentConfig(name: "OpenCode", command: "opencode", args: [],
+                        environmentVars: ["OPENCODE_PERMISSION": "{\"*\":\"allow\"}"],
+                        reviewCommand: "OPENCODE_PERMISSION='{\"*\":\"allow\"}' opencode \"Apply the code review found at $REVIEW_FILE\"")
         ]
         save()
     }

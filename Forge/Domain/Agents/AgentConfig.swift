@@ -58,7 +58,12 @@ struct AgentConfig: Codable, Identifiable, Equatable {
     var fullCommand: String {
         var parts: [String] = []
         for (key, value) in environmentVars.sorted(by: { $0.key < $1.key }) {
-            parts.append("\(key)=\(value)")
+            // Single-quote values that contain special shell characters
+            if value.contains(" ") || value.contains("{") || value.contains("\"") || value.contains("$") {
+                parts.append("\(key)='\(value)'")
+            } else {
+                parts.append("\(key)=\(value)")
+            }
         }
         parts.append(command)
         parts.append(contentsOf: args)

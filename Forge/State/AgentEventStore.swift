@@ -10,7 +10,7 @@ class AgentEventStore: ObservableObject {
     // MARK: - Published State
 
     /// Agent activity per tab
-    @Published private(set) var activityByTab: [UUID: AgentActivity] = [:]
+    @Published var activityByTab: [UUID: AgentActivity] = [:]
 
     /// Full agent state per tab (for detail views)
     @Published private(set) var stateByTab: [UUID: AgentSessionState] = [:]
@@ -18,8 +18,30 @@ class AgentEventStore: ObservableObject {
     /// Unread notification count per tab
     @Published private(set) var unreadCountByTab: [UUID: Int] = [:]
 
+    /// Active OpenCode SSE clients per tab
+    private var openCodeClients: [UUID: OpenCodeClient] = [:]
+
     var totalUnreadCount: Int {
         unreadCountByTab.values.reduce(0, +)
+    }
+
+    // MARK: - OpenCode SSE
+
+    /// Called when TerminalObserver detects or loses an opencode agent in a tab.
+    func updateOpenCodeConnection(tabID: UUID, agent: String?, sessionID: UUID?) {
+        if agent == "opencode" {
+            // Start SSE client if not already connected
+            if openCodeClients[tabID] == nil, let sessionID {
+                let port = OpenCodePortManager.shared.portForSession(sessionID: sessionID)
+                let client = OpenCodeClient(port: port, tabID: tabID)
+                openCodeClients[tabID] = client
+                client.connect()
+            }
+        } else {
+            // Agent is not opencode — disconnect if we had a client
+            openCodeClients[tabID]?.disconnect()
+            openCodeClients.removeValue(forKey: tabID)
+        }
     }
 
     // MARK: - Notifications
@@ -256,6 +278,8 @@ class AgentEventStore: ObservableObject {
         notifications.removeAll { $0.tabID == tabID }
         activityByTab.removeValue(forKey: tabID)
         stateByTab.removeValue(forKey: tabID)
+        openCodeClients[tabID]?.disconnect()
+        openCodeClients.removeValue(forKey: tabID)
         if !ids.isEmpty {
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ids)
         }

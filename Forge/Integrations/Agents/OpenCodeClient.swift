@@ -90,27 +90,34 @@ class OpenCodeClient {
 
         AgentEventLogger.shared.log(source: "opencode-sse", session: nil, agent: "opencode", event: type, data: payload)
 
+        // Route directly to store using our known tabID (bypasses session resolution)
+        let store = AgentEventStore.shared
+
         switch type {
         case "session.status":
             if let status = (payload["status"] as? [String: Any])?["type"] as? String {
-                AgentEventStore.shared.handleAgentEvent(
-                    sessionID: nil, agent: "opencode", event: "status",
-                    data: ["status": status]
-                )
+                switch status {
+                case "busy":
+                    store.activityByTab[tabID] = .thinking
+                case "retry":
+                    store.activityByTab[tabID] = .retrying
+                case "idle":
+                    let prev = store.activityByTab[tabID]
+                    store.activityByTab[tabID] = .idle
+                    if prev == .thinking || prev == .toolExecuting {
+                        store.addNotification(tabID: tabID, sessionID: nil, title: "OpenCode", body: "Task complete")
+                        if TerminalSessionManager.shared.activeTabID == tabID {
+                            store.markRead(tabID: tabID)
+                        }
+                    }
+                default: break
+                }
             }
 
         case "permission.asked":
-            AgentEventStore.shared.handleAgentEvent(
-                sessionID: nil, agent: "opencode", event: "permission",
-                data: payload
-            )
-
-        case "message.part.updated", "message.part.delta":
-            // Forward as generic event for future UI consumption
-            AgentEventStore.shared.handleAgentEvent(
-                sessionID: nil, agent: "opencode", event: type,
-                data: payload
-            )
+            store.activityByTab[tabID] = .waitingForPermission
+            let permission = payload["permission"] as? String ?? "Permission needed"
+            store.addNotification(tabID: tabID, sessionID: nil, title: "OpenCode", body: permission)
 
         default:
             break

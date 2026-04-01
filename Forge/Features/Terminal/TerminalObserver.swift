@@ -136,6 +136,9 @@ class TerminalObserver {
 
         let activity = synthesizeActivity(signals)
         AgentEventStore.shared.updateFromTerminalSignals(tabID: tab.id, agent: signals.agent, activity: activity)
+
+        // Manage OpenCode SSE connection based on agent detection
+        AgentEventStore.shared.updateOpenCodeConnection(tabID: tab.id, agent: signals.agent, sessionID: sessionID)
     }
 
     private func synthesizeActivity(_ signals: TerminalSignals) -> AgentActivity {
