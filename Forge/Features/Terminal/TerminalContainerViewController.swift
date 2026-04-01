@@ -78,7 +78,7 @@ class TerminalContainerViewController: NSViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Agent status and notifications driven by ForgeSocketServer via NotificationStore
+        // Agent status and notifications driven by ForgeSocketServer via AgentEventStore
 
         let initialProjectID = ProjectStore.shared.activeProjectID
         let initialWorkspaceID = ProjectStore.shared.activeWorkspaceID
@@ -158,12 +158,12 @@ class TerminalContainerViewController: NSViewController {
             }
             .store(in: &cancellables)
 
-        NotificationStore.shared.$agentStatusByTab
+        AgentEventStore.shared.$activityByTab
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateTabBar() }
             .store(in: &cancellables)
 
-        NotificationStore.shared.$unreadCountByTab
+        AgentEventStore.shared.$unreadCountByTab
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateTabBar() }
             .store(in: &cancellables)
@@ -189,7 +189,7 @@ class TerminalContainerViewController: NSViewController {
         // Tab bar callbacks
         tabBar.onSelectTab = { [weak self] id in
             self?.sessionManager.activateTab(id: id)
-            NotificationStore.shared.markRead(tabID: id)
+            AgentEventStore.shared.markRead(tabID: id)
         }
         tabBar.onCloseTab = { [weak self] id in
             self?.sessionManager.closeTab(id: id)
@@ -354,8 +354,8 @@ class TerminalContainerViewController: NSViewController {
         tabBar.update(
             tabs: sessionManager.visibleTabs,
             activeID: sessionManager.activeTabID,
-            agentStatuses: NotificationStore.shared.agentStatusByTab,
-            notificationCounts: NotificationStore.shared.unreadCountByTab
+            agentStatuses: AgentEventStore.shared.activityByTab,
+            notificationCounts: AgentEventStore.shared.unreadCountByTab
         )
     }
 
@@ -373,7 +373,7 @@ class TerminalContainerViewController: NSViewController {
     private func updateAgentInfo() {
         let focusedID = sessionManager.focusedSessionID
         let processName = focusedID.flatMap { id in
-            AgentDetector.shared.detectAgent(sessionID: id)
+            TerminalObserver.shared.detectAgent(sessionID: id)
         }
 
         guard let processName,

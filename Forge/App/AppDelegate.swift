@@ -25,10 +25,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         // Write shell integration scripts for scrollback restore
         ShellEnvironment.ensureShellIntegration()
 
-        // Offer to install forge CLI and agent status hooks
+        // Install agent hooks/config/extensions
         DispatchQueue.main.async {
-            ForgeCLIInstaller.installIfNeeded()
-            AgentHookInstaller.installIfNeeded()
+            AgentSetup.shared.installAll()
         }
 
         // Global Cmd+K for command palette
@@ -207,7 +206,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 MainActor.assumeIsolated {
                     TerminalSessionManager.shared.activateTab(id: tabID)
                 }
-                NotificationStore.shared.markRead(tabID: tabID)
+                AgentEventStore.shared.markRead(tabID: tabID)
             }
         }
         NSApp.activate(ignoringOtherApps: true)
@@ -216,7 +215,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func userNotificationCenter(_: UNUserNotificationCenter, willPresent _: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        // Show banner even when app is in foreground (but our suppression logic in NotificationStore
+        // Show banner even when app is in foreground (but our suppression logic in AgentEventStore
         // already avoids sending system notifications for the focused tab)
         completionHandler([.banner, .sound])
     }

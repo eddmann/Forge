@@ -42,7 +42,8 @@ enum ShellEnvironment {
 
     /// Path to the forge CLI bundled in the app.
     static var forgeCLIPath: String? {
-        ForgeCLIInstaller.bundledCLIPath
+        Bundle.main.resourceURL?
+            .appendingPathComponent("bin/forge").path
     }
 
     // MARK: - Shell Integration (ZDOTDIR injection)
@@ -207,12 +208,14 @@ enum ShellEnvironment {
         let shell = defaultShell
         env["SHELL"] = shell
 
-        // Forge CLI for agent notifications
-        if let cliPath = forgeCLIPath {
-            env["FORGE_NOTIFY"] = cliPath
-        }
+        // Forge socket for agent communication
         env["FORGE_SOCKET"] = ForgeStore.shared.stateDir
             .appendingPathComponent("forge.sock").path
+
+        // OpenCode: inject config that auto-starts HTTP/SSE server alongside TUI
+        let openCodePort = OpenCodePortManager.shared.portForSession(sessionID: sessionID)
+        env["OPENCODE_CONFIG_CONTENT"] = "{\"server\":{\"port\":\(openCodePort)}}"
+
         if let sessionID {
             env["FORGE_SESSION"] = sessionID.uuidString
 

@@ -183,7 +183,7 @@ struct SendToAgentView: View {
             let sessionIDs = tab.paneManager?.allSessionIDs ?? tab.sessionIDs
 
             for sessionID in sessionIDs {
-                if let agentCommand = AgentDetector.shared.detectAgent(sessionID: sessionID) {
+                if let agentCommand = TerminalObserver.shared.detectAgent(sessionID: sessionID) {
                     found.append(AgentSessionInfo(
                         sessionID: sessionID,
                         agentCommand: agentCommand,

@@ -127,7 +127,7 @@ final class ForgeSocketServer {
         var timeout = timeval(tv_sec: 5, tv_usec: 0)
         setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
 
-        var buffer = [UInt8](repeating: 0, count: 4096)
+        var buffer = [UInt8](repeating: 0, count: 131072)
         var accumulated = Data()
 
         while true {
@@ -139,7 +139,7 @@ final class ForgeSocketServer {
             if accumulated.contains(0x0A) { break }
 
             // Prevent oversized messages
-            if accumulated.count > 4096 { return }
+            if accumulated.count > 131072 { return }
         }
 
         guard !accumulated.isEmpty,
@@ -155,30 +155,28 @@ final class ForgeSocketServer {
 
     // MARK: - Message Processing
 
-    private struct SocketMessage: Decodable {
-        let command: String
-        let session: String?
-        let title: String?
-        let body: String?
-    }
-
     private func processMessage(_ json: String) {
         guard let data = json.data(using: .utf8),
-              let message = try? JSONDecoder().decode(SocketMessage.self, from: data)
+              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let command = dict["command"] as? String
         else {
             return
         }
 
-        switch message.command {
-        case "notify":
-            let sessionID = message.session.flatMap { UUID(uuidString: $0) }
-            let title = message.title ?? ""
-            let body = message.body ?? ""
+        let sessionID = (dict["session"] as? String).flatMap { UUID(uuidString: $0) }
+
+        switch command {
+        case "agent_event":
+            guard let agent = dict["agent"] as? String,
+                  let event = dict["event"] as? String
+            else { return }
+            let eventData = dict["data"] as? [String: Any] ?? [:]
             DispatchQueue.main.async {
-                NotificationStore.shared.handleSocketNotification(
+                AgentEventStore.shared.handleAgentEvent(
                     sessionID: sessionID,
-                    title: title,
-                    body: body
+                    agent: agent,
+                    event: event,
+                    data: eventData
                 )
             }
         default:

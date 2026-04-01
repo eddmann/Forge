@@ -1,8 +1,8 @@
 import Foundation
 
 // MARK: - Forge CLI
-
-// Usage: forge notify <title> <body>
+// Usage: forge event <agent> <event_type>
+// Reads JSON from stdin, wraps with metadata, sends to Forge socket.
 
 let args = CommandLine.arguments
 
@@ -12,14 +12,14 @@ guard args.count >= 2 else {
 }
 
 switch args[1] {
-case "notify":
+case "event":
     guard args.count >= 4 else {
-        FileHandle.standardError.write(Data("Usage: forge notify <title> <body>\n".utf8))
+        FileHandle.standardError.write(Data("Usage: forge event <agent> <event_type>\n".utf8))
         exit(1)
     }
-    let title = args[2]
-    let body = args[3]
-    sendNotify(title: title, body: body)
+    let agent = args[2]
+    let eventType = args[3]
+    sendEvent(agent: agent, eventType: eventType)
 
 case "--help", "-h", "help":
     printUsage()
@@ -31,21 +31,37 @@ default:
     exit(1)
 }
 
-// MARK: - Notify
+// MARK: - Event
 
-func sendNotify(title: String, body: String) {
+func sendEvent(agent: String, eventType: String) {
     let socketPath = ProcessInfo.processInfo.environment["FORGE_SOCKET"]
         ?? NSHomeDirectory() + "/.forge/state/forge.sock"
     let sessionID = ProcessInfo.processInfo.environment["FORGE_SESSION"]
 
-    // Build JSON payload
-    var payload: [String: String] = [
-        "command": "notify",
-        "title": title,
-        "body": body
+    // Read hook JSON payload from stdin
+    var stdinData = Data()
+    let handle = FileHandle.standardInput
+    while true {
+        let chunk = handle.availableData
+        if chunk.isEmpty { break }
+        stdinData.append(chunk)
+        if stdinData.count > 131072 { break } // 128KB limit
+    }
+
+    // Build wrapped payload
+    var payload: [String: Any] = [
+        "command": "agent_event",
+        "agent": agent,
+        "event": eventType
     ]
     if let sessionID {
         payload["session"] = sessionID
+    }
+
+    // Parse stdin as JSON and attach as "data" field
+    if !stdinData.isEmpty,
+       let stdinJSON = try? JSONSerialization.jsonObject(with: stdinData) {
+        payload["data"] = stdinJSON
     }
 
     guard let data = try? JSONSerialization.data(withJSONObject: payload),
@@ -80,11 +96,10 @@ func sendNotify(title: String, body: String) {
         }
     }
     guard connectResult == 0 else {
-        FileHandle.standardError.write(Data("Failed to connect to Forge socket at \(socketPath)\n".utf8))
-        exit(1)
+        // Silent failure — don't break agent hooks if Forge isn't running
+        exit(0)
     }
 
-    // Send JSON + newline
     json.withCString { ptr in
         _ = Darwin.write(fd, ptr, strlen(ptr))
     }
@@ -97,16 +112,15 @@ func printUsage() {
     Usage: forge <command> [arguments]
 
     Commands:
-      notify <title> <body>    Send a notification to Forge
+      event <agent> <event_type>    Pipe agent hook JSON from stdin to Forge
 
     Environment:
       FORGE_SOCKET    Path to Forge socket (default: ~/.forge/state/forge.sock)
       FORGE_SESSION   Terminal session UUID (auto-set by Forge)
 
     Examples:
-      forge notify "Claude Code" "status:running"
-      forge notify "Claude Code" "Task complete"
-      forge notify "Codex" "status:waiting"
+      echo '{"tool_name":"Bash"}' | forge event claude tool_start
+      forge event codex stop < /dev/stdin
 
     """
     FileHandle.standardError.write(Data(usage.utf8))

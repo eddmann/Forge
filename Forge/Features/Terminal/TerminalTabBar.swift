@@ -124,7 +124,7 @@ class TerminalTabBar: NSView {
         onNewAgentTab?(agent)
     }
 
-    func update(tabs: [TerminalTab], activeID: UUID?, agentStatuses: [UUID: AgentStatus] = [:], notificationCounts: [UUID: Int] = [:]) {
+    func update(tabs: [TerminalTab], activeID: UUID?, agentStatuses: [UUID: AgentActivity] = [:], notificationCounts: [UUID: Int] = [:]) {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
 
         for (index, tab) in tabs.enumerated() {
@@ -163,7 +163,7 @@ private class TabCell: NSView, NSTextFieldDelegate {
 
     private let tabID: UUID
     private let isActive: Bool
-    private let agentStatus: AgentStatus
+    private let agentStatus: AgentActivity
     private let theme: TerminalTheme
     private let titleLabel = NSTextField(labelWithString: "")
     private let titleStack = NSStackView()
@@ -177,7 +177,7 @@ private class TabCell: NSView, NSTextFieldDelegate {
     private var trackingArea: NSTrackingArea?
     private var isHovered = false
 
-    init(tab: TerminalTab, isActive: Bool, shortcutIndex: Int, showRightSeparator: Bool, agentStatus: AgentStatus = .idle, agentIcons: [String] = [], unreadCount: Int = 0, theme: TerminalTheme = TerminalAppearanceStore.shared.config.theme) {
+    init(tab: TerminalTab, isActive: Bool, shortcutIndex: Int, showRightSeparator: Bool, agentStatus: AgentActivity = .idle, agentIcons: [String] = [], unreadCount: Int = 0, theme: TerminalTheme = TerminalAppearanceStore.shared.config.theme) {
         tabID = tab.id
         self.isActive = isActive
         self.agentStatus = agentStatus
@@ -239,8 +239,11 @@ private class TabCell: NSView, NSTextFieldDelegate {
         statusDot.layer?.cornerRadius = 3
         addSubview(statusDot)
 
-        if unreadCount > 0 {
-            // Solid blue dot for notifications
+        // Active agent states take priority over notification badge
+        if agentStatus != .idle && agentStatus != .complete {
+            configureStatusDot()
+        } else if unreadCount > 0 {
+            // Solid blue dot for notifications (only when agent is idle/complete)
             statusDot.layer?.backgroundColor = NSColor.systemBlue.cgColor
             statusDot.isHidden = false
             statusDot.layer?.removeAllAnimations()
@@ -305,15 +308,27 @@ private class TabCell: NSView, NSTextFieldDelegate {
 
     private func configureStatusDot() {
         switch agentStatus {
-        case .running:
+        case .thinking:
+            statusDot.layer?.backgroundColor = NSColor.systemBlue.cgColor
+            statusDot.isHidden = false
+            addPulseAnimation()
+        case .toolExecuting:
             statusDot.layer?.backgroundColor = NSColor.systemGreen.cgColor
             statusDot.isHidden = false
             addPulseAnimation()
-        case .waitingForInput:
+        case .waitingForPermission, .waitingForInput:
             statusDot.layer?.backgroundColor = NSColor.systemOrange.cgColor
             statusDot.isHidden = false
             statusDot.layer?.removeAllAnimations()
-        case .idle:
+        case .retrying:
+            statusDot.layer?.backgroundColor = NSColor.systemRed.cgColor
+            statusDot.isHidden = false
+            addPulseAnimation()
+        case .compacting:
+            statusDot.layer?.backgroundColor = NSColor.systemPurple.cgColor
+            statusDot.isHidden = false
+            addPulseAnimation()
+        case .idle, .complete:
             statusDot.isHidden = true
             statusDot.layer?.removeAllAnimations()
         }
@@ -440,8 +455,8 @@ private class TabCell: NSView, NSTextFieldDelegate {
     override func mouseExited(with _: NSEvent) {
         isHovered = false
         closeButton.isHidden = true
-        // Restore status dot visibility based on agent status
-        statusDot.isHidden = (agentStatus == .idle)
+        // Restore status dot visibility based on agent activity
+        statusDot.isHidden = (agentStatus == .idle || agentStatus == .complete)
         shortcutLabel.isHidden = false
         updateBackground()
     }

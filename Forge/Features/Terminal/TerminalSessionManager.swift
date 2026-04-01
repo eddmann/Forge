@@ -260,7 +260,7 @@ class TerminalSessionManager: ObservableObject {
         let tabProjectID = tab.projectID
         let tabWorkspaceID = tab.workspaceID
 
-        NotificationStore.shared.clearForTab(id)
+        AgentEventStore.shared.clearForTab(id)
 
         let visibleIndexBefore = visibleTabs.firstIndex(where: { $0.id == id })
 
@@ -377,7 +377,7 @@ class TerminalSessionManager: ObservableObject {
             let sessionIDs = tabs[i].paneManager?.allSessionIDs ?? tabs[i].sessionIDs
             guard let primarySession = sessionIDs.first else { continue }
 
-            if let agentCommand = AgentDetector.shared.detectAgent(sessionID: primarySession),
+            if let agentCommand = TerminalObserver.shared.detectAgent(sessionID: primarySession),
                let agent = agents.first(where: { $0.command == agentCommand })
             {
                 // Set to agent display name and icon

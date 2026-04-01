@@ -7,9 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		039AF28D6180FA6863458BBE /* OpenCodeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA66E30B9FF754A2972DC13E /* OpenCodeClient.swift */; };
 		0C401CA4784BC5616BB7AA5D /* AgentReviewPayloadBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */; };
-		144B2D71D94D15DD9A2E5FD4 /* AgentStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36AAFA0CE4C8B2CB5DA66D84 /* AgentStatus.swift */; };
+		14CB2C84FC65B925A953F23E /* AgentEventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71607C511F2A39E630507479 /* AgentEventStore.swift */; };
 		186B0FFC225E49680C7A1400 /* ExternalEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17988CA2EA98D7A6396E2B91 /* ExternalEditor.swift */; };
+		1ADCE9E20D14A95F005B6033 /* AgentEventLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E002CD819513C0820D42DF3 /* AgentEventLogger.swift */; };
 		1B65752028DE519CB345DAB8 /* ForgeSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */; };
 		1C0AEA61EA5DEA5E2847EAD1 /* AgentCapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE6E9898D02521ED5E5A26C /* AgentCapabilities.swift */; };
 		1C121FFC047C8B2497C556D9 /* AgentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE1F53D3088D83C929C6089 /* AgentStore.swift */; };
@@ -45,6 +47,7 @@
 		636833B4508AD5E5520B0E57 /* TerminalSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */; };
 		660EC2752004FADA5827C386 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99751F6A0C8860A70146FB8D /* WelcomeView.swift */; };
 		6620650A4F8E1CB27057FE5B /* TerminalSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03D48F43AB138181D6CD761 /* TerminalSession.swift */; };
+		673D256E6787F286D9EEC05B /* TerminalObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E805EE38B5FF260D35CE21 /* TerminalObserver.swift */; };
 		676341BCA86E78A23161ED1B /* PaneID.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8ADAE09E2AF777777761B7F /* PaneID.swift */; };
 		694668C2FDEE836BC7B3F22D /* PaneState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7701E79B028746189D17A0A7 /* PaneState.swift */; };
 		69BA6066822D2EC3ECF04AAA /* SummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10E6E44336CA3AE64223EDF /* SummaryStore.swift */; };
@@ -52,24 +55,23 @@
 		6CE799C3EC6812DCC3610D63 /* GitClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B48636B23896A11A9644925 /* GitClient.swift */; };
 		6D10E1C247D18BA59E04D540 /* WorkspaceCloner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EA6848CBC1E2DEE1295EDC /* WorkspaceCloner.swift */; };
 		6D32E213A2DB89468558046F /* BranchPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BD7C813556607AFCF0EAFB /* BranchPickerView.swift */; };
+		6D91E9F5B57216E730CD6E44 /* OpenCodePortManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1BD0781FCD4F902B5A7F38F /* OpenCodePortManager.swift */; };
 		6D9CB313204C45E8B2FC20AF /* TabID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CBFE7A0F60D63CBB4B6E17 /* TabID.swift */; };
 		6E66D7FFCF8DFBB0390ECD49 /* FileStatusList.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC582D54CE2623E5734E1EEE /* FileStatusList.swift */; };
 		70C18486C2C2B8BCCF6EF853 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E2BA9B896F72867C2704FC /* CommandPalette.swift */; };
 		7135B8F57163B17958BAAA26 /* ChangesTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FF87CF5EC77FF694158BAC /* ChangesTabView.swift */; };
-		72A63CB02229017307EC1299 /* AgentDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD87FE6EFA673C8D1F22A9C /* AgentDetector.swift */; };
 		792DB5B7CE3CD212E63347F3 /* JetBrainsMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */; };
 		8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */; };
 		87DE037B3A7130EABAEEA4FC /* GitUnifiedDiffParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */; };
 		8932C47CE7A9158D452B4E4E /* WordDiffLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */; };
 		8B4C5CAD6ACD54E118395D79 /* SplitNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */; };
-		93F21DA41BF8F4A5EC252551 /* ForgeCLIInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = E965BA01C4383FAB2CA7EA70 /* ForgeCLIInstaller.swift */; };
 		95668F7CED1D165D912E2656 /* AgentInfoPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */; };
 		958919E7AFE933A2ECE729BE /* FileStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557D56D0DBFDC04108086ED /* FileStatus.swift */; };
-		96FD18E31023CBACC444EB5E /* NotificationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A70137B365D7CD6FCCF21A4D /* NotificationStore.swift */; };
 		9BF204E729543B6E9E689976 /* TerminalAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A330C61E147E9935FB2584 /* TerminalAppearance.swift */; };
 		9EC89A28301B55CD351004C8 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E18D8DBAC71B87110136F /* SplitViewController.swift */; };
 		9EDD41D6CE5D3A6834DC9C8C /* BonsplitPaneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17205892BB4CD21C1A347A75 /* BonsplitPaneManager.swift */; };
 		A2858A5B2AAD0956FC54CA0B /* forge-cli in Resources */ = {isa = PBXBuildFile; fileRef = 0DC2B1C4E2E0CE097908C96B /* forge-cli */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A5E0E33106E041E304409673 /* AgentSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014017376795403DB6AD56A /* AgentSetup.swift */; };
 		A6AC1E458EE45F2D0FDC703C /* SplitAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 243460106C0C757CFFBF6D4E /* SplitAnimator.swift */; };
 		AD12FBB49FFE0B110FA16F4D /* SplitNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBFCA5701CEE5E34D6C159E /* SplitNode.swift */; };
 		B2A94F3E550AC00F336C7D1D /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFD8D52036236C912F9A75B /* MainWindowController.swift */; };
@@ -82,10 +84,10 @@
 		B9859F0953678386516F55D4 /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FE53F98FC4ED53EBACE627 /* TabBarView.swift */; };
 		BBD8AE2D99990E0BE2681B70 /* TabBarMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */; };
 		BF0BCA07938D96A6D897E1C8 /* CommandDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */; };
-		C3273E02B9C26B2417368297 /* AgentHookInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = E933B0C6052DEC30210330BC /* AgentHookInstaller.swift */; };
 		C570FF0EF21F8683B536CAC4 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67FC7642C53676D66D0BD42 /* main.swift */; };
 		C8EE75452F5337ABC30CAAFE /* BonsplitDebugCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */; };
 		CC902EED542F094CEFCC2F78 /* libghostty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F9518B116ACF472BAE659D2 /* libghostty.a */; };
+		D22DD4E346A00578FC2AB34A /* AgentActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E462273D87AE64CBBE7EB1F3 /* AgentActivity.swift */; };
 		D3AC14E880180F1AEA725ABD /* TabDragPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4F0F389914743FA021ED2E /* TabDragPreview.swift */; };
 		D3B75B31144F373A322543BD /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F8D881C55D57EE673CB404 /* main.swift */; };
 		D3BD134D32903952D880E53C /* TerminalAppearanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53E8575792CD729D327E6C2A /* TerminalAppearanceView.swift */; };
@@ -128,6 +130,7 @@
 /* Begin PBXFileReference section */
 		027D11694354B37A74D44611 /* SummaryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryLog.swift; sourceTree = "<group>"; };
 		07F919EC60D33B385F139603 /* Forge-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Forge-Bridging-Header.h"; sourceTree = "<group>"; };
+		09E805EE38B5FF260D35CE21 /* TerminalObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalObserver.swift; sourceTree = "<group>"; };
 		0C342594BAD505C190C0CAB5 /* TabBarColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarColors.swift; sourceTree = "<group>"; };
 		0C67F3ACD4D8E2FD015C9B5E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0DC2B1C4E2E0CE097908C96B /* forge-cli */ = {isa = PBXFileReference; includeInIndex = 0; path = "forge-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -147,7 +150,6 @@
 		324C6BF661A3B57C7A0FE4DC /* TabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItem.swift; sourceTree = "<group>"; };
 		33009813506A712F05C01586 /* WorkspaceNaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceNaming.swift; sourceTree = "<group>"; };
 		33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentReviewPayloadBuilder.swift; sourceTree = "<group>"; };
-		36AAFA0CE4C8B2CB5DA66D84 /* AgentStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentStatus.swift; sourceTree = "<group>"; };
 		39F12DDCB35F9733A5846460 /* DiffTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTabView.swift; sourceTree = "<group>"; };
 		3C0E18D8DBAC71B87110136F /* SplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
 		411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitDebugCounters.swift; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 		688827BF577108EF9FFD38F8 /* SplitOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitOrientation.swift; sourceTree = "<group>"; };
 		69A330C61E147E9935FB2584 /* TerminalAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalAppearance.swift; sourceTree = "<group>"; };
 		6E518EB16255BC5AC4967951 /* SummaryCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryCommand.swift; sourceTree = "<group>"; };
+		71607C511F2A39E630507479 /* AgentEventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentEventStore.swift; sourceTree = "<group>"; };
 		72C84715E19D3D7A198B19B8 /* ProjectListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectListView.swift; sourceTree = "<group>"; };
 		749EB54C1D9FD07119776AA4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7519165D08DFDF8192EA8F7C /* BonsplitController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitController.swift; sourceTree = "<group>"; };
@@ -189,11 +192,12 @@
 		95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMono-Regular.ttf"; sourceTree = "<group>"; };
 		95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendToAgentView.swift; sourceTree = "<group>"; };
 		99751F6A0C8860A70146FB8D /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		9E002CD819513C0820D42DF3 /* AgentEventLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentEventLogger.swift; sourceTree = "<group>"; };
 		9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitNodeView.swift; sourceTree = "<group>"; };
 		9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarMetrics.swift; sourceTree = "<group>"; };
+		A014017376795403DB6AD56A /* AgentSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSetup.swift; sourceTree = "<group>"; };
 		A0FE24D12EFC16A9E835DFD3 /* BonsplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitView.swift; sourceTree = "<group>"; };
 		A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeSocketServer.swift; sourceTree = "<group>"; };
-		A70137B365D7CD6FCCF21A4D /* NotificationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationStore.swift; sourceTree = "<group>"; };
 		A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentInfoPopoverView.swift; sourceTree = "<group>"; };
 		A913D1CB5E730CFBA223F25D /* DebugEventLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugEventLog.swift; sourceTree = "<group>"; };
 		A918DA6D12D11F5510C604BB /* ProjectStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectStore.swift; sourceTree = "<group>"; };
@@ -203,17 +207,18 @@
 		B820530CBC1D596D6A54011E /* TabContextAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabContextAction.swift; sourceTree = "<group>"; };
 		B9E4187EE35799D24A79EF0B /* ghostty */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ghostty; path = Forge/Resources/ghostty; sourceTree = SOURCE_ROOT; };
 		BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryScheduler.swift; sourceTree = "<group>"; };
-		BBD87FE6EFA673C8D1F22A9C /* AgentDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDetector.swift; sourceTree = "<group>"; };
 		BC582D54CE2623E5734E1EEE /* FileStatusList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusList.swift; sourceTree = "<group>"; };
 		C27615076A6D6DC12ADBB86E /* DiffViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffViewModel.swift; sourceTree = "<group>"; };
 		C2B68C999B71210CCBAAC317 /* SplitDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitDiffView.swift; sourceTree = "<group>"; };
 		CA4F0F389914743FA021ED2E /* TabDragPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabDragPreview.swift; sourceTree = "<group>"; };
+		CA66E30B9FF754A2972DC13E /* OpenCodeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCodeClient.swift; sourceTree = "<group>"; };
 		CDD54FF735F21B48ED884859 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		CE0283AAF15EE234022748C7 /* TerminalTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalTab.swift; sourceTree = "<group>"; };
 		CE5A832DC1A1CA840C037625 /* TerminalAppearanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalAppearanceStore.swift; sourceTree = "<group>"; };
 		D10E6E44336CA3AE64223EDF /* SummaryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryStore.swift; sourceTree = "<group>"; };
 		D13DD0F1CF1BF5AEB2EB8042 /* PaneContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneContainerView.swift; sourceTree = "<group>"; };
 		D189E7C10808C8DFEA133A5C /* TabItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItemView.swift; sourceTree = "<group>"; };
+		D1BD0781FCD4F902B5A7F38F /* OpenCodePortManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenCodePortManager.swift; sourceTree = "<group>"; };
 		D28C2E3C2AE15E481B8C9FDB /* SafeTooltip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeTooltip.swift; sourceTree = "<group>"; };
 		D4F8D881C55D57EE673CB404 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		D50575BD258BDA402F95EE53 /* GitDiffModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitDiffModels.swift; sourceTree = "<group>"; };
@@ -223,10 +228,9 @@
 		D8B6352ABACD0556576E6674 /* WordDiff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiff.swift; sourceTree = "<group>"; };
 		DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitContainerView.swift; sourceTree = "<group>"; };
 		DCF2655CE07FECC563390787 /* FileStatusRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusRow.swift; sourceTree = "<group>"; };
+		E462273D87AE64CBBE7EB1F3 /* AgentActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentActivity.swift; sourceTree = "<group>"; };
 		E79EB0D856F2E78068B504FC /* AgentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentConfig.swift; sourceTree = "<group>"; };
 		E8C30B829376599F48CCB5C7 /* ReviewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewStore.swift; sourceTree = "<group>"; };
-		E933B0C6052DEC30210330BC /* AgentHookInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentHookInstaller.swift; sourceTree = "<group>"; };
-		E965BA01C4383FAB2CA7EA70 /* ForgeCLIInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeCLIInstaller.swift; sourceTree = "<group>"; };
 		E9F9A1C5B81DD1DFC08BE0BD /* GhosttyTerminalViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyTerminalViewRepresentable.swift; sourceTree = "<group>"; };
 		EAD57FE43439B2C292022C07 /* Forge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Forge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDE6E9898D02521ED5E5A26C /* AgentCapabilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCapabilities.swift; sourceTree = "<group>"; };
@@ -253,6 +257,7 @@
 		0576244C30124FF79A99D703 /* IPC */ = {
 			isa = PBXGroup;
 			children = (
+				9E002CD819513C0820D42DF3 /* AgentEventLogger.swift */,
 				A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */,
 			);
 			path = IPC;
@@ -261,7 +266,7 @@
 		066F585DEFAB5A4500906CC9 /* Terminal */ = {
 			isa = PBXGroup;
 			children = (
-				36AAFA0CE4C8B2CB5DA66D84 /* AgentStatus.swift */,
+				E462273D87AE64CBBE7EB1F3 /* AgentActivity.swift */,
 				F03D48F43AB138181D6CD761 /* TerminalSession.swift */,
 				CE0283AAF15EE234022748C7 /* TerminalTab.swift */,
 			);
@@ -396,8 +401,9 @@
 			isa = PBXGroup;
 			children = (
 				8E49E4582AFF44F5057030E3 /* AgentCapabilityParser.swift */,
-				E933B0C6052DEC30210330BC /* AgentHookInstaller.swift */,
-				E965BA01C4383FAB2CA7EA70 /* ForgeCLIInstaller.swift */,
+				A014017376795403DB6AD56A /* AgentSetup.swift */,
+				CA66E30B9FF754A2972DC13E /* OpenCodeClient.swift */,
+				D1BD0781FCD4F902B5A7F38F /* OpenCodePortManager.swift */,
 				6E518EB16255BC5AC4967951 /* SummaryCommand.swift */,
 				027D11694354B37A74D44611 /* SummaryLog.swift */,
 			);
@@ -407,8 +413,8 @@
 		5DCF51239E4D414F8A138D1C /* State */ = {
 			isa = PBXGroup;
 			children = (
+				71607C511F2A39E630507479 /* AgentEventStore.swift */,
 				FDE1F53D3088D83C929C6089 /* AgentStore.swift */,
-				A70137B365D7CD6FCCF21A4D /* NotificationStore.swift */,
 				A918DA6D12D11F5510C604BB /* ProjectStore.swift */,
 				E8C30B829376599F48CCB5C7 /* ReviewStore.swift */,
 				BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */,
@@ -593,11 +599,11 @@
 		DAED6D2987F96FEEA9DE8C05 /* Terminal */ = {
 			isa = PBXGroup;
 			children = (
-				BBD87FE6EFA673C8D1F22A9C /* AgentDetector.swift */,
 				A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */,
 				17205892BB4CD21C1A347A75 /* BonsplitPaneManager.swift */,
 				839E65E109DAFF8720308214 /* TerminalCache.swift */,
 				165C25925FC171DC2A54087F /* TerminalContainerViewController.swift */,
+				09E805EE38B5FF260D35CE21 /* TerminalObserver.swift */,
 				47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */,
 				63B21B2E308767754671E62E /* TerminalTabBar.swift */,
 			);
@@ -808,14 +814,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D22DD4E346A00578FC2AB34A /* AgentActivity.swift in Sources */,
 				1C0AEA61EA5DEA5E2847EAD1 /* AgentCapabilities.swift in Sources */,
 				B7AEDCC3748C5C2C8E4699E4 /* AgentCapabilityParser.swift in Sources */,
 				2642F6F94CF38C2D37E37D83 /* AgentConfig.swift in Sources */,
-				72A63CB02229017307EC1299 /* AgentDetector.swift in Sources */,
-				C3273E02B9C26B2417368297 /* AgentHookInstaller.swift in Sources */,
+				1ADCE9E20D14A95F005B6033 /* AgentEventLogger.swift in Sources */,
+				14CB2C84FC65B925A953F23E /* AgentEventStore.swift in Sources */,
 				95668F7CED1D165D912E2656 /* AgentInfoPopoverView.swift in Sources */,
 				0C401CA4784BC5616BB7AA5D /* AgentReviewPayloadBuilder.swift in Sources */,
-				144B2D71D94D15DD9A2E5FD4 /* AgentStatus.swift in Sources */,
+				A5E0E33106E041E304409673 /* AgentSetup.swift in Sources */,
 				1C121FFC047C8B2497C556D9 /* AgentStore.swift in Sources */,
 				4E353DD84E747CCAAC3E9A85 /* AppDelegate.swift in Sources */,
 				227D8A9991C1E52BE92D2B4B /* BonsplitConfiguration.swift in Sources */,
@@ -836,7 +843,6 @@
 				958919E7AFE933A2ECE729BE /* FileStatus.swift in Sources */,
 				6E66D7FFCF8DFBB0390ECD49 /* FileStatusList.swift in Sources */,
 				B6C05E6C34DD83B11063FB87 /* FileStatusRow.swift in Sources */,
-				93F21DA41BF8F4A5EC252551 /* ForgeCLIInstaller.swift in Sources */,
 				1B65752028DE519CB345DAB8 /* ForgeSocketServer.swift in Sources */,
 				DEAC350B0F837DF5137CCCDF /* ForgeStore.swift in Sources */,
 				D9329A95BC037EA8F5E7C659 /* GhosttyApp.swift in Sources */,
@@ -852,7 +858,8 @@
 				4E5B37050E49C380D5DDC77A /* MainSplitViewController.swift in Sources */,
 				B2A94F3E550AC00F336C7D1D /* MainWindowController.swift in Sources */,
 				44E8410998E0416714800A1B /* NavigationDirection.swift in Sources */,
-				96FD18E31023CBACC444EB5E /* NotificationStore.swift in Sources */,
+				039AF28D6180FA6863458BBE /* OpenCodeClient.swift in Sources */,
+				6D91E9F5B57216E730CD6E44 /* OpenCodePortManager.swift in Sources */,
 				F351A2997F2AFC7ADB235655 /* PaneContainerView.swift in Sources */,
 				676341BCA86E78A23161ED1B /* PaneID.swift in Sources */,
 				694668C2FDEE836BC7B3F22D /* PaneState.swift in Sources */,
@@ -895,6 +902,7 @@
 				D3BD134D32903952D880E53C /* TerminalAppearanceView.swift in Sources */,
 				42E7DC31BEDCE5A34140C5AB /* TerminalCache.swift in Sources */,
 				3C391F6FF78E99BD75053CBC /* TerminalContainerViewController.swift in Sources */,
+				673D256E6787F286D9EEC05B /* TerminalObserver.swift in Sources */,
 				6620650A4F8E1CB27057FE5B /* TerminalSession.swift in Sources */,
 				636833B4508AD5E5520B0E57 /* TerminalSessionManager.swift in Sources */,
 				E9935234B95FAF969A02353A /* TerminalTab.swift in Sources */,

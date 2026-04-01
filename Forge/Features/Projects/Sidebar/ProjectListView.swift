@@ -1,7 +1,7 @@
 import SwiftUI
 
 private struct ScopeActivity {
-    let status: AgentStatus
+    let status: AgentActivity
     let sessionCount: Int
 }
 
@@ -447,19 +447,22 @@ private struct WorkspaceRow: View {
     let onDelete: () -> Void
     let onRename: (String) -> Void
 
-    @ObservedObject private var notificationStore = NotificationStore.shared
+    @ObservedObject private var agentEventStore = AgentEventStore.shared
     @ObservedObject private var summaryStore = SummaryStore.shared
     @State private var isEditing = false
     @State private var editName = ""
 
-    /// Aggregate agent status across all tabs in this workspace
-    private var workspaceAgentStatus: AgentStatus {
+    /// Aggregate agent activity across all tabs in this workspace
+    private var workspaceAgentStatus: AgentActivity {
         let tabIDs = TerminalSessionManager.shared.tabs
             .filter { $0.workspaceID == workspace.id }
             .map(\.id)
         for id in tabIDs {
-            if notificationStore.agentStatusByTab[id] == .waitingForInput { return .waitingForInput }
-            if notificationStore.agentStatusByTab[id] == .running { return .running }
+            if agentEventStore.activityByTab[id] == .waitingForPermission { return .waitingForPermission }
+            if agentEventStore.activityByTab[id] == .toolExecuting { return .toolExecuting }
+            if agentEventStore.activityByTab[id] == .thinking { return .thinking }
+            if agentEventStore.activityByTab[id] == .retrying { return .retrying }
+            if agentEventStore.activityByTab[id] == .compacting { return .compacting }
         }
         return .idle
     }
@@ -469,7 +472,7 @@ private struct WorkspaceRow: View {
         let tabIDs = TerminalSessionManager.shared.tabs
             .filter { $0.workspaceID == workspace.id }
             .map(\.id)
-        return tabIDs.reduce(0) { $0 + (notificationStore.unreadCountByTab[$1] ?? 0) }
+        return tabIDs.reduce(0) { $0 + (agentEventStore.unreadCountByTab[$1] ?? 0) }
     }
 
     var body: some View {
@@ -495,7 +498,7 @@ private struct WorkspaceRow: View {
                             )
                             .lineLimit(1)
                             .strikethrough(workspace.status == .merged, color: Color(nsColor: .tertiaryLabelColor))
-                            .opacity(workspaceAgentStatus == .running ? 1.0 : 1.0)
+                            .opacity(workspaceAgentStatus == .toolExecuting ? 1.0 : 1.0)
                         Spacer()
 
                         if workspace.status == .merged {
@@ -509,13 +512,28 @@ private struct WorkspaceRow: View {
                             Circle()
                                 .fill(Color.blue)
                                 .frame(width: 6, height: 6)
-                        } else if workspaceAgentStatus == .waitingForInput {
+                        } else if workspaceAgentStatus == .waitingForPermission {
                             Circle()
                                 .fill(Color.orange)
                                 .frame(width: 6, height: 6)
-                        } else if workspaceAgentStatus == .running {
+                        } else if workspaceAgentStatus == .thinking {
+                            Circle()
+                                .fill(Color.blue)
+                                .frame(width: 6, height: 6)
+                                .modifier(PulseModifier())
+                        } else if workspaceAgentStatus == .toolExecuting {
                             Circle()
                                 .fill(Color.green)
+                                .frame(width: 6, height: 6)
+                                .modifier(PulseModifier())
+                        } else if workspaceAgentStatus == .retrying {
+                            Circle()
+                                .fill(Color.red)
+                                .frame(width: 6, height: 6)
+                                .modifier(PulseModifier())
+                        } else if workspaceAgentStatus == .compacting {
+                            Circle()
+                                .fill(Color.purple)
                                 .frame(width: 6, height: 6)
                                 .modifier(PulseModifier())
                         }

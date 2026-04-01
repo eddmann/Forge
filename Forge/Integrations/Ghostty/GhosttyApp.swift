@@ -169,24 +169,69 @@ class GhosttyApp {
                     let ctx = Unmanaged<GhosttySurfaceContext>.fromOpaque(ptr).takeUnretainedValue()
                     let title = String(cString: action.action.set_title.title)
                     DispatchQueue.main.async {
-                        AgentDetector.shared.handleTitleChange(sessionID: ctx.sessionID, title: title)
+                        TerminalObserver.shared.handleTitle(sessionID: ctx.sessionID, title: title)
                     }
                 }
             }
             return true
         case GHOSTTY_ACTION_DESKTOP_NOTIFICATION:
-            // Notifications handled via ForgeSocketServer + forge CLI.
+            if target.tag == GHOSTTY_TARGET_SURFACE {
+                let userdata = ghostty_surface_userdata(target.target.surface)
+                if let ptr = userdata {
+                    let ctx = Unmanaged<GhosttySurfaceContext>.fromOpaque(ptr).takeUnretainedValue()
+                    let title = String(cString: action.action.desktop_notification.title)
+                    let body = String(cString: action.action.desktop_notification.body)
+                    DispatchQueue.main.async {
+                        TerminalObserver.shared.handleNotification(sessionID: ctx.sessionID, title: title, body: body)
+                    }
+                }
+            }
+            return true
+        case GHOSTTY_ACTION_PROGRESS_REPORT:
+            if target.tag == GHOSTTY_TARGET_SURFACE {
+                let userdata = ghostty_surface_userdata(target.target.surface)
+                if let ptr = userdata {
+                    let ctx = Unmanaged<GhosttySurfaceContext>.fromOpaque(ptr).takeUnretainedValue()
+                    let state = action.action.progress_report.state
+                    let progress = action.action.progress_report.progress
+                    DispatchQueue.main.async {
+                        TerminalObserver.shared.handleProgress(sessionID: ctx.sessionID, state: state.rawValue, progress: progress)
+                    }
+                }
+            }
+            return true
+        case GHOSTTY_ACTION_PWD:
+            if target.tag == GHOSTTY_TARGET_SURFACE {
+                let userdata = ghostty_surface_userdata(target.target.surface)
+                if let ptr = userdata {
+                    let ctx = Unmanaged<GhosttySurfaceContext>.fromOpaque(ptr).takeUnretainedValue()
+                    let pwd = String(cString: action.action.pwd.pwd)
+                    DispatchQueue.main.async {
+                        TerminalObserver.shared.handlePwd(sessionID: ctx.sessionID, pwd: pwd)
+                    }
+                }
+            }
             return true
         case GHOSTTY_ACTION_SHOW_CHILD_EXITED:
             // Child process exited — close the surface immediately instead of
             // showing "Press any key to close". Must be async to avoid re-entrant
             // close while Ghostty is still dispatching this action callback.
-            DispatchQueue.main.async {
-                // Trigger close via the surface's callback context
-                ghosttyCloseSurfaceCallback(
-                    ghostty_surface_userdata(target.target.surface),
-                    false
-                )
+            if target.tag == GHOSTTY_TARGET_SURFACE {
+                let userdata = ghostty_surface_userdata(target.target.surface)
+                if let ptr = userdata {
+                    let ctx = Unmanaged<GhosttySurfaceContext>.fromOpaque(ptr).takeUnretainedValue()
+                    DispatchQueue.main.async {
+                        TerminalObserver.shared.handleChildExited(sessionID: ctx.sessionID)
+                        ghosttyCloseSurfaceCallback(ptr, false)
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    ghosttyCloseSurfaceCallback(
+                        ghostty_surface_userdata(target.target.surface),
+                        false
+                    )
+                }
             }
             return true
         case GHOSTTY_ACTION_RING_BELL:
