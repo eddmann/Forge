@@ -63,7 +63,8 @@ class AgentEventStore: ObservableObject {
             stateByTab[tabID]?.transcriptPath = data["transcript_path"] as? String
             stateByTab[tabID]?.cwd = data["cwd"] as? String
             stateByTab[tabID]?.model = data["model"] as? String
-            activityByTab[tabID] = .thinking
+            // Don't set activity here — session_start fires on agent launch, not on work start.
+            // Let prompt/tool_start/terminal signals set the actual activity.
 
         case "prompt":
             stateByTab[tabID]?.lastPrompt = data["prompt"] as? String
@@ -177,10 +178,29 @@ class AgentEventStore: ObservableObject {
 
     func updateFromTerminalSignals(tabID: UUID, agent: String?, activity: AgentActivity) {
         guard let agent else {
-            activityByTab.removeValue(forKey: tabID)
+            if activityByTab.removeValue(forKey: tabID) != nil {}
             return
         }
+        // Only publish if activity actually changed — prevents rapid title updates
+        // (e.g. Codex spinner at 100ms) from rebuilding the tab bar and killing animations
+        let previousActivity = activityByTab[tabID]
+        guard previousActivity != activity else { return }
         activityByTab[tabID] = activity
+
+        // Detect working → idle transition from terminal signals alone.
+        // This catches agents whose Stop hook may not fire (e.g. Codex)
+        // or when the terminal title reverts before the hook arrives.
+        if activity == .idle,
+           previousActivity == .thinking || previousActivity == .toolExecuting {
+            let agentName = AgentStore.shared.agents.first(where: { $0.command == agent })?.name ?? agent
+            addNotification(tabID: tabID, sessionID: nil, title: agentName, body: "Task complete")
+            if TerminalSessionManager.shared.activeTabID == tabID {
+                markRead(tabID: tabID)
+            }
+            if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
+                SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID)
+            }
+        }
     }
 
     // MARK: - Notifications

@@ -145,11 +145,11 @@ class TerminalObserver {
         if let word = signals.titleStatusWord {
             switch word {
             case "Ready": return .idle
-            case "Working": return .toolExecuting
+            case "Working": return .thinking
             case "Thinking": return .thinking
             case "Waiting": return .waitingForPermission
-            case "Starting": return .thinking
-            case "Undoing": return .toolExecuting
+            case "Starting": return .idle
+            case "Undoing": return .thinking
             default: break
             }
         }

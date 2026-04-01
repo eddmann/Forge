@@ -37,27 +37,29 @@ class AgentSetup {
         }
 
         // Build hook entries — guarded by FORGE_SESSION so hooks only fire inside Forge
-        let guard_ = "[ -n \"$FORGE_SESSION\" ] && "
-        let cmd = "forge event claude"
+        // Uses if/then/fi (not &&) so exit code is always 0 when outside Forge
+        func claudeHook(_ event: String) -> String {
+            "if [ -n \"$FORGE_SESSION\" ]; then forge event claude \(event); fi"
+        }
         let hooks: [String: Any] = [
             "SessionStart": [
-                ["hooks": [["type": "command", "command": "\(guard_)\(cmd) session_start"]]]
+                ["hooks": [["type": "command", "command": claudeHook("session_start")]]]
             ],
             "PreToolUse": [
-                ["hooks": [["type": "command", "command": "\(guard_)\(cmd) tool_start"]]]
+                ["hooks": [["type": "command", "command": claudeHook("tool_start")]]]
             ],
             "PostToolUse": [
-                ["hooks": [["type": "command", "command": "\(guard_)\(cmd) tool_end"]]]
+                ["hooks": [["type": "command", "command": claudeHook("tool_end")]]]
             ],
             "Stop": [
-                ["hooks": [["type": "command", "command": "\(guard_)\(cmd) stop"]]]
+                ["hooks": [["type": "command", "command": claudeHook("stop")]]]
             ],
             "UserPromptSubmit": [
-                ["hooks": [["type": "command", "command": "\(guard_)\(cmd) prompt"]]]
+                ["hooks": [["type": "command", "command": claudeHook("prompt")]]]
             ],
             "Notification": [
                 ["matcher": "permission_prompt|elicitation_dialog",
-                 "hooks": [["type": "command", "command": "\(guard_)\(cmd) notification"]]]
+                 "hooks": [["type": "command", "command": claudeHook("notification")]]]
             ]
         ]
 
@@ -96,26 +98,27 @@ class AgentSetup {
         // Only install if Codex is already set up
         guard fm.fileExists(atPath: codexDir) else { return }
 
-        // hooks.json — guarded by FORGE_SESSION
+        // hooks.json — guarded by FORGE_SESSION, if/then/fi for clean exit code
         let hooksPath = codexDir + "/hooks.json"
-        let guard_ = "[ -n \"$FORGE_SESSION\" ] && "
-        let cmd = "forge event codex"
+        func codexHook(_ event: String) -> String {
+            "if [ -n \"$FORGE_SESSION\" ]; then forge event codex \(event); fi"
+        }
         let hooks: [String: Any] = [
             "hooks": [
                 "SessionStart": [
-                    ["hooks": [["type": "command", "command": "\(guard_)\(cmd) session_start"]]]
+                    ["hooks": [["type": "command", "command": codexHook("session_start")]]]
                 ],
                 "PreToolUse": [
-                    ["hooks": [["type": "command", "command": "\(guard_)\(cmd) tool_start"]]]
+                    ["hooks": [["type": "command", "command": codexHook("tool_start")]]]
                 ],
                 "PostToolUse": [
-                    ["hooks": [["type": "command", "command": "\(guard_)\(cmd) tool_end"]]]
+                    ["hooks": [["type": "command", "command": codexHook("tool_end")]]]
                 ],
                 "UserPromptSubmit": [
-                    ["hooks": [["type": "command", "command": "\(guard_)\(cmd) prompt"]]]
+                    ["hooks": [["type": "command", "command": codexHook("prompt")]]]
                 ],
                 "Stop": [
-                    ["hooks": [["type": "command", "command": "\(guard_)\(cmd) stop"]]]
+                    ["hooks": [["type": "command", "command": codexHook("stop")]]]
                 ]
             ]
         ]
@@ -196,30 +199,17 @@ class AgentSetup {
           const socketPath = process.env.FORGE_SOCKET || `${process.env.HOME}/.forge/state/forge.sock`;
           const session = process.env.FORGE_SESSION;
 
-          // Don't connect if no socket configured
           if (!process.env.FORGE_SOCKET && !process.env.FORGE_SESSION) return;
 
-          let sock: net.Socket | null = null;
-
-          function connect() {
-            try {
-              sock = net.createConnection(socketPath);
-              sock.on("error", () => { sock = null; });
-              sock.on("close", () => { sock = null; });
-            } catch {
-              sock = null;
-            }
-          }
-
-          connect();
-
           function send(event: string, data: Record<string, any> = {}) {
-            if (!sock) connect();
-            if (!sock) return;
+            // New connection per message — ForgeSocketServer closes after each read
             try {
-              sock.write(JSON.stringify({
-                command: "agent_event", session, agent: "pi", event, data
-              }) + "\\n");
+              const sock = net.createConnection(socketPath, () => {
+                sock.end(JSON.stringify({
+                  command: "agent_event", session, agent: "pi", event, data
+                }) + "\\n");
+              });
+              sock.on("error", () => {});
             } catch {}
           }
 

@@ -147,6 +147,9 @@ class TerminalContainerViewController: NSViewController {
             .sink { [weak self] _ in
                 self?.updateTabBar()
                 self?.updateStatusBar()
+                if let tabID = self?.sessionManager.activeTabID {
+                    AgentEventStore.shared.markRead(tabID: tabID)
+                }
             }
             .store(in: &cancellables)
 
