@@ -260,6 +260,7 @@ private struct ProjectSection: View {
     @State private var expanded: Bool
     @State private var branches: [String] = []
     @State private var isHovered = false
+    @State private var showRemoveConfirmation = false
 
     private var isProjectActive: Bool {
         ProjectStore.shared.activeProjectID == project.id && ProjectStore.shared.activeWorkspaceID == nil
@@ -369,7 +370,7 @@ private struct ProjectSection: View {
                         }
                     }
                     Divider()
-                    Button("Remove Project", role: .destructive) { onRemoveProject() }
+                    Button("Remove Project", role: .destructive) { showRemoveConfirmation = true }
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 12, weight: .medium))
@@ -408,6 +409,15 @@ private struct ProjectSection: View {
         }
         .padding(.bottom, 4)
         .onAppear { loadBranches() }
+        .confirmationDialog(
+            "Remove \(project.name)?",
+            isPresented: $showRemoveConfirmation
+        ) {
+            Button("Remove") { onRemoveProject() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will remove the project and delete all its workspaces from disk.")
+        }
     }
 
     private func toggleExpanded() {
@@ -451,6 +461,7 @@ private struct WorkspaceRow: View {
     @ObservedObject private var summaryStore = SummaryStore.shared
     @State private var isEditing = false
     @State private var editName = ""
+    @State private var showDeleteConfirmation = false
 
     /// Aggregate agent activity across all tabs in this workspace
     private var workspaceAgentStatus: AgentActivity {
@@ -573,7 +584,16 @@ private struct WorkspaceRow: View {
                 isEditing = true
             }
             Divider()
-            Button("Delete Workspace", role: .destructive) { onDelete() }
+            Button("Delete Workspace", role: .destructive) { showDeleteConfirmation = true }
+        }
+        .confirmationDialog(
+            "Delete \(workspace.name)?",
+            isPresented: $showDeleteConfirmation
+        ) {
+            Button("Delete") { onDelete() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete the workspace directory from disk.")
         }
     }
 }
