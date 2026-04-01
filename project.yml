@@ -1,0 +1,90 @@
+name: Forge
+options:
+  bundleIdPrefix: com.forge
+  deploymentTarget:
+    macOS: "15.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+
+targets:
+  Forge:
+    type: application
+    platform: macOS
+    sources:
+      - path: Forge
+        excludes:
+          - "*.entitlements"
+          - Resources/ghostty
+      - path: Forge/Integrations/Ghostty/ghostty.h
+        buildPhase: none
+      - path: Forge/Resources/ghostty
+        buildPhase: resources
+        type: folder
+    info:
+      path: Forge/Info.plist
+      properties:
+        NSPrincipalClass: NSApplication
+    entitlements:
+      path: Forge/Forge.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.cs.allow-unsigned-executable-memory: true
+    dependencies:
+      - framework: Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64/libghostty.a
+        embed: false
+      - target: forge-cli
+    postBuildScripts:
+      - script: |
+          mkdir -p "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/bin"
+          cp "${BUILT_PRODUCTS_DIR}/forge" "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/bin/forge"
+        name: "Embed forge CLI"
+        inputFiles: ["$(BUILT_PRODUCTS_DIR)/forge"]
+        outputFiles: ["$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/bin/forge"]
+    settings:
+      base:
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
+        PRODUCT_BUNDLE_IDENTIFIER: com.forge.app
+        PRODUCT_NAME: Forge
+        SWIFT_VERSION: "5.10"
+        CODE_SIGN_ENTITLEMENTS: Forge/Forge.entitlements
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGNING_REQUIRED: "NO"
+        ENABLE_APP_SANDBOX: "NO"
+        INFOPLIST_FILE: Forge/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_OBJC_BRIDGING_HEADER: Forge/Forge-Bridging-Header.h
+        HEADER_SEARCH_PATHS:
+          - "$(SRCROOT)"
+          - "$(SRCROOT)/Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64/Headers"
+        LIBRARY_SEARCH_PATHS:
+          - "$(SRCROOT)/Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64"
+        OTHER_LDFLAGS:
+          - "-lz"
+          - "-lc++"
+          - "-framework Metal"
+          - "-framework MetalKit"
+          - "-framework CoreGraphics"
+          - "-framework QuartzCore"
+          - "-framework Foundation"
+          - "-framework AppKit"
+          - "-framework Carbon"
+          - "-framework IOKit"
+          - "-framework IOSurface"
+          - "-framework UniformTypeIdentifiers"
+      configs:
+        Debug:
+          SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG"
+        Release:
+          SWIFT_OPTIMIZATION_LEVEL: "-O"
+
+  forge-cli:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Tools/forge
+    settings:
+      base:
+        PRODUCT_NAME: forge
+        SWIFT_VERSION: "5.10"
+        MACOSX_DEPLOYMENT_TARGET: "15.0"

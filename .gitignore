@@ -1,0 +1,7 @@
+build/
+dist/
+Dependencies/GhosttyKit.xcframework/
+*.xcuserstate
+xcuserdata/
+DerivedData/
+.DS_Store

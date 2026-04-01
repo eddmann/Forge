@@ -1,0 +1,26 @@
+included:
+  - Forge
+  - Tools
+
+excluded:
+  - Dependencies
+  - build
+  - dist
+  - Forge/Vendor
+
+disabled_rules:
+  - cyclomatic_complexity
+  - file_length
+  - function_body_length
+  - function_parameter_count
+  - for_where
+  - identifier_name
+  - large_tuple
+  - line_length
+  - multiple_closures_with_trailing_closure
+  - opening_brace
+  - statement_position
+  - todo
+  - type_body_length
+
+reporter: xcode

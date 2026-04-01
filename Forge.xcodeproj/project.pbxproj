@@ -1,0 +1,1207 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0C401CA4784BC5616BB7AA5D /* AgentReviewPayloadBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */; };
+		144B2D71D94D15DD9A2E5FD4 /* AgentStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36AAFA0CE4C8B2CB5DA66D84 /* AgentStatus.swift */; };
+		186B0FFC225E49680C7A1400 /* ExternalEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17988CA2EA98D7A6396E2B91 /* ExternalEditor.swift */; };
+		1B65752028DE519CB345DAB8 /* ForgeSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */; };
+		1C0AEA61EA5DEA5E2847EAD1 /* AgentCapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE6E9898D02521ED5E5A26C /* AgentCapabilities.swift */; };
+		1C121FFC047C8B2497C556D9 /* AgentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE1F53D3088D83C929C6089 /* AgentStore.swift */; };
+		20C407A650E8850652C0EE78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0C67F3ACD4D8E2FD015C9B5E /* Assets.xcassets */; };
+		227D8A9991C1E52BE92D2B4B /* BonsplitConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2C640E2A64288AE183298D /* BonsplitConfiguration.swift */; };
+		2642F6F94CF38C2D37E37D83 /* AgentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E79EB0D856F2E78068B504FC /* AgentConfig.swift */; };
+		268611429A1A8DAD935BBCAA /* BonsplitDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20F68C9DCE5D98462D21881D /* BonsplitDelegate.swift */; };
+		2822496228736C7358FF2727 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB98837939F9B485797E3A7 /* SettingsWindowController.swift */; };
+		2D45B233B746EEEEFB436AEF /* TabBarColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C342594BAD505C190C0CAB5 /* TabBarColors.swift */; };
+		32AA8DE2E57C810B1FC02B29 /* GitDiffService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447E8085460F22791A2E2002 /* GitDiffService.swift */; };
+		35DDF4BBBAADD20B50582174 /* SplitOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688827BF577108EF9FFD38F8 /* SplitOrientation.swift */; };
+		3C391F6FF78E99BD75053CBC /* TerminalContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165C25925FC171DC2A54087F /* TerminalContainerViewController.swift */; };
+		3DD3AEA2B0CB40D49AA3892D /* BonsplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FE24D12EFC16A9E835DFD3 /* BonsplitView.swift */; };
+		3FF161D6FC74BF72BACE1CF4 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDD54FF735F21B48ED884859 /* InspectorView.swift */; };
+		4034DD01EBE7FAC68390EF94 /* GhosttyTerminalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79BF2869844D4AADB3EFF3E5 /* GhosttyTerminalView.swift */; };
+		4121FFA30CD6FD65E1905C8F /* TabContextAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B820530CBC1D596D6A54011E /* TabContextAction.swift */; };
+		4221E9F2065D464F9BF957B2 /* FiraCode-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1A84E6A2F7CC7832E0DA529E /* FiraCode-Regular.ttf */; };
+		42E7DC31BEDCE5A34140C5AB /* TerminalCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839E65E109DAFF8720308214 /* TerminalCache.swift */; };
+		440926E6DA96FD3DAE4BCDD4 /* TerminalTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B21B2E308767754671E62E /* TerminalTabBar.swift */; };
+		440BF1A6FAD5DDC760BD501E /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5692E40E8CC3135ACC22733D /* Tab.swift */; };
+		44E8410998E0416714800A1B /* NavigationDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A477301682EA23DAA59E81 /* NavigationDirection.swift */; };
+		4C793C7041A31A190944A901 /* UnifiedDiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED7ECF021E249100D45C7B2 /* UnifiedDiffView.swift */; };
+		4E353DD84E747CCAAC3E9A85 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749EB54C1D9FD07119776AA4 /* AppDelegate.swift */; };
+		4E5B37050E49C380D5DDC77A /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE29E80CC2891CE39E9AA50 /* MainSplitViewController.swift */; };
+		4F96F61957F72017DFCF2068 /* SplitState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E76234D32CE8896741114CD /* SplitState.swift */; };
+		5050EFE698D87918D89621C2 /* DiffViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27615076A6D6DC12ADBB86E /* DiffViewModel.swift */; };
+		519F6930B3D931C69681CE4E /* SummaryCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E518EB16255BC5AC4967951 /* SummaryCommand.swift */; };
+		5250AFE57FA4E85444DAF169 /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10150AB1CC6C4F8AE3423ABD /* SidebarViewController.swift */; };
+		5756BA39E77383BFCAF37803 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3839390BDE8DD11221E196 /* SettingsView.swift */; };
+		5B2ADA71AF99EE2B0D9A802A /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28C3575AE17D6490A76432 /* Workspace.swift */; };
+		61EAB7F9E8DBF4632D654669 /* BonsplitController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7519165D08DFDF8192EA8F7C /* BonsplitController.swift */; };
+		6301D6142F066E246ADA5117 /* SplitContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */; };
+		636833B4508AD5E5520B0E57 /* TerminalSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */; };
+		660EC2752004FADA5827C386 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99751F6A0C8860A70146FB8D /* WelcomeView.swift */; };
+		6620650A4F8E1CB27057FE5B /* TerminalSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03D48F43AB138181D6CD761 /* TerminalSession.swift */; };
+		676341BCA86E78A23161ED1B /* PaneID.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8ADAE09E2AF777777761B7F /* PaneID.swift */; };
+		694668C2FDEE836BC7B3F22D /* PaneState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7701E79B028746189D17A0A7 /* PaneState.swift */; };
+		69BA6066822D2EC3ECF04AAA /* SummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10E6E44336CA3AE64223EDF /* SummaryStore.swift */; };
+		6A3DE35686696B1253DA0735 /* SafeTooltip.swift in Sources */ = {isa = PBXBuildFile; fileRef = D28C2E3C2AE15E481B8C9FDB /* SafeTooltip.swift */; };
+		6CE799C3EC6812DCC3610D63 /* GitClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B48636B23896A11A9644925 /* GitClient.swift */; };
+		6D10E1C247D18BA59E04D540 /* WorkspaceCloner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EA6848CBC1E2DEE1295EDC /* WorkspaceCloner.swift */; };
+		6D32E213A2DB89468558046F /* BranchPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BD7C813556607AFCF0EAFB /* BranchPickerView.swift */; };
+		6D9CB313204C45E8B2FC20AF /* TabID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CBFE7A0F60D63CBB4B6E17 /* TabID.swift */; };
+		6E66D7FFCF8DFBB0390ECD49 /* FileStatusList.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC582D54CE2623E5734E1EEE /* FileStatusList.swift */; };
+		70C18486C2C2B8BCCF6EF853 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E2BA9B896F72867C2704FC /* CommandPalette.swift */; };
+		7135B8F57163B17958BAAA26 /* ChangesTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FF87CF5EC77FF694158BAC /* ChangesTabView.swift */; };
+		72A63CB02229017307EC1299 /* AgentDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD87FE6EFA673C8D1F22A9C /* AgentDetector.swift */; };
+		792DB5B7CE3CD212E63347F3 /* JetBrainsMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */; };
+		8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */; };
+		87DE037B3A7130EABAEEA4FC /* GitUnifiedDiffParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */; };
+		8932C47CE7A9158D452B4E4E /* WordDiffLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */; };
+		8B4C5CAD6ACD54E118395D79 /* SplitNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */; };
+		93F21DA41BF8F4A5EC252551 /* ForgeCLIInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = E965BA01C4383FAB2CA7EA70 /* ForgeCLIInstaller.swift */; };
+		95668F7CED1D165D912E2656 /* AgentInfoPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */; };
+		958919E7AFE933A2ECE729BE /* FileStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557D56D0DBFDC04108086ED /* FileStatus.swift */; };
+		96FD18E31023CBACC444EB5E /* NotificationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A70137B365D7CD6FCCF21A4D /* NotificationStore.swift */; };
+		9BF204E729543B6E9E689976 /* TerminalAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A330C61E147E9935FB2584 /* TerminalAppearance.swift */; };
+		9EC89A28301B55CD351004C8 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E18D8DBAC71B87110136F /* SplitViewController.swift */; };
+		9EDD41D6CE5D3A6834DC9C8C /* BonsplitPaneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17205892BB4CD21C1A347A75 /* BonsplitPaneManager.swift */; };
+		A2858A5B2AAD0956FC54CA0B /* forge-cli in Resources */ = {isa = PBXBuildFile; fileRef = 0DC2B1C4E2E0CE097908C96B /* forge-cli */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A6AC1E458EE45F2D0FDC703C /* SplitAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 243460106C0C757CFFBF6D4E /* SplitAnimator.swift */; };
+		AD12FBB49FFE0B110FA16F4D /* SplitNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBFCA5701CEE5E34D6C159E /* SplitNode.swift */; };
+		B2A94F3E550AC00F336C7D1D /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFD8D52036236C912F9A75B /* MainWindowController.swift */; };
+		B2C65263AB86E25FD03ED68E /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1D2E8F62597C740B62B4D0 /* Project.swift */; };
+		B4074675E659D561A121BCC9 /* SplitDiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B68C999B71210CCBAAC317 /* SplitDiffView.swift */; };
+		B6C05E6C34DD83B11063FB87 /* FileStatusRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF2655CE07FECC563390787 /* FileStatusRow.swift */; };
+		B7070FB12D059250F93792F8 /* DiffTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F12DDCB35F9733A5846460 /* DiffTabView.swift */; };
+		B7AEDCC3748C5C2C8E4699E4 /* AgentCapabilityParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E49E4582AFF44F5057030E3 /* AgentCapabilityParser.swift */; };
+		B9210B522CAA640A2E75D1B4 /* ProjectStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A918DA6D12D11F5510C604BB /* ProjectStore.swift */; };
+		B9859F0953678386516F55D4 /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FE53F98FC4ED53EBACE627 /* TabBarView.swift */; };
+		BBD8AE2D99990E0BE2681B70 /* TabBarMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */; };
+		BF0BCA07938D96A6D897E1C8 /* CommandDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */; };
+		C3273E02B9C26B2417368297 /* AgentHookInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = E933B0C6052DEC30210330BC /* AgentHookInstaller.swift */; };
+		C570FF0EF21F8683B536CAC4 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67FC7642C53676D66D0BD42 /* main.swift */; };
+		C8EE75452F5337ABC30CAAFE /* BonsplitDebugCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */; };
+		CC902EED542F094CEFCC2F78 /* libghostty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F9518B116ACF472BAE659D2 /* libghostty.a */; };
+		D3AC14E880180F1AEA725ABD /* TabDragPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4F0F389914743FA021ED2E /* TabDragPreview.swift */; };
+		D3B75B31144F373A322543BD /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F8D881C55D57EE673CB404 /* main.swift */; };
+		D3BD134D32903952D880E53C /* TerminalAppearanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53E8575792CD729D327E6C2A /* TerminalAppearanceView.swift */; };
+		D80AF7ED304AE0FCA3C5E84F /* SummaryScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */; };
+		D9329A95BC037EA8F5E7C659 /* GhosttyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3624BDB8FD61A57C38FA30C /* GhosttyApp.swift */; };
+		D9645675D4C6E211F608B386 /* SendToAgentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */; };
+		DAB078E282A2AEC5CE9E5284 /* ChangesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868FBDD017F6B9CA822F6A7D /* ChangesViewModel.swift */; };
+		DD6DF706C2BB39C33D15BE82 /* ProjectListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C84715E19D3D7A198B19B8 /* ProjectListView.swift */; };
+		DE18EFF881E8F22355D76103 /* TabItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C6BF661A3B57C7A0FE4DC /* TabItem.swift */; };
+		DEAC350B0F837DF5137CCCDF /* ForgeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A90616935E4BDC25E834E9B /* ForgeStore.swift */; };
+		DF49C321DAD4350EFE68125A /* GitDiffModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50575BD258BDA402F95EE53 /* GitDiffModels.swift */; };
+		E0B0011E31FC00183E2E9953 /* ShellEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 512FB160F659513F1441B40F /* ShellEnvironment.swift */; };
+		E4733A69B65CD74E31153FA1 /* WordDiff.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B6352ABACD0556576E6674 /* WordDiff.swift */; };
+		E648AB552ED0F339B98CDB27 /* TerminalAppearanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5A832DC1A1CA840C037625 /* TerminalAppearanceStore.swift */; };
+		E9935234B95FAF969A02353A /* TerminalTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0283AAF15EE234022748C7 /* TerminalTab.swift */; };
+		E9F327F7F66C401F89C3CA61 /* StatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75F643170BE9658FD3E9B594 /* StatusViewModel.swift */; };
+		EA6AE32F44FB744BAB361458 /* GhosttyTerminalViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F9A1C5B81DD1DFC08BE0BD /* GhosttyTerminalViewRepresentable.swift */; };
+		EB14AF51A502923B533D3ABE /* DebugEventLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A913D1CB5E730CFBA223F25D /* DebugEventLog.swift */; };
+		EBE6970C1FAB16099C16176C /* ReviewStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C30B829376599F48CCB5C7 /* ReviewStore.swift */; };
+		F07F1370F96DC83D03EFC104 /* TabItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D189E7C10808C8DFEA133A5C /* TabItemView.swift */; };
+		F351A2997F2AFC7ADB235655 /* PaneContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13DD0F1CF1BF5AEB2EB8042 /* PaneContainerView.swift */; };
+		F4F6CC41FF265C9DA098D17E /* WorkspaceNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33009813506A712F05C01586 /* WorkspaceNaming.swift */; };
+		F5B0165ECE06BC459D782E71 /* LayoutSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6962054AB32C0DF336214C6 /* LayoutSnapshot.swift */; };
+		FAC454390C347F8C1D33EB1F /* SummaryLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 027D11694354B37A74D44611 /* SummaryLog.swift */; };
+		FB4440F0A92FCE49B7117580 /* ProcessGitClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66919BFBD1A6FF892D421033 /* ProcessGitClient.swift */; };
+		FE99752BC2E4275E55557926 /* ghostty in Resources */ = {isa = PBXBuildFile; fileRef = B9E4187EE35799D24A79EF0B /* ghostty */; };
+		FEA9631053250363C9EEEC9A /* SplitViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58123122FDD0E29B7DBF9352 /* SplitViewContainer.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2A04F212CE778DCE362ACA73 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DD0290201C0E580E7A86156E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6C23C363E8683EE9D5C77A63;
+			remoteInfo = "forge-cli";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		027D11694354B37A74D44611 /* SummaryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryLog.swift; sourceTree = "<group>"; };
+		07F919EC60D33B385F139603 /* Forge-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Forge-Bridging-Header.h"; sourceTree = "<group>"; };
+		0C342594BAD505C190C0CAB5 /* TabBarColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarColors.swift; sourceTree = "<group>"; };
+		0C67F3ACD4D8E2FD015C9B5E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0DC2B1C4E2E0CE097908C96B /* forge-cli */ = {isa = PBXFileReference; includeInIndex = 0; path = "forge-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DE29E80CC2891CE39E9AA50 /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
+		0F3839390BDE8DD11221E196 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		10150AB1CC6C4F8AE3423ABD /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
+		165C25925FC171DC2A54087F /* TerminalContainerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalContainerViewController.swift; sourceTree = "<group>"; };
+		16CBFE7A0F60D63CBB4B6E17 /* TabID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabID.swift; sourceTree = "<group>"; };
+		17205892BB4CD21C1A347A75 /* BonsplitPaneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitPaneManager.swift; sourceTree = "<group>"; };
+		17988CA2EA98D7A6396E2B91 /* ExternalEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalEditor.swift; sourceTree = "<group>"; };
+		18E2BA9B896F72867C2704FC /* CommandPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPalette.swift; sourceTree = "<group>"; };
+		1A84E6A2F7CC7832E0DA529E /* FiraCode-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FiraCode-Regular.ttf"; sourceTree = "<group>"; };
+		1E76234D32CE8896741114CD /* SplitState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitState.swift; sourceTree = "<group>"; };
+		20F68C9DCE5D98462D21881D /* BonsplitDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitDelegate.swift; sourceTree = "<group>"; };
+		243460106C0C757CFFBF6D4E /* SplitAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitAnimator.swift; sourceTree = "<group>"; };
+		2B48636B23896A11A9644925 /* GitClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitClient.swift; sourceTree = "<group>"; };
+		324C6BF661A3B57C7A0FE4DC /* TabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItem.swift; sourceTree = "<group>"; };
+		33009813506A712F05C01586 /* WorkspaceNaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceNaming.swift; sourceTree = "<group>"; };
+		33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentReviewPayloadBuilder.swift; sourceTree = "<group>"; };
+		36AAFA0CE4C8B2CB5DA66D84 /* AgentStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentStatus.swift; sourceTree = "<group>"; };
+		39F12DDCB35F9733A5846460 /* DiffTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTabView.swift; sourceTree = "<group>"; };
+		3C0E18D8DBAC71B87110136F /* SplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
+		411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitDebugCounters.swift; sourceTree = "<group>"; };
+		447E8085460F22791A2E2002 /* GitDiffService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitDiffService.swift; sourceTree = "<group>"; };
+		47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSessionManager.swift; sourceTree = "<group>"; };
+		512FB160F659513F1441B40F /* ShellEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellEnvironment.swift; sourceTree = "<group>"; };
+		53E8575792CD729D327E6C2A /* TerminalAppearanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalAppearanceView.swift; sourceTree = "<group>"; };
+		5692E40E8CC3135ACC22733D /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
+		58123122FDD0E29B7DBF9352 /* SplitViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewContainer.swift; sourceTree = "<group>"; };
+		599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandDiscovery.swift; sourceTree = "<group>"; };
+		59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiffLineView.swift; sourceTree = "<group>"; };
+		5F9518B116ACF472BAE659D2 /* libghostty.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libghostty.a; path = "Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64/libghostty.a"; sourceTree = "<group>"; };
+		5FDA55941BDB098A23EAE9CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		63A477301682EA23DAA59E81 /* NavigationDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationDirection.swift; sourceTree = "<group>"; };
+		63B21B2E308767754671E62E /* TerminalTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalTabBar.swift; sourceTree = "<group>"; };
+		66919BFBD1A6FF892D421033 /* ProcessGitClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessGitClient.swift; sourceTree = "<group>"; };
+		67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorViewController.swift; sourceTree = "<group>"; };
+		688827BF577108EF9FFD38F8 /* SplitOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitOrientation.swift; sourceTree = "<group>"; };
+		69A330C61E147E9935FB2584 /* TerminalAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalAppearance.swift; sourceTree = "<group>"; };
+		6E518EB16255BC5AC4967951 /* SummaryCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryCommand.swift; sourceTree = "<group>"; };
+		72C84715E19D3D7A198B19B8 /* ProjectListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectListView.swift; sourceTree = "<group>"; };
+		749EB54C1D9FD07119776AA4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		7519165D08DFDF8192EA8F7C /* BonsplitController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitController.swift; sourceTree = "<group>"; };
+		75F643170BE9658FD3E9B594 /* StatusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewModel.swift; sourceTree = "<group>"; };
+		7701E79B028746189D17A0A7 /* PaneState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneState.swift; sourceTree = "<group>"; };
+		77FF87CF5EC77FF694158BAC /* ChangesTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesTabView.swift; sourceTree = "<group>"; };
+		79BF2869844D4AADB3EFF3E5 /* GhosttyTerminalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyTerminalView.swift; sourceTree = "<group>"; };
+		7E28C3575AE17D6490A76432 /* Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workspace.swift; sourceTree = "<group>"; };
+		839E65E109DAFF8720308214 /* TerminalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalCache.swift; sourceTree = "<group>"; };
+		868FBDD017F6B9CA822F6A7D /* ChangesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesViewModel.swift; sourceTree = "<group>"; };
+		8A1D2E8F62597C740B62B4D0 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
+		8A90616935E4BDC25E834E9B /* ForgeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeStore.swift; sourceTree = "<group>"; };
+		8BBFCA5701CEE5E34D6C159E /* SplitNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitNode.swift; sourceTree = "<group>"; };
+		8CFD8D52036236C912F9A75B /* MainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowController.swift; sourceTree = "<group>"; };
+		8E49E4582AFF44F5057030E3 /* AgentCapabilityParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCapabilityParser.swift; sourceTree = "<group>"; };
+		8ED7ECF021E249100D45C7B2 /* UnifiedDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedDiffView.swift; sourceTree = "<group>"; };
+		93EA6848CBC1E2DEE1295EDC /* WorkspaceCloner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceCloner.swift; sourceTree = "<group>"; };
+		94FE53F98FC4ED53EBACE627 /* TabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarView.swift; sourceTree = "<group>"; };
+		95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMono-Regular.ttf"; sourceTree = "<group>"; };
+		95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendToAgentView.swift; sourceTree = "<group>"; };
+		99751F6A0C8860A70146FB8D /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitNodeView.swift; sourceTree = "<group>"; };
+		9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarMetrics.swift; sourceTree = "<group>"; };
+		A0FE24D12EFC16A9E835DFD3 /* BonsplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitView.swift; sourceTree = "<group>"; };
+		A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeSocketServer.swift; sourceTree = "<group>"; };
+		A70137B365D7CD6FCCF21A4D /* NotificationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationStore.swift; sourceTree = "<group>"; };
+		A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentInfoPopoverView.swift; sourceTree = "<group>"; };
+		A913D1CB5E730CFBA223F25D /* DebugEventLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugEventLog.swift; sourceTree = "<group>"; };
+		A918DA6D12D11F5510C604BB /* ProjectStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectStore.swift; sourceTree = "<group>"; };
+		AB2C640E2A64288AE183298D /* BonsplitConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitConfiguration.swift; sourceTree = "<group>"; };
+		B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitUnifiedDiffParser.swift; sourceTree = "<group>"; };
+		B6962054AB32C0DF336214C6 /* LayoutSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSnapshot.swift; sourceTree = "<group>"; };
+		B820530CBC1D596D6A54011E /* TabContextAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabContextAction.swift; sourceTree = "<group>"; };
+		B9E4187EE35799D24A79EF0B /* ghostty */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ghostty; path = Forge/Resources/ghostty; sourceTree = SOURCE_ROOT; };
+		BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryScheduler.swift; sourceTree = "<group>"; };
+		BBD87FE6EFA673C8D1F22A9C /* AgentDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDetector.swift; sourceTree = "<group>"; };
+		BC582D54CE2623E5734E1EEE /* FileStatusList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusList.swift; sourceTree = "<group>"; };
+		C27615076A6D6DC12ADBB86E /* DiffViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffViewModel.swift; sourceTree = "<group>"; };
+		C2B68C999B71210CCBAAC317 /* SplitDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitDiffView.swift; sourceTree = "<group>"; };
+		CA4F0F389914743FA021ED2E /* TabDragPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabDragPreview.swift; sourceTree = "<group>"; };
+		CDD54FF735F21B48ED884859 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
+		CE0283AAF15EE234022748C7 /* TerminalTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalTab.swift; sourceTree = "<group>"; };
+		CE5A832DC1A1CA840C037625 /* TerminalAppearanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalAppearanceStore.swift; sourceTree = "<group>"; };
+		D10E6E44336CA3AE64223EDF /* SummaryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryStore.swift; sourceTree = "<group>"; };
+		D13DD0F1CF1BF5AEB2EB8042 /* PaneContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneContainerView.swift; sourceTree = "<group>"; };
+		D189E7C10808C8DFEA133A5C /* TabItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItemView.swift; sourceTree = "<group>"; };
+		D28C2E3C2AE15E481B8C9FDB /* SafeTooltip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeTooltip.swift; sourceTree = "<group>"; };
+		D4F8D881C55D57EE673CB404 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		D50575BD258BDA402F95EE53 /* GitDiffModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitDiffModels.swift; sourceTree = "<group>"; };
+		D557D56D0DBFDC04108086ED /* FileStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatus.swift; sourceTree = "<group>"; };
+		D627948FA55948A30B930C29 /* ghostty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ghostty.h; sourceTree = "<group>"; };
+		D67FC7642C53676D66D0BD42 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		D8B6352ABACD0556576E6674 /* WordDiff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiff.swift; sourceTree = "<group>"; };
+		DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitContainerView.swift; sourceTree = "<group>"; };
+		DCF2655CE07FECC563390787 /* FileStatusRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusRow.swift; sourceTree = "<group>"; };
+		E79EB0D856F2E78068B504FC /* AgentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentConfig.swift; sourceTree = "<group>"; };
+		E8C30B829376599F48CCB5C7 /* ReviewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewStore.swift; sourceTree = "<group>"; };
+		E933B0C6052DEC30210330BC /* AgentHookInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentHookInstaller.swift; sourceTree = "<group>"; };
+		E965BA01C4383FAB2CA7EA70 /* ForgeCLIInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeCLIInstaller.swift; sourceTree = "<group>"; };
+		E9F9A1C5B81DD1DFC08BE0BD /* GhosttyTerminalViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyTerminalViewRepresentable.swift; sourceTree = "<group>"; };
+		EAD57FE43439B2C292022C07 /* Forge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Forge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EDE6E9898D02521ED5E5A26C /* AgentCapabilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCapabilities.swift; sourceTree = "<group>"; };
+		F03D48F43AB138181D6CD761 /* TerminalSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSession.swift; sourceTree = "<group>"; };
+		F2BD7C813556607AFCF0EAFB /* BranchPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BranchPickerView.swift; sourceTree = "<group>"; };
+		F3624BDB8FD61A57C38FA30C /* GhosttyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyApp.swift; sourceTree = "<group>"; };
+		F8ADAE09E2AF777777761B7F /* PaneID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneID.swift; sourceTree = "<group>"; };
+		FCB98837939F9B485797E3A7 /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
+		FDE1F53D3088D83C929C6089 /* AgentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentStore.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		08B31B6D773D6982551855DF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CC902EED542F094CEFCC2F78 /* libghostty.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0576244C30124FF79A99D703 /* IPC */ = {
+			isa = PBXGroup;
+			children = (
+				A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */,
+			);
+			path = IPC;
+			sourceTree = "<group>";
+		};
+		066F585DEFAB5A4500906CC9 /* Terminal */ = {
+			isa = PBXGroup;
+			children = (
+				36AAFA0CE4C8B2CB5DA66D84 /* AgentStatus.swift */,
+				F03D48F43AB138181D6CD761 /* TerminalSession.swift */,
+				CE0283AAF15EE234022748C7 /* TerminalTab.swift */,
+			);
+			path = Terminal;
+			sourceTree = "<group>";
+		};
+		0D4BC5E4823BC617EF8D553A /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				0F3839390BDE8DD11221E196 /* SettingsView.swift */,
+				FCB98837939F9B485797E3A7 /* SettingsWindowController.swift */,
+				53E8575792CD729D327E6C2A /* TerminalAppearanceView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		17C8752B0BC2F5B3C679ED88 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				8A90616935E4BDC25E834E9B /* ForgeStore.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		1E363B98D1A59DA5586859C9 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				7701E79B028746189D17A0A7 /* PaneState.swift */,
+				8BBFCA5701CEE5E34D6C159E /* SplitNode.swift */,
+				1E76234D32CE8896741114CD /* SplitState.swift */,
+				324C6BF661A3B57C7A0FE4DC /* TabItem.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		274C08176A1CD73BCA0FFB93 /* Agents */ = {
+			isa = PBXGroup;
+			children = (
+				EDE6E9898D02521ED5E5A26C /* AgentCapabilities.swift */,
+				E79EB0D856F2E78068B504FC /* AgentConfig.swift */,
+			);
+			path = Agents;
+			sourceTree = "<group>";
+		};
+		31CEB509B1B70525E03ACD96 /* Integrations */ = {
+			isa = PBXGroup;
+			children = (
+				53D452DE7CE1B2076D48F99B /* Agents */,
+				621D86C0B3D44343684ADAAC /* Ghostty */,
+				9373D09CDDA037098CD15634 /* Git */,
+				0576244C30124FF79A99D703 /* IPC */,
+				995D01F4830F8499BBC936AA /* Shell */,
+			);
+			path = Integrations;
+			sourceTree = "<group>";
+		};
+		34E8869DDE042D5BA1A87195 /* CommandPalette */ = {
+			isa = PBXGroup;
+			children = (
+				18E2BA9B896F72867C2704FC /* CommandPalette.swift */,
+			);
+			path = CommandPalette;
+			sourceTree = "<group>";
+		};
+		3F167DB6C811830F62EF6956 /* Welcome */ = {
+			isa = PBXGroup;
+			children = (
+				99751F6A0C8860A70146FB8D /* WelcomeView.swift */,
+			);
+			path = Welcome;
+			sourceTree = "<group>";
+		};
+		3F234D2203A12BA60DE1F50E /* forge */ = {
+			isa = PBXGroup;
+			children = (
+				D67FC7642C53676D66D0BD42 /* main.swift */,
+			);
+			name = forge;
+			path = Tools/forge;
+			sourceTree = "<group>";
+		};
+		41C0AEC32001AE1EA2640441 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0C67F3ACD4D8E2FD015C9B5E /* Assets.xcassets */,
+				6E8C2DB5B05C6096896F7CE4 /* Fonts */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		453D7C8EB17ECD0321C9EAD1 /* Internal */ = {
+			isa = PBXGroup;
+			children = (
+				A3BE6A52D65E4F15C628894E /* Controllers */,
+				1E363B98D1A59DA5586859C9 /* Models */,
+				4B1221127FB4560C986F4EA6 /* Styling */,
+				61B0C8F1A89DEDE81689DF7C /* Utilities */,
+				A2C7ADC0966B12F7BC706953 /* Views */,
+			);
+			path = Internal;
+			sourceTree = "<group>";
+		};
+		4B1221127FB4560C986F4EA6 /* Styling */ = {
+			isa = PBXGroup;
+			children = (
+				0C342594BAD505C190C0CAB5 /* TabBarColors.swift */,
+				9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */,
+			);
+			path = Styling;
+			sourceTree = "<group>";
+		};
+		4D92E0C67E2F7B85FC426E2E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0DC2B1C4E2E0CE097908C96B /* forge-cli */,
+				EAD57FE43439B2C292022C07 /* Forge.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		538C0B8C7C5630BB274BE170 /* Workspaces */ = {
+			isa = PBXGroup;
+			children = (
+				F2BD7C813556607AFCF0EAFB /* BranchPickerView.swift */,
+				93EA6848CBC1E2DEE1295EDC /* WorkspaceCloner.swift */,
+				33009813506A712F05C01586 /* WorkspaceNaming.swift */,
+			);
+			path = Workspaces;
+			sourceTree = "<group>";
+		};
+		53D452DE7CE1B2076D48F99B /* Agents */ = {
+			isa = PBXGroup;
+			children = (
+				8E49E4582AFF44F5057030E3 /* AgentCapabilityParser.swift */,
+				E933B0C6052DEC30210330BC /* AgentHookInstaller.swift */,
+				E965BA01C4383FAB2CA7EA70 /* ForgeCLIInstaller.swift */,
+				6E518EB16255BC5AC4967951 /* SummaryCommand.swift */,
+				027D11694354B37A74D44611 /* SummaryLog.swift */,
+			);
+			path = Agents;
+			sourceTree = "<group>";
+		};
+		5DCF51239E4D414F8A138D1C /* State */ = {
+			isa = PBXGroup;
+			children = (
+				FDE1F53D3088D83C929C6089 /* AgentStore.swift */,
+				A70137B365D7CD6FCCF21A4D /* NotificationStore.swift */,
+				A918DA6D12D11F5510C604BB /* ProjectStore.swift */,
+				E8C30B829376599F48CCB5C7 /* ReviewStore.swift */,
+				BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */,
+				D10E6E44336CA3AE64223EDF /* SummaryStore.swift */,
+				CE5A832DC1A1CA840C037625 /* TerminalAppearanceStore.swift */,
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		61B0C8F1A89DEDE81689DF7C /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				243460106C0C757CFFBF6D4E /* SplitAnimator.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		621D86C0B3D44343684ADAAC /* Ghostty */ = {
+			isa = PBXGroup;
+			children = (
+				D627948FA55948A30B930C29 /* ghostty.h */,
+				F3624BDB8FD61A57C38FA30C /* GhosttyApp.swift */,
+				79BF2869844D4AADB3EFF3E5 /* GhosttyTerminalView.swift */,
+				E9F9A1C5B81DD1DFC08BE0BD /* GhosttyTerminalViewRepresentable.swift */,
+				69A330C61E147E9935FB2584 /* TerminalAppearance.swift */,
+			);
+			path = Ghostty;
+			sourceTree = "<group>";
+		};
+		6E8C2DB5B05C6096896F7CE4 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				1A84E6A2F7CC7832E0DA529E /* FiraCode-Regular.ttf */,
+				95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
+		81F4B98DE5F972A19403C726 /* Git */ = {
+			isa = PBXGroup;
+			children = (
+				33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */,
+				D557D56D0DBFDC04108086ED /* FileStatus.swift */,
+				D50575BD258BDA402F95EE53 /* GitDiffModels.swift */,
+			);
+			path = Git;
+			sourceTree = "<group>";
+		};
+		835DCE73F6356302BFD6167C /* Types */ = {
+			isa = PBXGroup;
+			children = (
+				B6962054AB32C0DF336214C6 /* LayoutSnapshot.swift */,
+				63A477301682EA23DAA59E81 /* NavigationDirection.swift */,
+				F8ADAE09E2AF777777761B7F /* PaneID.swift */,
+				688827BF577108EF9FFD38F8 /* SplitOrientation.swift */,
+				5692E40E8CC3135ACC22733D /* Tab.swift */,
+				B820530CBC1D596D6A54011E /* TabContextAction.swift */,
+				16CBFE7A0F60D63CBB4B6E17 /* TabID.swift */,
+			);
+			path = Types;
+			sourceTree = "<group>";
+		};
+		8558CAA6C457F4A3486CCA90 /* Inspector */ = {
+			isa = PBXGroup;
+			children = (
+				599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */,
+				BC582D54CE2623E5734E1EEE /* FileStatusList.swift */,
+				DCF2655CE07FECC563390787 /* FileStatusRow.swift */,
+				CDD54FF735F21B48ED884859 /* InspectorView.swift */,
+				67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */,
+			);
+			path = Inspector;
+			sourceTree = "<group>";
+		};
+		9373D09CDDA037098CD15634 /* Git */ = {
+			isa = PBXGroup;
+			children = (
+				2B48636B23896A11A9644925 /* GitClient.swift */,
+				66919BFBD1A6FF892D421033 /* ProcessGitClient.swift */,
+			);
+			path = Git;
+			sourceTree = "<group>";
+		};
+		995D01F4830F8499BBC936AA /* Shell */ = {
+			isa = PBXGroup;
+			children = (
+				512FB160F659513F1441B40F /* ShellEnvironment.swift */,
+			);
+			path = Shell;
+			sourceTree = "<group>";
+		};
+		A2C7ADC0966B12F7BC706953 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D13DD0F1CF1BF5AEB2EB8042 /* PaneContainerView.swift */,
+				DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */,
+				9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */,
+				58123122FDD0E29B7DBF9352 /* SplitViewContainer.swift */,
+				94FE53F98FC4ED53EBACE627 /* TabBarView.swift */,
+				CA4F0F389914743FA021ED2E /* TabDragPreview.swift */,
+				D189E7C10808C8DFEA133A5C /* TabItemView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A3BE6A52D65E4F15C628894E /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				3C0E18D8DBAC71B87110136F /* SplitViewController.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		A9F5995E185AFFE38D92DC5A /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				DC91EBBCBDEB1226466B0F0F /* Sidebar */,
+				538C0B8C7C5630BB274BE170 /* Workspaces */,
+			);
+			path = Projects;
+			sourceTree = "<group>";
+		};
+		AAF3AF338100C0CD97CE3B7F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5F9518B116ACF472BAE659D2 /* libghostty.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AD521890B3327BF9207A1521 /* Git */ = {
+			isa = PBXGroup;
+			children = (
+				77FF87CF5EC77FF694158BAC /* ChangesTabView.swift */,
+				868FBDD017F6B9CA822F6A7D /* ChangesViewModel.swift */,
+				39F12DDCB35F9733A5846460 /* DiffTabView.swift */,
+				C27615076A6D6DC12ADBB86E /* DiffViewModel.swift */,
+				447E8085460F22791A2E2002 /* GitDiffService.swift */,
+				B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */,
+				95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */,
+				C2B68C999B71210CCBAAC317 /* SplitDiffView.swift */,
+				75F643170BE9658FD3E9B594 /* StatusViewModel.swift */,
+				8ED7ECF021E249100D45C7B2 /* UnifiedDiffView.swift */,
+				D8B6352ABACD0556576E6674 /* WordDiff.swift */,
+				59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */,
+			);
+			path = Git;
+			sourceTree = "<group>";
+		};
+		ADC0D26F66EFE7D3E03AF0D7 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				34E8869DDE042D5BA1A87195 /* CommandPalette */,
+				AD521890B3327BF9207A1521 /* Git */,
+				8558CAA6C457F4A3486CCA90 /* Inspector */,
+				A9F5995E185AFFE38D92DC5A /* Projects */,
+				0D4BC5E4823BC617EF8D553A /* Settings */,
+				DAED6D2987F96FEEA9DE8C05 /* Terminal */,
+				3F167DB6C811830F62EF6956 /* Welcome */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		D14B0A46FA87914B041BF5F5 /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				17988CA2EA98D7A6396E2B91 /* ExternalEditor.swift */,
+				8A1D2E8F62597C740B62B4D0 /* Project.swift */,
+				7E28C3575AE17D6490A76432 /* Workspace.swift */,
+			);
+			path = Projects;
+			sourceTree = "<group>";
+		};
+		D646513D2630CC44398531CB /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				FFC679D764475AE19CE4F3EA /* Bonsplit */,
+			);
+			path = Vendor;
+			sourceTree = "<group>";
+		};
+		DAED6D2987F96FEEA9DE8C05 /* Terminal */ = {
+			isa = PBXGroup;
+			children = (
+				BBD87FE6EFA673C8D1F22A9C /* AgentDetector.swift */,
+				A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */,
+				17205892BB4CD21C1A347A75 /* BonsplitPaneManager.swift */,
+				839E65E109DAFF8720308214 /* TerminalCache.swift */,
+				165C25925FC171DC2A54087F /* TerminalContainerViewController.swift */,
+				47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */,
+				63B21B2E308767754671E62E /* TerminalTabBar.swift */,
+			);
+			path = Terminal;
+			sourceTree = "<group>";
+		};
+		DC91EBBCBDEB1226466B0F0F /* Sidebar */ = {
+			isa = PBXGroup;
+			children = (
+				72C84715E19D3D7A198B19B8 /* ProjectListView.swift */,
+				10150AB1CC6C4F8AE3423ABD /* SidebarViewController.swift */,
+			);
+			path = Sidebar;
+			sourceTree = "<group>";
+		};
+		DD5E2466335F3E5F02761415 /* Forge */ = {
+			isa = PBXGroup;
+			children = (
+				07F919EC60D33B385F139603 /* Forge-Bridging-Header.h */,
+				5FDA55941BDB098A23EAE9CF /* Info.plist */,
+				D4F8D881C55D57EE673CB404 /* main.swift */,
+				F58E162190EDFBD34CC2D4B6 /* App */,
+				F80283DA0A8804F1577DBCBA /* Domain */,
+				ADC0D26F66EFE7D3E03AF0D7 /* Features */,
+				31CEB509B1B70525E03ACD96 /* Integrations */,
+				17C8752B0BC2F5B3C679ED88 /* Persistence */,
+				41C0AEC32001AE1EA2640441 /* Resources */,
+				5DCF51239E4D414F8A138D1C /* State */,
+				D646513D2630CC44398531CB /* Vendor */,
+			);
+			path = Forge;
+			sourceTree = "<group>";
+		};
+		EFCB33EBE3812EE38333409F = {
+			isa = PBXGroup;
+			children = (
+				B9E4187EE35799D24A79EF0B /* ghostty */,
+				DD5E2466335F3E5F02761415 /* Forge */,
+				3F234D2203A12BA60DE1F50E /* forge */,
+				AAF3AF338100C0CD97CE3B7F /* Frameworks */,
+				4D92E0C67E2F7B85FC426E2E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F4CD822D93D13182F511D4BB /* Public */ = {
+			isa = PBXGroup;
+			children = (
+				AB2C640E2A64288AE183298D /* BonsplitConfiguration.swift */,
+				7519165D08DFDF8192EA8F7C /* BonsplitController.swift */,
+				411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */,
+				20F68C9DCE5D98462D21881D /* BonsplitDelegate.swift */,
+				A0FE24D12EFC16A9E835DFD3 /* BonsplitView.swift */,
+				A913D1CB5E730CFBA223F25D /* DebugEventLog.swift */,
+				D28C2E3C2AE15E481B8C9FDB /* SafeTooltip.swift */,
+				835DCE73F6356302BFD6167C /* Types */,
+			);
+			path = Public;
+			sourceTree = "<group>";
+		};
+		F58E162190EDFBD34CC2D4B6 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				749EB54C1D9FD07119776AA4 /* AppDelegate.swift */,
+				0DE29E80CC2891CE39E9AA50 /* MainSplitViewController.swift */,
+				8CFD8D52036236C912F9A75B /* MainWindowController.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		F80283DA0A8804F1577DBCBA /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				274C08176A1CD73BCA0FFB93 /* Agents */,
+				81F4B98DE5F972A19403C726 /* Git */,
+				D14B0A46FA87914B041BF5F5 /* Projects */,
+				066F585DEFAB5A4500906CC9 /* Terminal */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		FFC679D764475AE19CE4F3EA /* Bonsplit */ = {
+			isa = PBXGroup;
+			children = (
+				453D7C8EB17ECD0321C9EAD1 /* Internal */,
+				F4CD822D93D13182F511D4BB /* Public */,
+			);
+			path = Bonsplit;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6C23C363E8683EE9D5C77A63 /* forge-cli */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6DA92043EA45A0767C8B9EEA /* Build configuration list for PBXNativeTarget "forge-cli" */;
+			buildPhases = (
+				4B30E54F2E66D71FFC0030B5 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "forge-cli";
+			packageProductDependencies = (
+			);
+			productName = "forge-cli";
+			productReference = 0DC2B1C4E2E0CE097908C96B /* forge-cli */;
+			productType = "com.apple.product-type.tool";
+		};
+		B86A17B415789897E93F9B10 /* Forge */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 14C3B2F58A3E154141422499 /* Build configuration list for PBXNativeTarget "Forge" */;
+			buildPhases = (
+				54A6215C61489CB2E4C48797 /* Sources */,
+				A16CEC7F4CECFBE8099E0D0C /* Resources */,
+				08B31B6D773D6982551855DF /* Frameworks */,
+				8AD15B778C4FD0E16223B439 /* Embed forge CLI */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F0D4C38AE0F9DDE958CF4286 /* PBXTargetDependency */,
+			);
+			name = Forge;
+			packageProductDependencies = (
+			);
+			productName = Forge;
+			productReference = EAD57FE43439B2C292022C07 /* Forge.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DD0290201C0E580E7A86156E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = 6CD494A99F804B5C2D6C9DD2 /* Build configuration list for PBXProject "Forge" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = EFCB33EBE3812EE38333409F;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B86A17B415789897E93F9B10 /* Forge */,
+				6C23C363E8683EE9D5C77A63 /* forge-cli */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A16CEC7F4CECFBE8099E0D0C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				20C407A650E8850652C0EE78 /* Assets.xcassets in Resources */,
+				4221E9F2065D464F9BF957B2 /* FiraCode-Regular.ttf in Resources */,
+				792DB5B7CE3CD212E63347F3 /* JetBrainsMono-Regular.ttf in Resources */,
+				FE99752BC2E4275E55557926 /* ghostty in Resources */,
+				A2858A5B2AAD0956FC54CA0B /* forge-cli in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8AD15B778C4FD0E16223B439 /* Embed forge CLI */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/forge",
+			);
+			name = "Embed forge CLI";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/bin/forge",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "mkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/bin\"\ncp \"${BUILT_PRODUCTS_DIR}/forge\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/bin/forge\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4B30E54F2E66D71FFC0030B5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C570FF0EF21F8683B536CAC4 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54A6215C61489CB2E4C48797 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C0AEA61EA5DEA5E2847EAD1 /* AgentCapabilities.swift in Sources */,
+				B7AEDCC3748C5C2C8E4699E4 /* AgentCapabilityParser.swift in Sources */,
+				2642F6F94CF38C2D37E37D83 /* AgentConfig.swift in Sources */,
+				72A63CB02229017307EC1299 /* AgentDetector.swift in Sources */,
+				C3273E02B9C26B2417368297 /* AgentHookInstaller.swift in Sources */,
+				95668F7CED1D165D912E2656 /* AgentInfoPopoverView.swift in Sources */,
+				0C401CA4784BC5616BB7AA5D /* AgentReviewPayloadBuilder.swift in Sources */,
+				144B2D71D94D15DD9A2E5FD4 /* AgentStatus.swift in Sources */,
+				1C121FFC047C8B2497C556D9 /* AgentStore.swift in Sources */,
+				4E353DD84E747CCAAC3E9A85 /* AppDelegate.swift in Sources */,
+				227D8A9991C1E52BE92D2B4B /* BonsplitConfiguration.swift in Sources */,
+				61EAB7F9E8DBF4632D654669 /* BonsplitController.swift in Sources */,
+				C8EE75452F5337ABC30CAAFE /* BonsplitDebugCounters.swift in Sources */,
+				268611429A1A8DAD935BBCAA /* BonsplitDelegate.swift in Sources */,
+				9EDD41D6CE5D3A6834DC9C8C /* BonsplitPaneManager.swift in Sources */,
+				3DD3AEA2B0CB40D49AA3892D /* BonsplitView.swift in Sources */,
+				6D32E213A2DB89468558046F /* BranchPickerView.swift in Sources */,
+				7135B8F57163B17958BAAA26 /* ChangesTabView.swift in Sources */,
+				DAB078E282A2AEC5CE9E5284 /* ChangesViewModel.swift in Sources */,
+				BF0BCA07938D96A6D897E1C8 /* CommandDiscovery.swift in Sources */,
+				70C18486C2C2B8BCCF6EF853 /* CommandPalette.swift in Sources */,
+				EB14AF51A502923B533D3ABE /* DebugEventLog.swift in Sources */,
+				B7070FB12D059250F93792F8 /* DiffTabView.swift in Sources */,
+				5050EFE698D87918D89621C2 /* DiffViewModel.swift in Sources */,
+				186B0FFC225E49680C7A1400 /* ExternalEditor.swift in Sources */,
+				958919E7AFE933A2ECE729BE /* FileStatus.swift in Sources */,
+				6E66D7FFCF8DFBB0390ECD49 /* FileStatusList.swift in Sources */,
+				B6C05E6C34DD83B11063FB87 /* FileStatusRow.swift in Sources */,
+				93F21DA41BF8F4A5EC252551 /* ForgeCLIInstaller.swift in Sources */,
+				1B65752028DE519CB345DAB8 /* ForgeSocketServer.swift in Sources */,
+				DEAC350B0F837DF5137CCCDF /* ForgeStore.swift in Sources */,
+				D9329A95BC037EA8F5E7C659 /* GhosttyApp.swift in Sources */,
+				4034DD01EBE7FAC68390EF94 /* GhosttyTerminalView.swift in Sources */,
+				EA6AE32F44FB744BAB361458 /* GhosttyTerminalViewRepresentable.swift in Sources */,
+				6CE799C3EC6812DCC3610D63 /* GitClient.swift in Sources */,
+				DF49C321DAD4350EFE68125A /* GitDiffModels.swift in Sources */,
+				32AA8DE2E57C810B1FC02B29 /* GitDiffService.swift in Sources */,
+				87DE037B3A7130EABAEEA4FC /* GitUnifiedDiffParser.swift in Sources */,
+				3FF161D6FC74BF72BACE1CF4 /* InspectorView.swift in Sources */,
+				8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */,
+				F5B0165ECE06BC459D782E71 /* LayoutSnapshot.swift in Sources */,
+				4E5B37050E49C380D5DDC77A /* MainSplitViewController.swift in Sources */,
+				B2A94F3E550AC00F336C7D1D /* MainWindowController.swift in Sources */,
+				44E8410998E0416714800A1B /* NavigationDirection.swift in Sources */,
+				96FD18E31023CBACC444EB5E /* NotificationStore.swift in Sources */,
+				F351A2997F2AFC7ADB235655 /* PaneContainerView.swift in Sources */,
+				676341BCA86E78A23161ED1B /* PaneID.swift in Sources */,
+				694668C2FDEE836BC7B3F22D /* PaneState.swift in Sources */,
+				FB4440F0A92FCE49B7117580 /* ProcessGitClient.swift in Sources */,
+				B2C65263AB86E25FD03ED68E /* Project.swift in Sources */,
+				DD6DF706C2BB39C33D15BE82 /* ProjectListView.swift in Sources */,
+				B9210B522CAA640A2E75D1B4 /* ProjectStore.swift in Sources */,
+				EBE6970C1FAB16099C16176C /* ReviewStore.swift in Sources */,
+				6A3DE35686696B1253DA0735 /* SafeTooltip.swift in Sources */,
+				D9645675D4C6E211F608B386 /* SendToAgentView.swift in Sources */,
+				5756BA39E77383BFCAF37803 /* SettingsView.swift in Sources */,
+				2822496228736C7358FF2727 /* SettingsWindowController.swift in Sources */,
+				E0B0011E31FC00183E2E9953 /* ShellEnvironment.swift in Sources */,
+				5250AFE57FA4E85444DAF169 /* SidebarViewController.swift in Sources */,
+				A6AC1E458EE45F2D0FDC703C /* SplitAnimator.swift in Sources */,
+				6301D6142F066E246ADA5117 /* SplitContainerView.swift in Sources */,
+				B4074675E659D561A121BCC9 /* SplitDiffView.swift in Sources */,
+				AD12FBB49FFE0B110FA16F4D /* SplitNode.swift in Sources */,
+				8B4C5CAD6ACD54E118395D79 /* SplitNodeView.swift in Sources */,
+				35DDF4BBBAADD20B50582174 /* SplitOrientation.swift in Sources */,
+				4F96F61957F72017DFCF2068 /* SplitState.swift in Sources */,
+				FEA9631053250363C9EEEC9A /* SplitViewContainer.swift in Sources */,
+				9EC89A28301B55CD351004C8 /* SplitViewController.swift in Sources */,
+				E9F327F7F66C401F89C3CA61 /* StatusViewModel.swift in Sources */,
+				519F6930B3D931C69681CE4E /* SummaryCommand.swift in Sources */,
+				FAC454390C347F8C1D33EB1F /* SummaryLog.swift in Sources */,
+				D80AF7ED304AE0FCA3C5E84F /* SummaryScheduler.swift in Sources */,
+				69BA6066822D2EC3ECF04AAA /* SummaryStore.swift in Sources */,
+				440BF1A6FAD5DDC760BD501E /* Tab.swift in Sources */,
+				2D45B233B746EEEEFB436AEF /* TabBarColors.swift in Sources */,
+				BBD8AE2D99990E0BE2681B70 /* TabBarMetrics.swift in Sources */,
+				B9859F0953678386516F55D4 /* TabBarView.swift in Sources */,
+				4121FFA30CD6FD65E1905C8F /* TabContextAction.swift in Sources */,
+				D3AC14E880180F1AEA725ABD /* TabDragPreview.swift in Sources */,
+				6D9CB313204C45E8B2FC20AF /* TabID.swift in Sources */,
+				DE18EFF881E8F22355D76103 /* TabItem.swift in Sources */,
+				F07F1370F96DC83D03EFC104 /* TabItemView.swift in Sources */,
+				9BF204E729543B6E9E689976 /* TerminalAppearance.swift in Sources */,
+				E648AB552ED0F339B98CDB27 /* TerminalAppearanceStore.swift in Sources */,
+				D3BD134D32903952D880E53C /* TerminalAppearanceView.swift in Sources */,
+				42E7DC31BEDCE5A34140C5AB /* TerminalCache.swift in Sources */,
+				3C391F6FF78E99BD75053CBC /* TerminalContainerViewController.swift in Sources */,
+				6620650A4F8E1CB27057FE5B /* TerminalSession.swift in Sources */,
+				636833B4508AD5E5520B0E57 /* TerminalSessionManager.swift in Sources */,
+				E9935234B95FAF969A02353A /* TerminalTab.swift in Sources */,
+				440926E6DA96FD3DAE4BCDD4 /* TerminalTabBar.swift in Sources */,
+				4C793C7041A31A190944A901 /* UnifiedDiffView.swift in Sources */,
+				660EC2752004FADA5827C386 /* WelcomeView.swift in Sources */,
+				E4733A69B65CD74E31153FA1 /* WordDiff.swift in Sources */,
+				8932C47CE7A9158D452B4E4E /* WordDiffLineView.swift in Sources */,
+				5B2ADA71AF99EE2B0D9A802A /* Workspace.swift in Sources */,
+				6D10E1C247D18BA59E04D540 /* WorkspaceCloner.swift in Sources */,
+				F4F6CC41FF265C9DA098D17E /* WorkspaceNaming.swift in Sources */,
+				D3B75B31144F373A322543BD /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F0D4C38AE0F9DDE958CF4286 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6C23C363E8683EE9D5C77A63 /* forge-cli */;
+			targetProxy = 2A04F212CE778DCE362ACA73 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		442FDACF09C5FC0D7B846F4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_ENTITLEMENTS = Forge/Forge.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64\"",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)",
+					"$(SRCROOT)/Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64/Headers",
+				);
+				INFOPLIST_FILE = Forge/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lc++",
+					"-framework Metal",
+					"-framework MetalKit",
+					"-framework CoreGraphics",
+					"-framework QuartzCore",
+					"-framework Foundation",
+					"-framework AppKit",
+					"-framework Carbon",
+					"-framework IOKit",
+					"-framework IOSurface",
+					"-framework UniformTypeIdentifiers",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.forge.app;
+				PRODUCT_NAME = Forge;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "Forge/Forge-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.10;
+			};
+			name = Debug;
+		};
+		6D21D08D1832C3A56AB282E6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.forge.forge-cli";
+				PRODUCT_NAME = forge;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.10;
+			};
+			name = Release;
+		};
+		AF7B7C6608444234562BD549 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		CA5431A0961D90652011889D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_ENTITLEMENTS = Forge/Forge.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_APP_SANDBOX = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64\"",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)",
+					"$(SRCROOT)/Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64/Headers",
+				);
+				INFOPLIST_FILE = Forge/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lc++",
+					"-framework Metal",
+					"-framework MetalKit",
+					"-framework CoreGraphics",
+					"-framework QuartzCore",
+					"-framework Foundation",
+					"-framework AppKit",
+					"-framework Carbon",
+					"-framework IOKit",
+					"-framework IOSurface",
+					"-framework UniformTypeIdentifiers",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.forge.app;
+				PRODUCT_NAME = Forge;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "Forge/Forge-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.10;
+			};
+			name = Release;
+		};
+		DCC2F712BBF791A5AA4F603C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E71FA5B74AAC62EBFCE70C33 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.forge.forge-cli";
+				PRODUCT_NAME = forge;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.10;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		14C3B2F58A3E154141422499 /* Build configuration list for PBXNativeTarget "Forge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				442FDACF09C5FC0D7B846F4F /* Debug */,
+				CA5431A0961D90652011889D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6CD494A99F804B5C2D6C9DD2 /* Build configuration list for PBXProject "Forge" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCC2F712BBF791A5AA4F603C /* Debug */,
+				AF7B7C6608444234562BD549 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6DA92043EA45A0767C8B9EEA /* Build configuration list for PBXNativeTarget "forge-cli" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E71FA5B74AAC62EBFCE70C33 /* Debug */,
+				6D21D08D1832C3A56AB282E6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DD0290201C0E580E7A86156E /* Project object */;
+}

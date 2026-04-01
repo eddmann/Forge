@@ -1,0 +1,8 @@
+--swiftversion 5.10
+--indent 4
+--linebreaks lf
+--trimwhitespace always
+--commas inline
+--semicolons inline
+--self remove
+--exclude Dependencies,build,dist,Forge/Vendor
