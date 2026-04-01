@@ -215,7 +215,7 @@ final class CommandPalette {
         let all = sections.flatMap(\.items)
         guard !all.isEmpty else { return }
         guard let selectedItemID, let idx = all.firstIndex(where: { $0.id == selectedItemID }) else {
-            self.selectedItemID = all.first?.id
+            selectedItemID = all.first?.id
             updateResults()
             return
         }
