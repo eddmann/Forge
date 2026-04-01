@@ -10,14 +10,12 @@ A native macOS tool for managing local coding-agent workflows.
 
 Forge is [living personal software](#living-personal-software) built to make local coding-agent workflows easier to manage, with isolated workspaces, local diff review, feedback, and merge-back into the project.
 
+It focuses on:
+
 - Running multiple agent sessions without losing track of what each one is doing
-- Keeping agent work tied to a specific project or workspace
 - Giving agents isolated workspaces for local changes
 - Letting each agent keep its own CLI and TUI instead of forcing a generic abstraction
-- Inspecting and reviewing the Git diffs agents produce
-- Sending targeted feedback back into the same local loop
-- Reducing context switching across the local agent workflow
-- Making agent activity easier to track and respond to
+- Inspecting, reviewing, and feeding back on the work agents produce
 
 ## Core Concepts
 
