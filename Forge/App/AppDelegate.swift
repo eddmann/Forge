@@ -8,6 +8,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     func applicationDidFinishLaunching(_: Notification) {
         registerBundledFonts()
         setupMainMenu()
+
+        #if DEBUG
+            if let demoMode = DemoMode.fromArguments() {
+                ProjectStore.shared.isDemo = true
+                DemoStateFactory.configure(for: demoMode)
+            }
+        #endif
+
         mainWindowController = MainWindowController()
         mainWindowController?.showWindow(nil)
         mainWindowController?.window?.makeKeyAndOrderFront(nil)
@@ -15,6 +23,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         // Set up notification center delegate for handling taps on system notifications
         UNUserNotificationCenter.current().delegate = self
+
+        #if DEBUG
+            if ProjectStore.shared.isDemo { return }
+        #endif
 
         // Prevent macOS from force-killing the app before session save completes
         ProcessInfo.processInfo.disableSuddenTermination()
@@ -54,6 +66,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func applicationShouldTerminate(_: NSApplication) -> NSApplication.TerminateReply {
+        #if DEBUG
+            if ProjectStore.shared.isDemo { return .terminateNow }
+        #endif
         ForgeSocketServer.shared.stop()
         saveSessionSnapshot()
         return .terminateNow

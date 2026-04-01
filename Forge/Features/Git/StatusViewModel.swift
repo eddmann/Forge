@@ -52,6 +52,9 @@ final class StatusViewModel: ObservableObject {
     // MARK: - Auto Refresh
 
     func startAutoRefresh(interval: TimeInterval = 3.0) {
+        #if DEBUG
+            if ProjectStore.shared.isDemo { return }
+        #endif
         stopAutoRefresh()
         refresh()
         refreshTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
@@ -69,6 +72,9 @@ final class StatusViewModel: ObservableObject {
     // MARK: - Refresh
 
     func refresh() {
+        #if DEBUG
+            if ProjectStore.shared.isDemo { return }
+        #endif
         guard let repoPath else {
             statuses = []
             grouped = [:]
@@ -363,6 +369,14 @@ final class StatusViewModel: ObservableObject {
         feedbackDismissTask = task
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: task)
     }
+
+    #if DEBUG
+        func setDemo(statuses demoStatuses: [FileStatus], selectedPath: String? = nil) {
+            statuses = demoStatuses
+            grouped = FileStatus.categorize(demoStatuses)
+            selectedFilePath = selectedPath
+        }
+    #endif
 
     private func cleanError(_ text: String) -> String {
         let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)

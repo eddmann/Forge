@@ -32,4 +32,10 @@ class SummaryStore: ObservableObject {
     func clearInFlight(_ workspaceID: UUID) {
         inFlight.remove(workspaceID)
     }
+
+    #if DEBUG
+        func setDemo(workspaceID: UUID, summary: String) {
+            summaryByWorkspace[workspaceID] = summary
+        }
+    #endif
 }

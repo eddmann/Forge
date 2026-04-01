@@ -12,7 +12,7 @@ GHOSTTY_ARCHIVE_SHA256 := 073ea7f8ee5f889b3208365942373b53fa9cd71d0406d4599f7f15
 GHOSTTY_XCFRAMEWORK := Dependencies/GhosttyKit.xcframework
 GHOSTTY_STAMP := $(GHOSTTY_XCFRAMEWORK)/.forge-$(GHOSTTY_RELEASE_TAG)
 
-.PHONY: help deps project test build release lint format fmt clean can-release \
+.PHONY: help deps project test build release demo lint format fmt clean can-release \
 	_require-curl _require-shasum _require-tar _require-xcodebuild _require-xcodegen \
 	_require-swiftformat _require-swiftlint
 
@@ -69,6 +69,9 @@ release: project _require-xcodebuild ## Build the release app into dist/
 	@cp -R "$(APP_PATH)" "$(DIST_DIR)/$(APP_NAME)"
 	@echo "==> Copied to: $(DIST_DIR)/$(APP_NAME)"
 	@echo "==> Done. Run with: open $(DIST_DIR)/$(APP_NAME)"
+
+demo: project _require-xcodebuild ## Launch interactive demo mode for screenshots
+	@bash scripts/demo.sh
 
 clean: _require-xcodebuild ## Remove generated artifacts and clean Xcode outputs
 	@rm -rf build dist

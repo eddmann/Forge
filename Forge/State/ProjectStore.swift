@@ -4,6 +4,11 @@ import Foundation
 class ProjectStore: ObservableObject {
     static let shared = ProjectStore()
 
+    #if DEBUG
+        /// When true, persistence and git operations are skipped.
+        var isDemo = false
+    #endif
+
     @Published var projects: [Project] = []
     @Published var workspaces: [Workspace] = []
     @Published var activeProjectID: UUID? {
@@ -89,6 +94,9 @@ class ProjectStore: ObservableObject {
     }
 
     private func debouncedSave() {
+        #if DEBUG
+            if isDemo { return }
+        #endif
         saveWorkItem?.cancel()
         let item = DispatchWorkItem { [weak self] in
             self?.saveAll()
@@ -99,6 +107,9 @@ class ProjectStore: ObservableObject {
 
     private func selectionDidChange() {
         guard selectionCallbacksEnabled else { return }
+        #if DEBUG
+            if isDemo { return }
+        #endif
         ForgeStore.shared.updateStateFields { state in
             state.activeProjectID = self.activeProjectID
             state.activeWorkspaceID = self.activeWorkspaceID

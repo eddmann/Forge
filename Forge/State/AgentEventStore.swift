@@ -288,6 +288,16 @@ class AgentEventStore: ObservableObject {
         NSApp?.dockTile.badgeLabel = count > 0 ? "\(count)" : nil
     }
 
+    #if DEBUG
+        func setDemoState(tabID: UUID, state: AgentSessionState) {
+            stateByTab[tabID] = state
+        }
+
+        func setDemoUnread(tabID: UUID, count: Int) {
+            unreadCountByTab[tabID] = count
+        }
+    #endif
+
     private func deliverSystemNotification(_ notification: AgentNotification) {
         let content = UNMutableNotificationContent()
         content.title = notification.title
