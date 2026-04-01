@@ -1,6 +1,6 @@
 name: Forge
 options:
-  bundleIdPrefix: com.forge
+  bundleIdPrefix: com.eddmann.forge
   deploymentTarget:
     macOS: "15.0"
   xcodeVersion: "16.0"
@@ -45,7 +45,7 @@ targets:
         MACOSX_DEPLOYMENT_TARGET: "15.0"
         MARKETING_VERSION: "0.0.1"
         CURRENT_PROJECT_VERSION: "1"
-        PRODUCT_BUNDLE_IDENTIFIER: com.forge.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.eddmann.forge
         PRODUCT_NAME: Forge
         SWIFT_VERSION: "5.10"
         CODE_SIGN_ENTITLEMENTS: Forge/Forge.entitlements
