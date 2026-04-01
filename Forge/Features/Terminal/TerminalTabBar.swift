@@ -240,7 +240,7 @@ private class TabCell: NSView, NSTextFieldDelegate {
         addSubview(statusDot)
 
         // Active agent states take priority over notification badge
-        if agentStatus != .idle && agentStatus != .complete {
+        if agentStatus != .idle, agentStatus != .complete {
             configureStatusDot()
         } else if unreadCount > 0 {
             // Solid blue dot for notifications (only when agent is idle/complete)

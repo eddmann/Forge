@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Forge CLI
+
 // Usage: forge event <agent> <event_type>
 // Reads JSON from stdin, wraps with metadata, sends to Forge socket.
 
@@ -45,7 +46,7 @@ func sendEvent(agent: String, eventType: String) {
         let chunk = handle.availableData
         if chunk.isEmpty { break }
         stdinData.append(chunk)
-        if stdinData.count > 131072 { break } // 128KB limit
+        if stdinData.count > 131_072 { break } // 128KB limit
     }
 
     // Build wrapped payload
@@ -60,7 +61,8 @@ func sendEvent(agent: String, eventType: String) {
 
     // Parse stdin as JSON and attach as "data" field
     if !stdinData.isEmpty,
-       let stdinJSON = try? JSONSerialization.jsonObject(with: stdinData) {
+       let stdinJSON = try? JSONSerialization.jsonObject(with: stdinData)
+    {
         payload["data"] = stdinJSON
     }
 

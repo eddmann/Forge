@@ -127,7 +127,7 @@ final class ForgeSocketServer {
         var timeout = timeval(tv_sec: 5, tv_usec: 0)
         setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
 
-        var buffer = [UInt8](repeating: 0, count: 131072)
+        var buffer = [UInt8](repeating: 0, count: 131_072)
         var accumulated = Data()
 
         while true {
@@ -139,7 +139,7 @@ final class ForgeSocketServer {
             if accumulated.contains(0x0A) { break }
 
             // Prevent oversized messages
-            if accumulated.count > 131072 { return }
+            if accumulated.count > 131_072 { return }
         }
 
         guard !accumulated.isEmpty,

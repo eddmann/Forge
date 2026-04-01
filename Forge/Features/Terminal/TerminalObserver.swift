@@ -22,8 +22,8 @@ class TerminalObserver {
     private var signalsBySession: [UUID: TerminalSignals] = [:]
 
     private static let brailleSpinnerChars: Set<Character> = [
-        "\u{2802}", "\u{2810}",  // Claude: ⠂ ⠐
-        "\u{280B}", "\u{2819}", "\u{2839}", "\u{2838}",  // Codex braille
+        "\u{2802}", "\u{2810}", // Claude: ⠂ ⠐
+        "\u{280B}", "\u{2819}", "\u{2839}", "\u{2838}", // Codex braille
         "\u{283C}", "\u{2834}", "\u{2826}", "\u{2827}",
         "\u{2807}", "\u{280F}"
     ]
@@ -60,7 +60,7 @@ class TerminalObserver {
 
         // Parse status word for Codex enriched titles ("⠋ Working | myproject")
         if let pipeIndex = title.firstIndex(of: "|") {
-            let beforePipe = title[title.startIndex..<pipeIndex]
+            let beforePipe = title[title.startIndex ..< pipeIndex]
                 .trimmingCharacters(in: .whitespaces)
             // Remove spinner char if present
             let words = beforePipe.split(separator: " ")

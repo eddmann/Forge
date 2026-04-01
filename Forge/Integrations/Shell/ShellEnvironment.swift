@@ -40,7 +40,6 @@ enum ShellEnvironment {
         return "/bin/zsh"
     }
 
-
     // MARK: - Shell Integration (ZDOTDIR injection)
 
     /// Directory where Forge writes its ZDOTDIR wrapper and integration scripts.

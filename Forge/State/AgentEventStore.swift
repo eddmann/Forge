@@ -196,7 +196,8 @@ class AgentEventStore: ObservableObject {
         // This catches agents whose Stop hook may not fire (e.g. Codex)
         // or when the terminal title reverts before the hook arrives.
         if activity == .idle,
-           previousActivity == .thinking || previousActivity == .toolExecuting {
+           previousActivity == .thinking || previousActivity == .toolExecuting
+        {
             let agentName = AgentStore.shared.agents.first(where: { $0.command == agent })?.name ?? agent
             addNotification(tabID: tabID, sessionID: nil, title: agentName, body: "Task complete")
             if TerminalSessionManager.shared.activeTabID == tabID {
@@ -221,7 +222,7 @@ class AgentEventStore: ObservableObject {
             id: UUID(), tabID: tabID, sessionID: sessionID,
             title: title.isEmpty ? "Terminal" : title,
             body: body, createdAt: Date(),
-            isRead: isAppFocused && isActiveTab  // Auto-read if user is looking at this tab
+            isRead: isAppFocused && isActiveTab // Auto-read if user is looking at this tab
         )
         updated.insert(notification, at: 0)
         notifications = updated
@@ -251,7 +252,9 @@ class AgentEventStore: ObservableObject {
 
     func markAllRead() {
         var updated = notifications
-        for i in updated.indices { updated[i].isRead = true }
+        for i in updated.indices {
+            updated[i].isRead = true
+        }
         notifications = updated
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     }

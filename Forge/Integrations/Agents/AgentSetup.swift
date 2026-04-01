@@ -32,12 +32,13 @@ class AgentSetup {
         // Read existing settings
         var settings: [String: Any] = [:]
         if let data = fm.contents(atPath: settingsPath),
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        {
             settings = json
         }
 
-        // Build hook entries — guarded by FORGE_SESSION so hooks only fire inside Forge
-        // Uses if/then/fi (not &&) so exit code is always 0 when outside Forge
+        /// Build hook entries — guarded by FORGE_SESSION so hooks only fire inside Forge
+        /// Uses if/then/fi (not &&) so exit code is always 0 when outside Forge
         func claudeHook(_ event: String) -> String {
             "if [ -n \"$FORGE_SESSION\" ]; then forge event claude \(event); fi"
         }
@@ -126,7 +127,8 @@ class AgentSetup {
         // Read existing, merge Forge hooks
         var existingRoot: [String: Any] = [:]
         if let data = fm.contents(atPath: hooksPath),
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        {
             existingRoot = json
         }
 
@@ -238,7 +240,8 @@ class AgentSetup {
 
         // Write or update if marker present
         if let existing = try? String(contentsOfFile: extensionPath, encoding: .utf8),
-           existing.contains("FORGE_SOCKET") {
+           existing.contains("FORGE_SOCKET")
+        {
             // Already installed — update in place
             try? extensionCode.write(toFile: extensionPath, atomically: true, encoding: .utf8)
         } else if !fm.fileExists(atPath: extensionPath) {
@@ -313,7 +316,8 @@ class AgentSetup {
 
         // Write or update if Forge marker present
         if let existing = try? String(contentsOfFile: pluginPath, encoding: .utf8),
-           existing.contains("FORGE_SOCKET") {
+           existing.contains("FORGE_SOCKET")
+        {
             try? pluginCode.write(toFile: pluginPath, atomically: true, encoding: .utf8)
         } else if !fm.fileExists(atPath: pluginPath) {
             try? pluginCode.write(toFile: pluginPath, atomically: true, encoding: .utf8)
