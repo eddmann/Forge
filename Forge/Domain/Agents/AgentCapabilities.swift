@@ -47,5 +47,4 @@ struct AgentCapabilities: Identifiable {
     var skills: [AgentSkillInfo]
     var plugins: [AgentPluginInfo]
     var instructions: [AgentInstructions]
-    var model: String?
 }

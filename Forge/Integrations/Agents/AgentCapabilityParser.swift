@@ -14,6 +14,8 @@ enum AgentCapabilityParser {
             parseCodex(projectPath: projectPath, agent: agent)
         case "opencode":
             parseOpenCode(projectPath: projectPath, agent: agent)
+        case "pi":
+            parsePi(projectPath: projectPath, agent: agent)
         default:
             AgentCapabilities(
                 agentName: agent.name,
@@ -22,8 +24,7 @@ enum AgentCapabilityParser {
                 mcpServers: [],
                 skills: [],
                 plugins: [],
-                instructions: [],
-                model: nil
+                instructions: []
             )
         }
     }
@@ -38,6 +39,8 @@ enum AgentCapabilityParser {
                 parseCodex(projectPath: projectPath, agent: agent)
             case "opencode":
                 parseOpenCode(projectPath: projectPath, agent: agent)
+            case "pi":
+                parsePi(projectPath: projectPath, agent: agent)
             default:
                 AgentCapabilities(
                     agentName: agent.name,
@@ -46,8 +49,7 @@ enum AgentCapabilityParser {
                     mcpServers: [],
                     skills: [],
                     plugins: [],
-                    instructions: [],
-                    model: nil
+                    instructions: []
                 )
             }
         }
@@ -138,23 +140,10 @@ enum AgentCapabilityParser {
             }
         }
 
-        // Project commands from <project>/.claude/commands/*.md
-        let projectCommandsDir = (projectPath as NSString).appendingPathComponent(".claude/commands")
-        if let entries = try? fm.contentsOfDirectory(atPath: projectCommandsDir) {
-            for entry in entries.sorted() where entry.hasSuffix(".md") {
-                let name = String(entry.dropLast(3))
-                let filePath = (projectCommandsDir as NSString).appendingPathComponent(entry)
-                if let content = try? String(contentsOfFile: filePath, encoding: .utf8) {
-                    let frontmatter = parseFrontmatter(content)
-                    skills.append(AgentSkillInfo(
-                        name: frontmatter["name"] ?? name,
-                        description: frontmatter["description"],
-                        filePath: filePath,
-                        scope: .project
-                    ))
-                }
-            }
-        }
+        // Project skills from <project>/.claude/skills/ (SKILL.md in subdirs + flat .md files)
+        let projectSkillsDir = (projectPath as NSString).appendingPathComponent(".claude/skills")
+        skills += parseSkillsDirectory(projectSkillsDir, scope: .project)
+        skills += parseCommandsDirectory(projectSkillsDir, scope: .project)
 
         // Plugins from ~/.claude/plugins/installed_plugins.json
         let pluginsPath = (home as NSString).appendingPathComponent(".claude/plugins/installed_plugins.json")
@@ -186,13 +175,37 @@ enum AgentCapabilityParser {
             }
         }
 
-        // Instructions
+        // Instructions — collect ALL sources (user-level, project, rules, local)
+        // User-level CLAUDE.md
+        let userClaudeMd = (home as NSString).appendingPathComponent(".claude/CLAUDE.md")
+        if fm.fileExists(atPath: userClaudeMd) {
+            instructions.append(AgentInstructions(fileName: "~/.claude/CLAUDE.md", filePath: userClaudeMd, exists: true))
+        }
+
+        // Project CLAUDE.md and .claude/CLAUDE.md (both can exist)
         let claudeMdRoot = (projectPath as NSString).appendingPathComponent("CLAUDE.md")
         let claudeMdNested = (projectPath as NSString).appendingPathComponent(".claude/CLAUDE.md")
         if fm.fileExists(atPath: claudeMdRoot) {
             instructions.append(AgentInstructions(fileName: "CLAUDE.md", filePath: claudeMdRoot, exists: true))
-        } else if fm.fileExists(atPath: claudeMdNested) {
+        }
+        if fm.fileExists(atPath: claudeMdNested) {
             instructions.append(AgentInstructions(fileName: ".claude/CLAUDE.md", filePath: claudeMdNested, exists: true))
+        }
+
+        // .claude/rules/*.md (recursive)
+        let rulesDir = (projectPath as NSString).appendingPathComponent(".claude/rules")
+        if fm.fileExists(atPath: rulesDir) {
+            let ruleFiles = scanRecursiveForMdFiles(rulesDir, scope: .project)
+            for rule in ruleFiles {
+                let displayName = ".claude/rules/" + ((rule.filePath as NSString).lastPathComponent)
+                instructions.append(AgentInstructions(fileName: displayName, filePath: rule.filePath, exists: true))
+            }
+        }
+
+        // CLAUDE.local.md (private, gitignored)
+        let claudeLocalMd = (projectPath as NSString).appendingPathComponent("CLAUDE.local.md")
+        if fm.fileExists(atPath: claudeLocalMd) {
+            instructions.append(AgentInstructions(fileName: "CLAUDE.local.md", filePath: claudeLocalMd, exists: true))
         }
 
         return AgentCapabilities(
@@ -202,8 +215,7 @@ enum AgentCapabilityParser {
             mcpServers: mcpServers,
             skills: skills,
             plugins: plugins,
-            instructions: instructions,
-            model: nil
+            instructions: instructions
         )
     }
 
@@ -213,47 +225,87 @@ enum AgentCapabilityParser {
         var mcpServers: [MCPServerInfo] = []
         var skills: [AgentSkillInfo] = []
         var instructions: [AgentInstructions] = []
-        var model: String?
+        let codexHome = (home as NSString).appendingPathComponent(".codex")
+        let gitRoot = findGitRoot(from: projectPath)
 
-        // Parse ~/.codex/config.toml (global)
-        let globalConfigPath = (home as NSString).appendingPathComponent(".codex/config.toml")
+        // MCP servers from ~/.codex/config.toml (global)
+        let globalConfigPath = (codexHome as NSString).appendingPathComponent("config.toml")
         if let content = try? String(contentsOfFile: globalConfigPath, encoding: .utf8) {
-            let lines = content.components(separatedBy: "\n")
-            for line in lines {
-                let trimmed = line.trimmingCharacters(in: .whitespaces)
-                if trimmed.hasPrefix("model"), trimmed.contains("=") {
-                    model = extractTOMLStringValue(trimmed)
-                    break
-                }
-            }
             mcpServers += parseMCPFromTOML(content, scope: .user)
         }
 
-        // Parse <project>/.codex/config.toml (project-scoped)
-        let projectConfigPath = (projectPath as NSString).appendingPathComponent(".codex/config.toml")
-        if let content = try? String(contentsOfFile: projectConfigPath, encoding: .utf8) {
-            let projectServers = parseMCPFromTOML(content, scope: .project)
-            for server in projectServers where !mcpServers.contains(where: { $0.name == server.name }) {
-                mcpServers.append(server)
+        // MCP servers from .codex/config.toml — walk from project to git root
+        if let root = gitRoot {
+            var current = projectPath
+            while true {
+                let configPath = (current as NSString).appendingPathComponent(".codex/config.toml")
+                if let content = try? String(contentsOfFile: configPath, encoding: .utf8) {
+                    let projectServers = parseMCPFromTOML(content, scope: .project)
+                    for server in projectServers where !mcpServers.contains(where: { $0.name == server.name }) {
+                        mcpServers.append(server)
+                    }
+                }
+                if current == root { break }
+                current = (current as NSString).deletingLastPathComponent
             }
         }
 
-        // Skills from ~/.codex/skills/*/SKILL.md
-        let codexSkillsDir = (home as NSString).appendingPathComponent(".codex/skills")
-        skills += parseSkillsDirectory(codexSkillsDir, scope: .user)
+        // Skills from ~/.codex/skills/ (legacy user skills)
+        skills += parseSkillsDirectory((codexHome as NSString).appendingPathComponent("skills"), scope: .user)
 
-        // Skills from ~/.agents/skills/*/SKILL.md
-        let agentsSkillsDir = (home as NSString).appendingPathComponent(".agents/skills")
-        skills += parseSkillsDirectory(agentsSkillsDir, scope: .user)
+        // Skills from ~/.agents/skills/ (shared)
+        skills += parseSkillsDirectory((home as NSString).appendingPathComponent(".agents/skills"), scope: .user)
 
-        // Skills from <project>/.agents/skills/*/SKILL.md
-        let projectAgentsSkillsDir = (projectPath as NSString).appendingPathComponent(".agents/skills")
-        skills += parseSkillsDirectory(projectAgentsSkillsDir, scope: .project)
+        // Skills from .agents/skills/ — walk from git root to project path
+        if let root = gitRoot {
+            var dirs: [String] = []
+            var current = projectPath
+            while true {
+                dirs.append(current)
+                if current == root { break }
+                current = (current as NSString).deletingLastPathComponent
+            }
+            for dir in dirs.reversed() {
+                let skillsDir = (dir as NSString).appendingPathComponent(".agents/skills")
+                skills += parseSkillsDirectory(skillsDir, scope: .project)
+            }
+        }
 
-        // Instructions
-        let agentsMd = (projectPath as NSString).appendingPathComponent("AGENTS.md")
-        if fm.fileExists(atPath: agentsMd) {
-            instructions.append(AgentInstructions(fileName: "AGENTS.md", filePath: agentsMd, exists: true))
+        // Instructions — user-level
+        let overrideMd = (codexHome as NSString).appendingPathComponent("AGENTS.override.md")
+        if fm.fileExists(atPath: overrideMd) {
+            instructions.append(AgentInstructions(fileName: "~/.codex/AGENTS.override.md", filePath: overrideMd, exists: true))
+        }
+        let userAgentsMd = (codexHome as NSString).appendingPathComponent("AGENTS.md")
+        if fm.fileExists(atPath: userAgentsMd) {
+            instructions.append(AgentInstructions(fileName: "~/.codex/AGENTS.md", filePath: userAgentsMd, exists: true))
+        }
+
+        // Instructions — walk from git root to project path collecting all AGENTS.md
+        if let root = gitRoot {
+            var dirs: [String] = []
+            var current = projectPath
+            while true {
+                dirs.append(current)
+                if current == root { break }
+                current = (current as NSString).deletingLastPathComponent
+            }
+            for dir in dirs.reversed() {
+                let agentsMd = (dir as NSString).appendingPathComponent("AGENTS.md")
+                if fm.fileExists(atPath: agentsMd), agentsMd != userAgentsMd {
+                    let displayName: String
+                    if dir == projectPath {
+                        displayName = "AGENTS.md"
+                    } else if agentsMd.hasPrefix(projectPath + "/") {
+                        displayName = String(agentsMd.dropFirst(projectPath.count + 1))
+                    } else {
+                        // Ancestor directory above project — show relative to git root
+                        let dirName = (dir as NSString).lastPathComponent
+                        displayName = "../\(dirName)/AGENTS.md"
+                    }
+                    instructions.append(AgentInstructions(fileName: displayName, filePath: agentsMd, exists: true))
+                }
+            }
         }
 
         return AgentCapabilities(
@@ -263,8 +315,7 @@ enum AgentCapabilityParser {
             mcpServers: mcpServers,
             skills: skills,
             plugins: [],
-            instructions: instructions,
-            model: model
+            instructions: instructions
         )
     }
 
@@ -273,45 +324,66 @@ enum AgentCapabilityParser {
     static func parseOpenCode(projectPath: String, agent: AgentConfig) -> AgentCapabilities {
         var mcpServers: [MCPServerInfo] = []
         var skills: [AgentSkillInfo] = []
+        var plugins: [AgentPluginInfo] = []
         var instructions: [AgentInstructions] = []
-        var model: String?
+        let globalConfigDir = (home as NSString).appendingPathComponent(".config/opencode")
+        let gitRoot = findGitRoot(from: projectPath)
 
-        // MCP servers from ~/.config/opencode/.opencode.json
-        let globalConfigPath = (home as NSString).appendingPathComponent(".config/opencode/.opencode.json")
-        parseMCPFromOpenCodeJSON(globalConfigPath, scope: .user, into: &mcpServers)
-
-        // MCP servers from <project>/.opencode.json
-        let projectConfigPath = (projectPath as NSString).appendingPathComponent(".opencode.json")
-        parseMCPFromOpenCodeJSON(projectConfigPath, scope: .project, into: &mcpServers)
-
-        // Model from .opencode.json
-        for path in [projectConfigPath, globalConfigPath] {
-            if model == nil,
-               let data = fm.contents(atPath: path),
-               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let agents = json["agents"] as? [String: Any],
-               let coder = agents["coder"] as? [String: Any],
-               let m = coder["model"] as? String
-            {
-                model = m
+        // MCP servers from global config (first found wins)
+        for name in ["opencode.jsonc", "opencode.json", ".opencode.json", "config.json"] {
+            let path = (globalConfigDir as NSString).appendingPathComponent(name)
+            if fm.fileExists(atPath: path) {
+                parseMCPFromOpenCodeJSON(path, scope: .user, into: &mcpServers)
+                break
             }
         }
 
-        // Commands from ~/.opencode/commands/*.md
-        let globalCommandsDir = (home as NSString).appendingPathComponent(".opencode/commands")
-        skills += parseCommandsDirectory(globalCommandsDir, scope: .user)
+        // MCP servers from project config (first found wins)
+        for name in ["opencode.jsonc", "opencode.json", ".opencode.json"] {
+            let path = (projectPath as NSString).appendingPathComponent(name)
+            if fm.fileExists(atPath: path) {
+                parseMCPFromOpenCodeJSON(path, scope: .project, into: &mcpServers)
+                break
+            }
+        }
 
-        // Commands from <project>/.opencode/commands/*.md
-        let projectCommandsDir = (projectPath as NSString).appendingPathComponent(".opencode/commands")
-        skills += parseCommandsDirectory(projectCommandsDir, scope: .project)
+        // Skills — external directories (shared with Claude/Codex ecosystem)
+        skills += parseSkillsDirectory((home as NSString).appendingPathComponent(".claude/skills"), scope: .user)
+        skills += parseSkillsDirectory((home as NSString).appendingPathComponent(".agents/skills"), scope: .user)
 
-        // Instructions
-        let opencodeMd = (projectPath as NSString).appendingPathComponent("opencode.md")
-        let cursorRules = (projectPath as NSString).appendingPathComponent(".cursorrules")
-        if fm.fileExists(atPath: opencodeMd) {
-            instructions.append(AgentInstructions(fileName: "opencode.md", filePath: opencodeMd, exists: true))
-        } else if fm.fileExists(atPath: cursorRules) {
-            instructions.append(AgentInstructions(fileName: ".cursorrules", filePath: cursorRules, exists: true))
+        // Skills — project-level external directories
+        skills += parseSkillsDirectory((projectPath as NSString).appendingPathComponent(".claude/skills"), scope: .project)
+        skills += parseSkillsDirectory((projectPath as NSString).appendingPathComponent(".agents/skills"), scope: .project)
+
+        // Skills — OpenCode native directories
+        skills += parseSkillsDirectory((projectPath as NSString).appendingPathComponent(".opencode/skill"), scope: .project)
+        skills += parseSkillsDirectory((projectPath as NSString).appendingPathComponent(".opencode/skills"), scope: .project)
+
+        // Commands from ~/.opencode/commands/*.md and ~/.opencode/command/*.md
+        skills += parseCommandsDirectory((home as NSString).appendingPathComponent(".opencode/commands"), scope: .user)
+        skills += parseCommandsDirectory((home as NSString).appendingPathComponent(".opencode/command"), scope: .user)
+
+        // Commands from <project>/.opencode/commands/*.md and .opencode/command/*.md
+        skills += parseCommandsDirectory((projectPath as NSString).appendingPathComponent(".opencode/commands"), scope: .project)
+        skills += parseCommandsDirectory((projectPath as NSString).appendingPathComponent(".opencode/command"), scope: .project)
+
+        // Plugins from .opencode/plugin[s]/ directories
+        plugins += scanExtensionDirectory((projectPath as NSString).appendingPathComponent(".opencode/plugin"))
+        plugins += scanExtensionDirectory((projectPath as NSString).appendingPathComponent(".opencode/plugins"))
+        plugins += scanExtensionDirectory((globalConfigDir as NSString).appendingPathComponent("plugin"))
+
+        // Instructions — findUp from project to git root for AGENTS.md, CLAUDE.md, CONTEXT.md
+        let stopPath = gitRoot ?? projectPath
+        instructions += findInstructionFiles(names: ["AGENTS.md", "CLAUDE.md", "CONTEXT.md"], startPath: projectPath, stopPath: stopPath)
+
+        // Instructions — global
+        let globalAgentsMd = (globalConfigDir as NSString).appendingPathComponent("AGENTS.md")
+        if fm.fileExists(atPath: globalAgentsMd) {
+            instructions.append(AgentInstructions(fileName: "~/.config/opencode/AGENTS.md", filePath: globalAgentsMd, exists: true))
+        }
+        let claudeGlobalMd = (home as NSString).appendingPathComponent(".claude/CLAUDE.md")
+        if fm.fileExists(atPath: claudeGlobalMd) {
+            instructions.append(AgentInstructions(fileName: "~/.claude/CLAUDE.md", filePath: claudeGlobalMd, exists: true))
         }
 
         return AgentCapabilities(
@@ -320,9 +392,76 @@ enum AgentCapabilityParser {
             isInstalled: agent.isInstalled,
             mcpServers: mcpServers,
             skills: skills,
-            plugins: [],
-            instructions: instructions,
-            model: model
+            plugins: plugins,
+            instructions: instructions
+        )
+    }
+
+    // MARK: - Pi
+
+    static func parsePi(projectPath: String, agent: AgentConfig) -> AgentCapabilities {
+        var skills: [AgentSkillInfo] = []
+        var plugins: [AgentPluginInfo] = []
+        var instructions: [AgentInstructions] = []
+        let piAgentDir = (home as NSString).appendingPathComponent(".pi/agent")
+        let gitRoot = findGitRoot(from: projectPath)
+
+        // Skills from ~/.pi/agent/skills/ and .pi/skills/
+        skills += parseSkillsDirectory((piAgentDir as NSString).appendingPathComponent("skills"), scope: .user)
+        skills += parseSkillsDirectory((projectPath as NSString).appendingPathComponent(".pi/skills"), scope: .project)
+
+        // Prompts (displayed as skills) from ~/.pi/agent/prompts/ and .pi/prompts/
+        skills += parseCommandsDirectory((piAgentDir as NSString).appendingPathComponent("prompts"), scope: .user)
+        skills += parseCommandsDirectory((projectPath as NSString).appendingPathComponent(".pi/prompts"), scope: .project)
+
+        // Extensions (displayed as plugins) from ~/.pi/agent/extensions/ and .pi/extensions/
+        plugins += scanExtensionDirectory((piAgentDir as NSString).appendingPathComponent("extensions"))
+        plugins += scanExtensionDirectory((projectPath as NSString).appendingPathComponent(".pi/extensions"))
+
+        // Instructions — project-level .pi/ directory
+        let piProjectAgentsMd = (projectPath as NSString).appendingPathComponent(".pi/AGENTS.md")
+        if fm.fileExists(atPath: piProjectAgentsMd) {
+            instructions.append(AgentInstructions(fileName: ".pi/AGENTS.md", filePath: piProjectAgentsMd, exists: true))
+        }
+        let piProjectClaudeMd = (projectPath as NSString).appendingPathComponent(".pi/CLAUDE.md")
+        if fm.fileExists(atPath: piProjectClaudeMd) {
+            instructions.append(AgentInstructions(fileName: ".pi/CLAUDE.md", filePath: piProjectClaudeMd, exists: true))
+        }
+
+        // Instructions — ancestor walk for AGENTS.md and CLAUDE.md
+        let stopPath = gitRoot ?? projectPath
+        instructions += findInstructionFiles(names: ["AGENTS.md", "CLAUDE.md"], startPath: projectPath, stopPath: stopPath)
+
+        // Instructions — global
+        let globalAgentsMd = (piAgentDir as NSString).appendingPathComponent("AGENTS.md")
+        if fm.fileExists(atPath: globalAgentsMd) {
+            instructions.append(AgentInstructions(fileName: "~/.pi/agent/AGENTS.md", filePath: globalAgentsMd, exists: true))
+        }
+        let globalClaudeMd = (piAgentDir as NSString).appendingPathComponent("CLAUDE.md")
+        if fm.fileExists(atPath: globalClaudeMd) {
+            instructions.append(AgentInstructions(fileName: "~/.pi/agent/CLAUDE.md", filePath: globalClaudeMd, exists: true))
+        }
+
+        // Instructions — SYSTEM.md and APPEND_SYSTEM.md
+        for name in ["SYSTEM.md", "APPEND_SYSTEM.md"] {
+            let projectPath_ = (projectPath as NSString).appendingPathComponent(".pi/\(name)")
+            if fm.fileExists(atPath: projectPath_) {
+                instructions.append(AgentInstructions(fileName: ".pi/\(name)", filePath: projectPath_, exists: true))
+            }
+            let globalPath = (piAgentDir as NSString).appendingPathComponent(name)
+            if fm.fileExists(atPath: globalPath) {
+                instructions.append(AgentInstructions(fileName: "~/.pi/agent/\(name)", filePath: globalPath, exists: true))
+            }
+        }
+
+        return AgentCapabilities(
+            agentName: agent.name,
+            icon: agent.icon,
+            isInstalled: agent.isInstalled,
+            mcpServers: [],
+            skills: skills,
+            plugins: plugins,
+            instructions: instructions
         )
     }
 
@@ -475,5 +614,95 @@ enum AgentCapabilityParser {
                 servers.append(info)
             }
         }
+    }
+
+    /// Walk upward from `path` to find the nearest `.git` directory, returning the containing directory.
+    private static func findGitRoot(from path: String) -> String? {
+        var current = path
+        while current != "/" {
+            let gitPath = (current as NSString).appendingPathComponent(".git")
+            if fm.fileExists(atPath: gitPath) {
+                return current
+            }
+            current = (current as NSString).deletingLastPathComponent
+        }
+        return nil
+    }
+
+    /// Walk from `startPath` up to `stopPath`, checking each directory for files matching `names`.
+    /// Returns all found files as AgentInstructions (deduped by filePath).
+    private static func findInstructionFiles(names: [String], startPath: String, stopPath: String? = nil) -> [AgentInstructions] {
+        var results: [AgentInstructions] = []
+        var seen = Set<String>()
+        var current = startPath
+        let stop = stopPath ?? "/"
+
+        while true {
+            for name in names {
+                let filePath = (current as NSString).appendingPathComponent(name)
+                if fm.fileExists(atPath: filePath), !seen.contains(filePath) {
+                    seen.insert(filePath)
+                    // Show path relative to startPath for nested files
+                    let displayName: String
+                    if current == startPath {
+                        displayName = name
+                    } else {
+                        let relative = String(current.dropFirst(startPath.count + 1))
+                        displayName = (relative as NSString).appendingPathComponent(name)
+                    }
+                    results.append(AgentInstructions(fileName: displayName, filePath: filePath, exists: true))
+                }
+            }
+            if current == stop || current == "/" { break }
+            current = (current as NSString).deletingLastPathComponent
+        }
+        return results
+    }
+
+    /// Recursively scan a directory for .md files. Used for .claude/rules/ etc.
+    private static func scanRecursiveForMdFiles(_ dirPath: String, scope: CapabilityScope) -> [AgentSkillInfo] {
+        var results: [AgentSkillInfo] = []
+        guard let enumerator = fm.enumerator(atPath: dirPath) else { return results }
+        while let relativePath = enumerator.nextObject() as? String {
+            guard relativePath.hasSuffix(".md") else { continue }
+            let filePath = (dirPath as NSString).appendingPathComponent(relativePath)
+            var isDir: ObjCBool = false
+            guard fm.fileExists(atPath: filePath, isDirectory: &isDir), !isDir.boolValue else { continue }
+            if let content = try? String(contentsOfFile: filePath, encoding: .utf8) {
+                let frontmatter = parseFrontmatter(content)
+                let name = frontmatter["name"] ?? String(relativePath.dropLast(3))
+                results.append(AgentSkillInfo(
+                    name: name,
+                    description: frontmatter["description"],
+                    filePath: filePath,
+                    scope: scope
+                ))
+            }
+        }
+        return results
+    }
+
+    /// Scan a directory for .ts/.js extension files and subdirectories with index.ts/index.js.
+    /// Returns them as AgentPluginInfo entries.
+    private static func scanExtensionDirectory(_ dirPath: String) -> [AgentPluginInfo] {
+        var results: [AgentPluginInfo] = []
+        guard let entries = try? fm.contentsOfDirectory(atPath: dirPath) else { return results }
+        for entry in entries.sorted() {
+            let entryPath = (dirPath as NSString).appendingPathComponent(entry)
+            var isDir: ObjCBool = false
+            fm.fileExists(atPath: entryPath, isDirectory: &isDir)
+            if isDir.boolValue {
+                // Check for index.ts or index.js inside subdirectory
+                let indexTs = (entryPath as NSString).appendingPathComponent("index.ts")
+                let indexJs = (entryPath as NSString).appendingPathComponent("index.js")
+                if fm.fileExists(atPath: indexTs) || fm.fileExists(atPath: indexJs) {
+                    results.append(AgentPluginInfo(name: entry, version: nil, enabled: true))
+                }
+            } else if entry.hasSuffix(".ts") || entry.hasSuffix(".js") {
+                let name = String((entry as NSString).deletingPathExtension)
+                results.append(AgentPluginInfo(name: name, version: nil, enabled: true))
+            }
+        }
+        return results
     }
 }
