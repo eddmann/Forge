@@ -7,7 +7,7 @@ final class ProcessGitClient: GitClient {
 
     private init() {}
 
-    func run(in directory: String, args: [String]) -> GitCommandResult {
+    func run(in directory: String, args: [String], timeout: TimeInterval = 30) -> GitCommandResult {
         let process = Process()
         let outPipe = Pipe()
         let errPipe = Pipe()
@@ -19,11 +19,29 @@ final class ProcessGitClient: GitClient {
 
         do {
             try process.run()
+
+            let timeoutItem = DispatchWorkItem { [weak process] in
+                guard let p = process, p.isRunning else { return }
+                p.terminate()
+            }
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: timeoutItem)
+
             process.waitUntilExit()
+            timeoutItem.cancel()
+
             let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
             let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
             let stdout = String(data: outData, encoding: .utf8) ?? ""
             let stderr = String(data: errData, encoding: .utf8) ?? ""
+
+            if process.terminationStatus == SIGTERM {
+                return GitCommandResult(
+                    success: false,
+                    stdout: "",
+                    stderr: "Git operation timed out after \(Int(timeout))s"
+                )
+            }
+
             return GitCommandResult(
                 success: process.terminationStatus == 0,
                 stdout: stdout,
@@ -40,11 +58,11 @@ final class ProcessGitClient: GitClient {
 
     func runAsync(in directory: String, args: [String], completion: @escaping (GitCommandResult) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async {
-            completion(self.run(in: directory, args: args))
+            completion(self.run(in: directory, args: args, timeout: 30))
         }
     }
 
-    func runWithStdin(in directory: String, args: [String], stdin stdinContent: String) -> GitCommandResult {
+    func runWithStdin(in directory: String, args: [String], stdin stdinContent: String, timeout: TimeInterval = 30) -> GitCommandResult {
         let process = Process()
         let outPipe = Pipe()
         let errPipe = Pipe()
@@ -65,6 +83,12 @@ final class ProcessGitClient: GitClient {
             }
             inPipe.fileHandleForWriting.closeFile()
 
+            let timeoutItem = DispatchWorkItem { [weak process] in
+                guard let p = process, p.isRunning else { return }
+                p.terminate()
+            }
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: timeoutItem)
+
             // Read pipes concurrently before waitUntilExit to prevent deadlock
             var outData = Data()
             var errData = Data()
@@ -83,9 +107,19 @@ final class ProcessGitClient: GitClient {
 
             group.wait()
             process.waitUntilExit()
+            timeoutItem.cancel()
 
             let stdout = String(data: outData, encoding: .utf8) ?? ""
             let stderr = String(data: errData, encoding: .utf8) ?? ""
+
+            if process.terminationStatus == SIGTERM {
+                return GitCommandResult(
+                    success: false,
+                    stdout: "",
+                    stderr: "Git operation timed out after \(Int(timeout))s"
+                )
+            }
+
             return GitCommandResult(
                 success: process.terminationStatus == 0,
                 stdout: stdout,

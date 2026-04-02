@@ -14,6 +14,7 @@ final class StatusViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var commitMessage = ""
     @Published var isAmend = false
+    @Published var isBusy = false
     @Published var isCommitting = false
     @Published var lastCommitMessage: String?
     @Published var currentBranch: String?
@@ -75,6 +76,7 @@ final class StatusViewModel: ObservableObject {
         #if DEBUG
             if ProjectStore.shared.isDemo { return }
         #endif
+        guard !isBusy else { return }
         guard let repoPath else {
             statuses = []
             grouped = [:]
@@ -148,64 +150,56 @@ final class StatusViewModel: ObservableObject {
 
     func stage(file: FileStatus) {
         guard let repoPath else { return }
-        runGit(in: repoPath, args: ["add", "--", file.path]) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                if result.success {
-                    self.setFeedback("Staged \(file.fileName)", isError: false)
-                    self.recordActivity()
-                    self.refresh()
-                } else {
-                    self.setFeedback(self.cleanError(result.stderr), isError: true)
-                }
+        runMutating(in: repoPath, args: ["add", "--", file.path]) { [weak self] result in
+            guard let self else { return }
+            if result.success {
+                setFeedback("Staged \(file.fileName)", isError: false)
+                recordActivity()
+                refresh()
+            } else {
+                setFeedback(cleanError(result.stderr), isError: true)
             }
         }
     }
 
     func unstage(file: FileStatus) {
         guard let repoPath else { return }
-        runGit(in: repoPath, args: ["restore", "--staged", "--", file.path]) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                if result.success {
-                    self.setFeedback("Unstaged \(file.fileName)", isError: false)
-                    self.recordActivity()
-                    self.refresh()
-                } else {
-                    self.setFeedback(self.cleanError(result.stderr), isError: true)
-                }
+        runMutating(in: repoPath, args: ["restore", "--staged", "--", file.path]) { [weak self] result in
+            guard let self else { return }
+            if result.success {
+                setFeedback("Unstaged \(file.fileName)", isError: false)
+                recordActivity()
+                refresh()
+            } else {
+                setFeedback(cleanError(result.stderr), isError: true)
             }
         }
     }
 
     func stageAll() {
         guard let repoPath else { return }
-        runGit(in: repoPath, args: ["add", "-A"]) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                if result.success {
-                    self.setFeedback("Staged all changes", isError: false)
-                    self.recordActivity()
-                    self.refresh()
-                } else {
-                    self.setFeedback(self.cleanError(result.stderr), isError: true)
-                }
+        runMutating(in: repoPath, args: ["add", "-A"]) { [weak self] result in
+            guard let self else { return }
+            if result.success {
+                setFeedback("Staged all changes", isError: false)
+                recordActivity()
+                refresh()
+            } else {
+                setFeedback(cleanError(result.stderr), isError: true)
             }
         }
     }
 
     func unstageAll() {
         guard let repoPath else { return }
-        runGit(in: repoPath, args: ["reset", "HEAD"]) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                if result.success {
-                    self.setFeedback("Unstaged all changes", isError: false)
-                    self.recordActivity()
-                    self.refresh()
-                } else {
-                    self.setFeedback(self.cleanError(result.stderr), isError: true)
-                }
+        runMutating(in: repoPath, args: ["reset", "HEAD"]) { [weak self] result in
+            guard let self else { return }
+            if result.success {
+                setFeedback("Unstaged all changes", isError: false)
+                recordActivity()
+                refresh()
+            } else {
+                setFeedback(cleanError(result.stderr), isError: true)
             }
         }
     }
@@ -225,15 +219,13 @@ final class StatusViewModel: ObservableObject {
             ["restore", "--", file.path]
         }
 
-        runGit(in: repoPath, args: args) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                if result.success {
-                    self.setFeedback("Discarded \(file.fileName)", isError: false)
-                    self.refresh()
-                } else {
-                    self.setFeedback(self.cleanError(result.stderr), isError: true)
-                }
+        runMutating(in: repoPath, args: args) { [weak self] result in
+            guard let self else { return }
+            if result.success {
+                setFeedback("Discarded \(file.fileName)", isError: false)
+                refresh()
+            } else {
+                setFeedback(cleanError(result.stderr), isError: true)
             }
         }
     }
@@ -251,7 +243,7 @@ final class StatusViewModel: ObservableObject {
 
     func commit() {
         let message = commitMessage.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !message.isEmpty, let repoPath, !isCommitting else { return }
+        guard !message.isEmpty, let repoPath, !isBusy else { return }
 
         isCommitting = true
         feedbackMessage = nil
@@ -259,27 +251,27 @@ final class StatusViewModel: ObservableObject {
         var args = ["commit", "-m", message]
         if isAmend { args = ["commit", "--amend", "-m", message] }
 
-        runGit(in: repoPath, args: args) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                self.isCommitting = false
-                if result.success {
-                    self.commitMessage = ""
-                    self.isAmend = false
-                    self.setFeedback(self.isAmend ? "Amended commit." : "Committed changes.", isError: false)
-                    self.recordActivity()
-                    self.refresh()
-                } else {
-                    self.setFeedback(self.cleanError(result.stderr), isError: true)
-                }
+        let wasAmend = isAmend
+        runMutating(in: repoPath, args: args) { [weak self] result in
+            guard let self else { return }
+            isCommitting = false
+            if result.success {
+                commitMessage = ""
+                isAmend = false
+                setFeedback(wasAmend ? "Amended commit." : "Committed changes.", isError: false)
+                recordActivity()
+                refresh()
+            } else {
+                setFeedback(cleanError(result.stderr), isError: true)
             }
         }
     }
 
     // MARK: - Hunk Staging
 
-    func stageHunk(_ hunk: GitDiffHunk, filePath: String) {
-        guard let repoPath else { return }
+    func stageHunk(_ hunk: GitDiffHunk, filePath: String, completion: (() -> Void)? = nil) {
+        guard let repoPath, !isBusy else { return }
+        isBusy = true
         let patch = hunk.toPatchString(filePath: filePath)
         DispatchQueue.global(qos: .userInitiated).async {
             let result = Git.shared.runWithStdin(
@@ -288,6 +280,7 @@ final class StatusViewModel: ObservableObject {
                 stdin: patch
             )
             DispatchQueue.main.async { [weak self] in
+                self?.isBusy = false
                 if result.success {
                     self?.setFeedback("Staged hunk", isError: false)
                     self?.recordActivity()
@@ -295,12 +288,14 @@ final class StatusViewModel: ObservableObject {
                 } else {
                     self?.setFeedback(self?.cleanError(result.stderr) ?? "Failed to stage hunk", isError: true)
                 }
+                completion?()
             }
         }
     }
 
-    func unstageHunk(_ hunk: GitDiffHunk, filePath: String) {
-        guard let repoPath else { return }
+    func unstageHunk(_ hunk: GitDiffHunk, filePath: String, completion: (() -> Void)? = nil) {
+        guard let repoPath, !isBusy else { return }
+        isBusy = true
         let patch = hunk.toPatchString(filePath: filePath)
         DispatchQueue.global(qos: .userInitiated).async {
             let result = Git.shared.runWithStdin(
@@ -309,6 +304,7 @@ final class StatusViewModel: ObservableObject {
                 stdin: patch
             )
             DispatchQueue.main.async { [weak self] in
+                self?.isBusy = false
                 if result.success {
                     self?.setFeedback("Unstaged hunk", isError: false)
                     self?.recordActivity()
@@ -316,6 +312,7 @@ final class StatusViewModel: ObservableObject {
                 } else {
                     self?.setFeedback(self?.cleanError(result.stderr) ?? "Failed to unstage hunk", isError: true)
                 }
+                completion?()
             }
         }
     }
@@ -351,8 +348,15 @@ final class StatusViewModel: ObservableObject {
 
     // MARK: - Helpers
 
-    private func runGit(in directory: String, args: [String], completion: @escaping (GitCommandResult) -> Void) {
-        Git.shared.runAsync(in: directory, args: args, completion: completion)
+    private func runMutating(in directory: String, args: [String], completion: @escaping (GitCommandResult) -> Void) {
+        guard !isBusy else { return }
+        isBusy = true
+        Git.shared.runAsync(in: directory, args: args) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isBusy = false
+                completion(result)
+            }
+        }
     }
 
     private var feedbackDismissTask: DispatchWorkItem?

@@ -261,8 +261,7 @@ final class ChangesViewModel: ObservableObject {
     // MARK: - Hunk Staging
 
     func stageHunk(_ hunk: GitDiffHunk, filePath: String) {
-        StatusViewModel.shared.stageHunk(hunk, filePath: filePath)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+        StatusViewModel.shared.stageHunk(hunk, filePath: filePath) { [weak self] in
             self?.reload()
         }
     }

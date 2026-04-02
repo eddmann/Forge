@@ -119,16 +119,13 @@ final class DiffViewModel: ObservableObject {
     // MARK: - Hunk Staging
 
     func stageHunk(_ hunk: GitDiffHunk) {
-        StatusViewModel.shared.stageHunk(hunk, filePath: filePath)
-        // Reload after a short delay to let git process
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+        StatusViewModel.shared.stageHunk(hunk, filePath: filePath) { [weak self] in
             self?.reload()
         }
     }
 
     func unstageHunk(_ hunk: GitDiffHunk) {
-        StatusViewModel.shared.unstageHunk(hunk, filePath: filePath)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+        StatusViewModel.shared.unstageHunk(hunk, filePath: filePath) { [weak self] in
             self?.reload()
         }
     }

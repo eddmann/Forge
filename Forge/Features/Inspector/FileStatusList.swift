@@ -89,6 +89,7 @@ struct FileStatusList: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.borderless)
+                .disabled(viewModel.isBusy)
             }
             .padding(.horizontal, 14)
             .padding(.top, 12)
@@ -103,6 +104,7 @@ struct FileStatusList: View {
                     commentCount: fileCommentCount(for: file),
                     onSelect: { viewModel.selectFile(file, staged: group == .staged) },
                     onStageToggle: {
+                        guard !viewModel.isBusy else { return }
                         if group == .staged {
                             viewModel.unstage(file: file)
                         } else {
@@ -110,6 +112,7 @@ struct FileStatusList: View {
                         }
                     },
                     onDiscard: group == .conflicts ? nil : {
+                        guard !viewModel.isBusy else { return }
                         pendingDiscard = (file, group)
                         showDiscardConfirmation = true
                     }

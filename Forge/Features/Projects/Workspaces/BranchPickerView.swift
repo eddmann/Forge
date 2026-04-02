@@ -7,6 +7,7 @@ struct BranchPickerView: View {
     @State private var newBranchName: String = ""
     @State private var errorMessage: String?
     @State private var successMessage: String?
+    @State private var isOperating = false
     var onDismiss: () -> Void
 
     private let accentGold = Color(red: 1.0, green: 0.76, blue: 0.28)
@@ -76,7 +77,7 @@ struct BranchPickerView: View {
                         Button("Create") { commitNewBranch() }
                             .buttonStyle(.bordered)
                             .controlSize(.small)
-                            .disabled(newBranchName.trimmingCharacters(in: .whitespaces).isEmpty)
+                            .disabled(newBranchName.trimmingCharacters(in: .whitespaces).isEmpty || isOperating)
 
                         Button(action: { showNewBranch = false; errorMessage = nil }) {
                             Image(systemName: "xmark")
@@ -158,12 +159,14 @@ struct BranchPickerView: View {
     }
 
     private func selectBranch(_ branch: String) {
-        guard let path = store.effectivePath else { return }
+        guard let path = store.effectivePath, !isOperating else { return }
+        isOperating = true
         errorMessage = nil
 
         DispatchQueue.global(qos: .userInitiated).async {
             let result = Git.shared.run(in: path, args: ["checkout", branch])
             DispatchQueue.main.async {
+                isOperating = false
                 if result.success {
                     store.currentBranch = branch
                     store.requestGitRefresh()
@@ -177,15 +180,17 @@ struct BranchPickerView: View {
 
     private func commitNewBranch() {
         let name = newBranchName.trimmingCharacters(in: .whitespaces)
-        guard !name.isEmpty else { return }
+        guard !name.isEmpty, !isOperating else { return }
         guard let path = store.effectivePath else { return }
 
+        isOperating = true
         errorMessage = nil
         successMessage = nil
 
         DispatchQueue.global(qos: .userInitiated).async {
             let result = Git.shared.run(in: path, args: ["checkout", "-b", name])
             DispatchQueue.main.async {
+                isOperating = false
                 if result.success {
                     showNewBranch = false
                     store.currentBranch = name
@@ -202,8 +207,9 @@ struct BranchPickerView: View {
     }
 
     private func createWorkspace() {
-        guard let project = store.activeProject else { return }
+        guard let project = store.activeProject, !isOperating else { return }
         let parentBranch = store.currentBranch.isEmpty ? project.defaultBranch : store.currentBranch
+        isOperating = true
         errorMessage = nil
         successMessage = nil
 
@@ -216,6 +222,7 @@ struct BranchPickerView: View {
                     parentBranch: parentBranch
                 )
                 DispatchQueue.main.async {
+                    isOperating = false
                     store.addWorkspace(workspace)
                     store.activeWorkspaceID = workspace.id
                     ProjectStore.shared.recordActivity(for: project.id)
@@ -226,6 +233,7 @@ struct BranchPickerView: View {
                 }
             } catch {
                 DispatchQueue.main.async {
+                    isOperating = false
                     errorMessage = error.localizedDescription
                 }
             }

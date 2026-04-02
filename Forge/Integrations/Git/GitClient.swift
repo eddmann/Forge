@@ -15,9 +15,19 @@ struct GitCommandResult {
 }
 
 protocol GitClient {
-    func run(in directory: String, args: [String]) -> GitCommandResult
+    func run(in directory: String, args: [String], timeout: TimeInterval) -> GitCommandResult
     func runAsync(in directory: String, args: [String], completion: @escaping (GitCommandResult) -> Void)
-    func runWithStdin(in directory: String, args: [String], stdin: String) -> GitCommandResult
+    func runWithStdin(in directory: String, args: [String], stdin: String, timeout: TimeInterval) -> GitCommandResult
+}
+
+extension GitClient {
+    func run(in directory: String, args: [String]) -> GitCommandResult {
+        run(in: directory, args: args, timeout: 30)
+    }
+
+    func runWithStdin(in directory: String, args: [String], stdin: String) -> GitCommandResult {
+        runWithStdin(in: directory, args: args, stdin: stdin, timeout: 30)
+    }
 }
 
 extension GitClient {
