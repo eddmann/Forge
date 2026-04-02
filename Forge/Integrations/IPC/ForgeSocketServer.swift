@@ -201,11 +201,8 @@ final class ForgeSocketServer {
         let dir = store.effectivePath ?? NSHomeDirectory()
         let resolved = store.activeProject.map { agent.applying(projectID: $0.id) } ?? agent
 
-        // Close the shell tab that invoked the welcome command
-        if let sessionID {
-            TerminalSessionManager.shared.closeSession(id: sessionID)
-        }
-
+        // Create the new agent tab first, then close the invoking shell tab.
+        // This ensures there is always at least one tab present.
         TerminalSessionManager.shared.createSession(
             workingDirectory: dir,
             title: resolved.name,
@@ -215,6 +212,10 @@ final class ForgeSocketServer {
             workspaceID: store.activeWorkspaceID,
             icon: resolved.icon
         )
+
+        if let sessionID {
+            TerminalSessionManager.shared.closeSession(id: sessionID)
+        }
     }
 
     // MARK: - Helpers
