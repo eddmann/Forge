@@ -57,7 +57,7 @@ final class ChangesViewModel: ObservableObject {
     // MARK: - Load All Diffs
 
     func loadAllDiffs() {
-        isLoading = true
+        isLoading = fileDiffs.isEmpty
         error = nil
 
         if let branchDiffRequest {

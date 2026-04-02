@@ -8,6 +8,7 @@ class TerminalContainerViewController: NSViewController {
     private let containerView = NSView()
     private var currentHostingView: NSView?
     private var cachedHostingViews: [UUID: NSView] = [:]
+    private var changesViewModels: [UUID: ChangesViewModel] = [:]
     private var cancellables = Set<AnyCancellable>()
     private var clickMonitor: Any?
 
@@ -258,6 +259,7 @@ class TerminalContainerViewController: NSViewController {
         for (tabID, view) in cachedHostingViews where !activeTabIDs.contains(tabID) {
             view.removeFromSuperview()
             cachedHostingViews.removeValue(forKey: tabID)
+            changesViewModels.removeValue(forKey: tabID)
         }
 
         guard let tabIndex = sessionManager.tabs.firstIndex(where: { $0.id == sessionManager.activeTabID }) else {
@@ -317,10 +319,12 @@ class TerminalContainerViewController: NSViewController {
         if let cached = cachedHostingViews[tabID] {
             cached.isHidden = false
             currentHostingView = cached
+            changesViewModels[tabID]?.reload()
             return
         }
 
         let viewModel = ChangesViewModel(repoPath: repoPath)
+        changesViewModels[tabID] = viewModel
         let changesView = ChangesTabView(viewModel: viewModel)
         let hostingView = NSHostingView(rootView: changesView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false
@@ -341,6 +345,7 @@ class TerminalContainerViewController: NSViewController {
         if let cached = cachedHostingViews[tabID] {
             cached.isHidden = false
             currentHostingView = cached
+            changesViewModels[tabID]?.reload()
             return
         }
 
@@ -348,6 +353,7 @@ class TerminalContainerViewController: NSViewController {
             repoPath: repoPath,
             branchDiffRequest: .between(baseRef, "HEAD")
         )
+        changesViewModels[tabID] = viewModel
         let changesView = ChangesTabView(viewModel: viewModel)
         let hostingView = NSHostingView(rootView: changesView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false
