@@ -116,6 +116,7 @@
 		EBE6970C1FAB16099C16176C /* ReviewStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C30B829376599F48CCB5C7 /* ReviewStore.swift */; };
 		ECC026CA6E87EFC21793377A /* CommitCountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B205456E82CD816617F8385 /* CommitCountStore.swift */; };
 		F07F1370F96DC83D03EFC104 /* TabItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D189E7C10808C8DFEA133A5C /* TabItemView.swift */; };
+		F3153553CB31A6997A3F936F /* ForgeCLIInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D7AB481543402B43A8E777 /* ForgeCLIInstaller.swift */; };
 		F351A2997F2AFC7ADB235655 /* PaneContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13DD0F1CF1BF5AEB2EB8042 /* PaneContainerView.swift */; };
 		F4F6CC41FF265C9DA098D17E /* WorkspaceNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33009813506A712F05C01586 /* WorkspaceNaming.swift */; };
 		F5B0165ECE06BC459D782E71 /* LayoutSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6962054AB32C0DF336214C6 /* LayoutSnapshot.swift */; };
@@ -172,6 +173,7 @@
 		53E8575792CD729D327E6C2A /* TerminalAppearanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalAppearanceView.swift; sourceTree = "<group>"; };
 		5692E40E8CC3135ACC22733D /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
 		58123122FDD0E29B7DBF9352 /* SplitViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewContainer.swift; sourceTree = "<group>"; };
+		58D7AB481543402B43A8E777 /* ForgeCLIInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeCLIInstaller.swift; sourceTree = "<group>"; };
 		599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandDiscovery.swift; sourceTree = "<group>"; };
 		59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiffLineView.swift; sourceTree = "<group>"; };
 		5B74FE47A67DD9F4A0C7684B /* WorkspaceDiffList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceDiffList.swift; sourceTree = "<group>"; };
@@ -522,6 +524,7 @@
 		995D01F4830F8499BBC936AA /* Shell */ = {
 			isa = PBXGroup;
 			children = (
+				58D7AB481543402B43A8E777 /* ForgeCLIInstaller.swift */,
 				512FB160F659513F1441B40F /* ShellEnvironment.swift */,
 			);
 			path = Shell;
@@ -883,6 +886,7 @@
 				958919E7AFE933A2ECE729BE /* FileStatus.swift in Sources */,
 				6E66D7FFCF8DFBB0390ECD49 /* FileStatusList.swift in Sources */,
 				B6C05E6C34DD83B11063FB87 /* FileStatusRow.swift in Sources */,
+				F3153553CB31A6997A3F936F /* ForgeCLIInstaller.swift in Sources */,
 				1B65752028DE519CB345DAB8 /* ForgeSocketServer.swift in Sources */,
 				DEAC350B0F837DF5137CCCDF /* ForgeStore.swift in Sources */,
 				D9329A95BC037EA8F5E7C659 /* GhosttyApp.swift in Sources */,

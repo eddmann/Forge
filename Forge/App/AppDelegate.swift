@@ -46,6 +46,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             AgentSetup.shared.installAll()
         }
 
+        // Ensure `forge` CLI symlink points to this app's bundled binary
+        #if !DEBUG
+            DispatchQueue.global(qos: .utility).async {
+                ForgeCLIInstaller.ensureInstalled()
+            }
+        #endif
+
         // Global Cmd+K for command palette
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
