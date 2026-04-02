@@ -221,6 +221,7 @@ struct PaneContainerView<Content: View, EmptyContent: View>: View {
             // Drop zones layer (above content, receives drops and taps)
             dropZonesLayer(size: size)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Content Area
@@ -419,9 +420,6 @@ struct UnifiedPaneDropDelegate: DropDelegate {
             group.notify(queue: .main) {
                 _ = onFileDrop(urls, pane.id)
             }
-#if DEBUG
-            dlog("pane.drop.fileURL pane=\(pane.id.id.uuidString.prefix(5)) providerCount=\(providers.count)")
-#endif
             return true
         }
 
@@ -565,10 +563,8 @@ struct UnifiedPaneDropDelegate: DropDelegate {
         }
 
         // Accept file URL drops (e.g. dragging images/files from Finder into a terminal).
-        if info.hasItemsConforming(to: [.fileURL]) {
-#if DEBUG
-            dlog("pane.validateDrop pane=\(pane.id.id.uuidString.prefix(5)) allowed=1 reason=fileURL")
-#endif
+        if info.hasItemsConforming(to: [.fileURL]),
+           !info.hasItemsConforming(to: [.tabTransfer]) {
             return controller.onFileDrop != nil
         }
 
