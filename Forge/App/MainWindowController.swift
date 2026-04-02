@@ -2,7 +2,7 @@ import AppKit
 import Combine
 import SwiftUI
 
-class MainWindowController: NSWindowController {
+class MainWindowController: NSWindowController, NSWindowDelegate {
     private var projectNameLabel: NSTextField?
     private var workspaceStack: NSStackView?
     private var workspaceIcon: NSImageView?
@@ -41,8 +41,16 @@ class MainWindowController: NSWindowController {
         setupToolbar(for: window)
         observeStore()
 
+        window.delegate = self
         window.setContentSize(NSSize(width: 1200, height: 800))
         window.center()
+    }
+
+    // MARK: - NSWindowDelegate
+
+    func windowShouldClose(_: NSWindow) -> Bool {
+        StatusBarController.shared.hideWindow()
+        return false
     }
 
     private func observeStore() {

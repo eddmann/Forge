@@ -286,6 +286,7 @@ class AgentEventStore: ObservableObject {
     private func refreshDockBadge() {
         let count = totalUnreadCount
         NSApp?.dockTile.badgeLabel = count > 0 ? "\(count)" : nil
+        StatusBarController.shared.updateBadge(count: count)
     }
 
     #if DEBUG

@@ -21,6 +21,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         mainWindowController?.window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
 
+        if let window = mainWindowController?.window {
+            StatusBarController.shared.configure(window: window)
+        }
+
         // Set up notification center delegate for handling taps on system notifications
         UNUserNotificationCenter.current().delegate = self
 
@@ -62,7 +66,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
-        true
+        false
+    }
+
+    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            StatusBarController.shared.showWindow()
+        }
+        return false
     }
 
     func applicationShouldTerminate(_: NSApplication) -> NSApplication.TerminateReply {
@@ -214,18 +225,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     func userNotificationCenter(_: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
-        if let tabIDString = userInfo["tabID"] as? String,
-           let tabID = UUID(uuidString: tabIDString)
-        {
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated {
+        DispatchQueue.main.async {
+            MainActor.assumeIsolated {
+                if let tabIDString = userInfo["tabID"] as? String,
+                   let tabID = UUID(uuidString: tabIDString)
+                {
                     TerminalSessionManager.shared.activateTab(id: tabID)
+                    AgentEventStore.shared.markRead(tabID: tabID)
                 }
-                AgentEventStore.shared.markRead(tabID: tabID)
+                StatusBarController.shared.showWindow()
             }
         }
-        NSApp.activate(ignoringOtherApps: true)
-        mainWindowController?.window?.makeKeyAndOrderFront(nil)
         completionHandler()
     }
 
