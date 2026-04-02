@@ -10,15 +10,19 @@ class SummaryStore: ObservableObject {
     /// Workspaces currently being summarized.
     private var inFlight: Set<UUID> = []
 
-    private init() {}
+    private init() {
+        loadFromDisk()
+    }
 
     func updateSummary(workspaceID: UUID, summary: String) {
         summaryByWorkspace[workspaceID] = summary
         inFlight.remove(workspaceID)
+        saveToDisk()
     }
 
     func clearSummary(workspaceID: UUID) {
         summaryByWorkspace.removeValue(forKey: workspaceID)
+        saveToDisk()
     }
 
     func isInFlight(_ workspaceID: UUID) -> Bool {
@@ -31,6 +35,26 @@ class SummaryStore: ObservableObject {
 
     func clearInFlight(_ workspaceID: UUID) {
         inFlight.remove(workspaceID)
+    }
+
+    // MARK: - Persistence
+
+    private func saveToDisk() {
+        let stringKeyed = Dictionary(
+            uniqueKeysWithValues: summaryByWorkspace.map { ($0.key.uuidString, $0.value) }
+        )
+        ForgeStore.shared.updateStateFields { state in
+            state.summaries = stringKeyed
+        }
+    }
+
+    private func loadFromDisk() {
+        let state = ForgeStore.shared.loadStateFields()
+        for (key, value) in state.summaries {
+            if let uuid = UUID(uuidString: key) {
+                summaryByWorkspace[uuid] = value
+            }
+        }
     }
 
     #if DEBUG

@@ -95,6 +95,7 @@ struct SessionStateFile: Codable {
     var workspaceSummariesEnabled: Bool = true
     var summarizerCommand: String = "claude -p --model haiku"
     var restoreScrollback: Bool = false
+    var summaries: [String: String] = [:]
     var scopes: [String: ScopeState] = [:]
     var scrollback: [String: String] = [:]
 }
