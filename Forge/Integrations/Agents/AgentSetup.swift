@@ -331,11 +331,8 @@ class AgentSetup {
     /// skip the interactive trust dialog. Claude Code walks up parent directories
     /// when checking trust, so a single entry for the clones dir covers all children.
     private func trustClaudeCodeClonesDir() {
-        let configPath = NSHomeDirectory() + "/.claude/config.json"
-        let claudeDir = (configPath as NSString).deletingLastPathComponent
+        let configPath = NSHomeDirectory() + "/.claude.json"
         let fm = FileManager.default
-
-        guard fm.fileExists(atPath: claudeDir) else { return }
 
         var config: [String: Any] = [:]
         if let data = fm.contents(atPath: configPath),
