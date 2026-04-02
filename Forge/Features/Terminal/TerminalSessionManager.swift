@@ -86,6 +86,13 @@ class TerminalSessionManager: ObservableObject {
         sessions.removeAll { $0.id == sessionID }
     }
 
+    /// Store the agent's own session ID on a terminal session for resume on restart.
+    func updateAgentSessionID(_ sessionID: UUID, agentSessionID: String) {
+        if let idx = sessions.firstIndex(where: { $0.id == sessionID }) {
+            sessions[idx].agentSessionID = agentSessionID
+        }
+    }
+
     // MARK: - Pane Manager Setup
 
     /// Ensure a tab has a BonsplitPaneManager. Creates one if missing.

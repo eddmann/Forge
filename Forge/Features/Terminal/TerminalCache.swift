@@ -58,9 +58,16 @@ class TerminalCache {
 
         if let command = session.launchCommand {
             if isRestored {
-                // Restored session: inject command into prompt without executing
+                // Restored session: inject command into prompt without executing.
+                // If the agent reported a session ID, append --resume so the user
+                // can pick up where they left off by pressing Enter.
+                let prefill = if let agentSID = session.agentSessionID {
+                    Self.resumeCommand(base: command, agentSessionID: agentSID)
+                } else {
+                    command
+                }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    view.sendInput(command)
+                    view.sendInput(prefill)
                 }
             } else {
                 // New session: execute immediately
@@ -91,6 +98,21 @@ class TerminalCache {
 
     func view(for id: UUID) -> GhosttyTerminalView? {
         cache[id]
+    }
+
+    // MARK: - Agent Resume
+
+    /// Appends the agent-specific resume flag to a launch command.
+    /// Returns the original command unchanged for unknown agents.
+    private static func resumeCommand(base: String, agentSessionID: String) -> String {
+        let tokens = base.split(separator: " ", omittingEmptySubsequences: true)
+        let commandName = tokens.first(where: { !$0.contains("=") }).map(String.init) ?? ""
+
+        switch commandName {
+        case "claude": return "\(base) --resume \(agentSessionID)"
+        case "codex": return "\(base) --resume \(agentSessionID)"
+        default: return base
+        }
     }
 
     // MARK: - Per-Session History

@@ -145,6 +145,7 @@ struct SessionEntry: Codable {
     var directory: String
     var command: String?
     var autoClose: Bool
+    var agentSessionID: String?
 
     init(session: TerminalSession) {
         id = session.id
@@ -152,6 +153,7 @@ struct SessionEntry: Codable {
         directory = session.workingDirectory
         command = session.launchCommand
         autoClose = session.closeOnExit
+        agentSessionID = session.agentSessionID
     }
 
     func toSession() -> TerminalSession {
@@ -161,7 +163,8 @@ struct SessionEntry: Codable {
             workingDirectory: directory,
             isRunning: false,
             launchCommand: command,
-            closeOnExit: autoClose
+            closeOnExit: autoClose,
+            agentSessionID: agentSessionID
         )
     }
 }

@@ -66,6 +66,13 @@ class AgentEventStore: ObservableObject {
             // Don't set activity here — session_start fires on agent launch, not on work start.
             // Let prompt/tool_start/terminal signals set the actual activity.
 
+            // Persist agent session ID onto the terminal session for resume on restart
+            if let agentSID = data["session_id"] as? String,
+               let sessionID
+            {
+                TerminalSessionManager.shared.updateAgentSessionID(sessionID, agentSessionID: agentSID)
+            }
+
         case "prompt":
             stateByTab[tabID]?.lastPrompt = data["prompt"] as? String
             activityByTab[tabID] = .thinking

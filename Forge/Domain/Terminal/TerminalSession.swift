@@ -7,18 +7,20 @@ struct TerminalSession: Identifiable, Equatable, Codable {
     var isRunning: Bool
     var launchCommand: String?
     var closeOnExit: Bool
+    var agentSessionID: String?
 
     private enum CodingKeys: String, CodingKey {
-        case id, title, workingDirectory, launchCommand, closeOnExit
+        case id, title, workingDirectory, launchCommand, closeOnExit, agentSessionID
     }
 
-    init(id: UUID = UUID(), title: String = "Shell", workingDirectory: String, isRunning: Bool = true, launchCommand: String? = nil, closeOnExit: Bool = false) {
+    init(id: UUID = UUID(), title: String = "Shell", workingDirectory: String, isRunning: Bool = true, launchCommand: String? = nil, closeOnExit: Bool = false, agentSessionID: String? = nil) {
         self.id = id
         self.title = title
         self.workingDirectory = workingDirectory
         self.isRunning = isRunning
         self.launchCommand = launchCommand
         self.closeOnExit = closeOnExit
+        self.agentSessionID = agentSessionID
     }
 
     init(from decoder: Decoder) throws {
@@ -29,5 +31,6 @@ struct TerminalSession: Identifiable, Equatable, Codable {
         isRunning = false
         launchCommand = try container.decodeIfPresent(String.self, forKey: .launchCommand)
         closeOnExit = try container.decodeIfPresent(Bool.self, forKey: .closeOnExit) ?? false
+        agentSessionID = try container.decodeIfPresent(String.self, forKey: .agentSessionID)
     }
 }
