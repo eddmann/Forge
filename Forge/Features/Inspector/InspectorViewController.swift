@@ -1,9 +1,15 @@
 import AppKit
 import SwiftUI
 
+private class ClickThroughEffectView: NSVisualEffectView {
+    override func acceptsFirstMouse(for _: NSEvent?) -> Bool {
+        true
+    }
+}
+
 class InspectorViewController: NSViewController {
     override func loadView() {
-        let effectView = NSVisualEffectView()
+        let effectView = ClickThroughEffectView()
         effectView.material = .sidebar
         effectView.blendingMode = .behindWindow
         effectView.state = .inactive

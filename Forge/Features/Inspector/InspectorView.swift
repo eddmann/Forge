@@ -18,22 +18,24 @@ struct InspectorView: View {
             // Tab bar — only show when a workspace is active
             if store.activeWorkspace != nil {
                 InspectorTabBar(activeTab: $activeTab)
+                    .zIndex(1)
             }
 
             // Tab content
-            switch activeTab {
-            case .working:
-                FileStatusList()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            case .workspace:
-                if store.activeWorkspace != nil {
-                    WorkspaceDiffList()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
+            Group {
+                switch activeTab {
+                case .working:
                     FileStatusList()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                case .workspace:
+                    if store.activeWorkspace != nil {
+                        WorkspaceDiffList()
+                    } else {
+                        FileStatusList()
+                    }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
 
             // Commands drawer pinned to bottom
             CommandsDrawer(
@@ -62,7 +64,6 @@ struct InspectorView: View {
         }
         .onChange(of: store.activeWorkspaceID) { _, _ in
             discoverCommands()
-            activeTab = .working
             Task { @MainActor in
                 StatusViewModel.shared.refresh()
                 WorkspaceDiffViewModel.shared.refresh()
@@ -133,14 +134,16 @@ private struct InspectorTabCell: View {
     @State private var isHovered = false
 
     var body: some View {
-        Text(title)
-            .font(.system(size: 12, weight: .regular))
-            .foregroundColor(Color(nsColor: isActive ? theme.chromePrimaryText : theme.chromeSecondaryText))
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(cellBackground)
-            .contentShape(Rectangle())
-            .onHover { isHovered = $0 }
-            .onTapGesture { onSelect() }
+        Button(action: { onSelect() }) {
+            Text(title)
+                .font(.system(size: 12, weight: .regular))
+                .foregroundColor(Color(nsColor: isActive ? theme.chromePrimaryText : theme.chromeSecondaryText))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(cellBackground)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
     }
 
     private var cellBackground: Color {
