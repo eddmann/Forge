@@ -15,9 +15,13 @@ targets:
         excludes:
           - "*.entitlements"
           - Resources/ghostty
+          - Resources/pokemon-sprites
       - path: Forge/Integrations/Ghostty/ghostty.h
         buildPhase: none
       - path: Forge/Resources/ghostty
+        buildPhase: resources
+        type: folder
+      - path: Forge/Resources/pokemon-sprites
         buildPhase: resources
         type: folder
     info:

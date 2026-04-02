@@ -364,6 +364,22 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
         sendInput(text)
     }
 
+    // MARK: - Output: Write Directly to Terminal Display
+
+    /// Write text directly to the terminal display without going through the shell.
+    /// The text appears as terminal output (not as a typed command).
+    /// Supports ANSI escape sequences for colors and formatting.
+    func writeOutput(_ text: String) {
+        guard let surface else { return }
+        let data = Array(text.utf8)
+        data.withUnsafeBufferPointer { buf in
+            guard let ptr = buf.baseAddress else { return }
+            ptr.withMemoryRebound(to: CChar.self, capacity: buf.count) { cPtr in
+                ghostty_surface_process_output(surface, cPtr, UInt(buf.count))
+            }
+        }
+    }
+
     // MARK: - Input: Send Text
 
     func sendInput(_ text: String) {

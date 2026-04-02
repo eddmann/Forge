@@ -194,6 +194,10 @@ class ProjectStore: ObservableObject {
 
     func addWorkspace(_ workspace: Workspace) {
         workspaces.append(workspace)
+        let wsID = workspace.id
+        Task { @MainActor in
+            TerminalSessionManager.shared.newlyCreatedWorkspaceIDs.insert(wsID)
+        }
         saveAll()
     }
 

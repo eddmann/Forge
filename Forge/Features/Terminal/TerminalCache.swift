@@ -51,12 +51,20 @@ class TerminalCache {
 
         cache[session.id] = view
 
-        // Send launch command after shell starts.
+        // Send launch command or welcome banner after shell starts.
         let isRestored = MainActor.assumeIsolated {
             TerminalSessionManager.shared.restoredSessionIDs.remove(session.id) != nil
         }
+        let welcomeBanner = MainActor.assumeIsolated {
+            TerminalSessionManager.shared.pendingWelcomeBanners.removeValue(forKey: session.id)
+        }
 
-        if let command = session.launchCommand {
+        if let banner = welcomeBanner {
+            // Write banner directly to terminal display (no command shown)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                view.writeOutput(banner)
+            }
+        } else if let command = session.launchCommand {
             if isRestored {
                 // Restored session: inject command into prompt without executing.
                 // If the agent reported a session ID, append --resume so the user

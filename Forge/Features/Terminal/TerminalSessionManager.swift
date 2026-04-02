@@ -65,6 +65,14 @@ class TerminalSessionManager: ObservableObject {
     /// Used to inject commands without auto-executing them.
     var restoredSessionIDs: Set<UUID> = []
 
+    /// Workspace IDs for newly created workspaces. Consumed once when the first
+    /// terminal session is created, to show a Pokémon welcome banner.
+    var newlyCreatedWorkspaceIDs: Set<UUID> = []
+
+    /// Welcome banner text to write directly to the terminal, keyed by session ID.
+    /// Consumed once during terminal view creation, then cleared per-session.
+    var pendingWelcomeBanners: [UUID: String] = [:]
+
     private init() {
         loadPersistedState()
         observeStateForPersistence()
@@ -493,11 +501,24 @@ class TerminalSessionManager: ObservableObject {
                 projectID: pid,
                 workspaceID: workspaceID
             ) ?? NSHomeDirectory()
-            createSession(
+            var bannerText: String?
+            if let wsID = workspaceID, newlyCreatedWorkspaceIDs.remove(wsID) != nil,
+               let ws = ProjectStore.shared.workspaces.first(where: { $0.id == wsID })
+            {
+                bannerText = PokemonBanner.bannerText(
+                    pokemonName: ws.name,
+                    workspacePath: ws.path,
+                    branch: ws.branch
+                )
+            }
+            let session = createSession(
                 workingDirectory: dir,
                 projectID: pid,
                 workspaceID: workspaceID
             )
+            if let bannerText {
+                pendingWelcomeBanners[session.id] = bannerText
+            }
         } else {
             activeTabID = nil
             focusedSessionID = nil
