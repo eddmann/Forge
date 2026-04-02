@@ -386,7 +386,7 @@ private struct ProjectSection: View {
 
                 // ... menu
                 Menu {
-                    Menu("From branch") {
+                    Menu {
                         if branches.isEmpty {
                             Text("Loading...")
                         } else {
@@ -397,9 +397,15 @@ private struct ProjectSection: View {
                                 .disabled(isCreatingWorkspace)
                             }
                         }
+                    } label: {
+                        Image(systemName: "arrow.branch")
+                        Text("From branch")
                     }
                     Divider()
-                    Button("Remove Project", role: .destructive) { showRemoveConfirmation = true }
+                    Button(role: .destructive) { showRemoveConfirmation = true } label: {
+                        Image(systemName: "trash")
+                        Text("Remove Project")
+                    }
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 12, weight: .medium))
@@ -644,14 +650,23 @@ private struct WorkspaceRow: View {
         .allowsHitTesting(!isDeleting && !isMerging)
         .contextMenu {
             if workspace.status == .active {
-                Button("Merge into Project") { onMerge() }
+                Button { onMerge() } label: {
+                    Image(systemName: "arrow.triangle.merge")
+                    Text("Merge into Project")
+                }
             }
-            Button("Rename") {
+            Button {
                 editName = workspace.name
                 isEditing = true
+            } label: {
+                Image(systemName: "pencil")
+                Text("Rename")
             }
             Divider()
-            Button("Delete Workspace", role: .destructive) { showDeleteConfirmation = true }
+            Button(role: .destructive) { showDeleteConfirmation = true } label: {
+                Image(systemName: "trash")
+                Text("Delete Workspace")
+            }
         }
         .confirmationDialog(
             "Delete \(workspace.name)?",
