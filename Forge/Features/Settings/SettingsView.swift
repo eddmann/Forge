@@ -706,7 +706,7 @@ private struct AdvancedSettingsContent: View {
                 .controlSize(.small)
                 .alert("Reset all settings?", isPresented: $showResetConfirm) {
                     Button("Cancel", role: .cancel) {}
-                    Button("Reset", role: .destructive) {
+                    Button("Reset") {
                         resetSettings()
                     }
                 } message: {

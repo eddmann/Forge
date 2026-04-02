@@ -47,7 +47,7 @@ struct FileStatusList: View {
             isPresented: $showDiscardConfirmation,
             presenting: pendingDiscard
         ) { pending in
-            Button("Discard", role: .destructive) {
+            Button("Discard") {
                 viewModel.discard(file: pending.file, group: pending.group)
             }
             Button("Cancel", role: .cancel) {}
