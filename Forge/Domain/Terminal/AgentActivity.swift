@@ -36,24 +36,22 @@ struct AgentStatusDot: View {
     let activity: AgentActivity
     var size: CGFloat = 6
 
-    @State private var isSpinning = false
+    private var spinnerColor: Color? {
+        switch activity {
+        case .thinking, .toolExecuting, .waitingForPermission, .waitingForInput:
+            .blue
+        case .retrying:
+            .red
+        case .compacting:
+            .purple
+        case .idle, .complete:
+            nil
+        }
+    }
 
     var body: some View {
-        switch activity {
-        case .thinking:
-            SpinningArc(color: .blue, size: size, isSpinning: $isSpinning)
-        case .toolExecuting:
-            SpinningArc(color: .green, size: size, isSpinning: $isSpinning)
-        case .waitingForPermission, .waitingForInput:
-            Circle()
-                .fill(Color.orange)
-                .frame(width: size, height: size)
-        case .retrying:
-            SpinningArc(color: .red, size: size, isSpinning: $isSpinning)
-        case .compacting:
-            SpinningArc(color: .purple, size: size, isSpinning: $isSpinning)
-        case .idle, .complete:
-            EmptyView()
+        if let color = spinnerColor {
+            SpinningArc(color: color, size: size)
         }
     }
 }
@@ -61,7 +59,7 @@ struct AgentStatusDot: View {
 private struct SpinningArc: View {
     let color: Color
     let size: CGFloat
-    @Binding var isSpinning: Bool
+    @State private var isSpinning = false
 
     var body: some View {
         Circle()
