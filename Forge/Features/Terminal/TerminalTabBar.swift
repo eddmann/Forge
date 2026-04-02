@@ -170,6 +170,7 @@ private class TabCell: NSView, NSTextFieldDelegate {
     private let shortcutLabel = NSTextField(labelWithString: "")
     private let closeButton = NSButton()
     private let statusDot = NSView()
+    private let spinnerLayer = CAShapeLayer()
     // notificationBadge removed — status dot handles all states
     private let separator = NSView()
     private var editField: NSTextField?
@@ -309,41 +310,61 @@ private class TabCell: NSView, NSTextFieldDelegate {
     private func configureStatusDot() {
         switch agentStatus {
         case .thinking:
-            statusDot.layer?.backgroundColor = NSColor.systemBlue.cgColor
-            statusDot.isHidden = false
-            addPulseAnimation()
+            showSpinningArc(color: NSColor.systemBlue)
         case .toolExecuting:
-            statusDot.layer?.backgroundColor = NSColor.systemGreen.cgColor
-            statusDot.isHidden = false
-            addPulseAnimation()
+            showSpinningArc(color: NSColor.systemGreen)
         case .waitingForPermission, .waitingForInput:
             statusDot.layer?.backgroundColor = NSColor.systemOrange.cgColor
             statusDot.isHidden = false
-            statusDot.layer?.removeAllAnimations()
+            removeSpinner()
         case .retrying:
-            statusDot.layer?.backgroundColor = NSColor.systemRed.cgColor
-            statusDot.isHidden = false
-            addPulseAnimation()
+            showSpinningArc(color: NSColor.systemRed)
         case .compacting:
-            statusDot.layer?.backgroundColor = NSColor.systemPurple.cgColor
-            statusDot.isHidden = false
-            addPulseAnimation()
+            showSpinningArc(color: NSColor.systemPurple)
         case .idle, .complete:
             statusDot.isHidden = true
-            statusDot.layer?.removeAllAnimations()
+            removeSpinner()
         }
     }
 
-    private func addPulseAnimation() {
+    private func showSpinningArc(color: NSColor) {
+        statusDot.layer?.backgroundColor = nil
+        statusDot.isHidden = false
+
+        let dotSize: CGFloat = 6
+        let lineWidth: CGFloat = dotSize * 0.3
+        let radius = (dotSize - lineWidth) / 2
+        let center = CGPoint(x: dotSize / 2, y: dotSize / 2)
+
+        let arcPath = CGMutablePath()
+        // 65% of the circle (same proportion as SwiftUI version)
+        arcPath.addArc(center: center, radius: radius, startAngle: 0, endAngle: .pi * 2 * 0.65, clockwise: false)
+
+        spinnerLayer.path = arcPath
+        spinnerLayer.fillColor = nil
+        spinnerLayer.strokeColor = color.cgColor
+        spinnerLayer.lineWidth = lineWidth
+        spinnerLayer.lineCap = .round
+        spinnerLayer.frame = CGRect(x: 0, y: 0, width: dotSize, height: dotSize)
+
+        if spinnerLayer.superlayer == nil {
+            statusDot.layer?.addSublayer(spinnerLayer)
+        }
+
+        spinnerLayer.removeAllAnimations()
+        let rotation = CABasicAnimation(keyPath: "transform.rotation.z")
+        rotation.fromValue = 0
+        rotation.toValue = CGFloat.pi * 2
+        rotation.duration = 0.9
+        rotation.repeatCount = .infinity
+        rotation.timingFunction = CAMediaTimingFunction(name: .linear)
+        spinnerLayer.add(rotation, forKey: "spin")
+    }
+
+    private func removeSpinner() {
+        spinnerLayer.removeAllAnimations()
+        spinnerLayer.removeFromSuperlayer()
         statusDot.layer?.removeAllAnimations()
-        let pulse = CABasicAnimation(keyPath: "opacity")
-        pulse.fromValue = 1.0
-        pulse.toValue = 0.3
-        pulse.duration = 1.2
-        pulse.autoreverses = true
-        pulse.repeatCount = .infinity
-        pulse.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        statusDot.layer?.add(pulse, forKey: "pulse")
     }
 
     override func mouseDown(with event: NSEvent) {

@@ -36,44 +36,40 @@ struct AgentStatusDot: View {
     let activity: AgentActivity
     var size: CGFloat = 6
 
-    @State private var isPulsing = false
+    @State private var isSpinning = false
 
     var body: some View {
         switch activity {
         case .thinking:
-            Circle()
-                .fill(Color.blue)
-                .frame(width: size, height: size)
-                .opacity(isPulsing ? 0.3 : 1.0)
-                .animation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true), value: isPulsing)
-                .onAppear { isPulsing = true }
+            SpinningArc(color: .blue, size: size, isSpinning: $isSpinning)
         case .toolExecuting:
-            Circle()
-                .fill(Color.green)
-                .frame(width: size, height: size)
-                .opacity(isPulsing ? 0.3 : 1.0)
-                .animation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true), value: isPulsing)
-                .onAppear { isPulsing = true }
+            SpinningArc(color: .green, size: size, isSpinning: $isSpinning)
         case .waitingForPermission, .waitingForInput:
             Circle()
                 .fill(Color.orange)
                 .frame(width: size, height: size)
         case .retrying:
-            Circle()
-                .fill(Color.red)
-                .frame(width: size, height: size)
-                .opacity(isPulsing ? 0.3 : 1.0)
-                .animation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true), value: isPulsing)
-                .onAppear { isPulsing = true }
+            SpinningArc(color: .red, size: size, isSpinning: $isSpinning)
         case .compacting:
-            Circle()
-                .fill(Color.purple)
-                .frame(width: size, height: size)
-                .opacity(isPulsing ? 0.3 : 1.0)
-                .animation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true), value: isPulsing)
-                .onAppear { isPulsing = true }
+            SpinningArc(color: .purple, size: size, isSpinning: $isSpinning)
         case .idle, .complete:
             EmptyView()
         }
+    }
+}
+
+private struct SpinningArc: View {
+    let color: Color
+    let size: CGFloat
+    @Binding var isSpinning: Bool
+
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.65)
+            .stroke(color, style: StrokeStyle(lineWidth: size * 0.3, lineCap: .round))
+            .frame(width: size, height: size)
+            .rotationEffect(.degrees(isSpinning ? 360 : 0))
+            .animation(.linear(duration: 0.9).repeatForever(autoreverses: false), value: isSpinning)
+            .onAppear { isSpinning = true }
     }
 }
