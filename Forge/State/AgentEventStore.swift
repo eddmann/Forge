@@ -100,7 +100,7 @@ class AgentEventStore: ObservableObject {
             // Trigger summarization on working → idle
             if previousActivity == .thinking || previousActivity == .toolExecuting {
                 if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
-                    SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID)
+                    SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID, tabID: tabID)
                 }
             }
 
@@ -153,7 +153,7 @@ class AgentEventStore: ObservableObject {
                             markRead(tabID: tabID)
                         }
                         if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
-                            SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID)
+                            SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID, tabID: tabID)
                         }
                     }
                 default: break
@@ -204,7 +204,7 @@ class AgentEventStore: ObservableObject {
                 markRead(tabID: tabID)
             }
             if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
-                SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID)
+                SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID, tabID: tabID)
             }
         }
     }
