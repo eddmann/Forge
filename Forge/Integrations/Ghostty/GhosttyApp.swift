@@ -299,6 +299,7 @@ class GhosttyApp {
         lines.append("copy-on-select = \(config.copyOnSelect ? "clipboard" : "false")")
         lines.append("macos-option-as-alt = \(config.optionAsAlt)")
         lines.append("shell-integration = detect")
+        lines.append("bell = none")
 
         // Forge manages its own window chrome and tab lifecycle
         lines.append("window-decoration = none")
