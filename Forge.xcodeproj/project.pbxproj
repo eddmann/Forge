@@ -987,8 +987,8 @@
 					"-framework IOSurface",
 					"-framework UniformTypeIdentifiers",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.eddmann.forge;
-				PRODUCT_NAME = Forge;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eddmann.forge.dev;
+				PRODUCT_NAME = "Forge Dev";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OBJC_BRIDGING_HEADER = "Forge/Forge-Bridging-Header.h";
