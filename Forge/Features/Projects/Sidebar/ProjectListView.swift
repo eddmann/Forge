@@ -564,9 +564,10 @@ private struct WorkspaceRow: View {
                                 .fill(Color.orange)
                                 .frame(width: 6, height: 6)
                         } else if workspaceAgentStatus == .thinking
-                                    || workspaceAgentStatus == .toolExecuting
-                                    || workspaceAgentStatus == .retrying
-                                    || workspaceAgentStatus == .compacting {
+                            || workspaceAgentStatus == .toolExecuting
+                            || workspaceAgentStatus == .retrying
+                            || workspaceAgentStatus == .compacting
+                        {
                             AgentStatusDot(activity: workspaceAgentStatus)
                         }
                     }
@@ -631,7 +632,6 @@ private struct WorkspaceRow: View {
         }
     }
 }
-
 
 extension Notification.Name {
     static let openProjectRequested = Notification.Name("openProjectRequested")
