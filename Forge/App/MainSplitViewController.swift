@@ -11,6 +11,9 @@ class MainSplitViewController: NSSplitViewController {
     private var cancellables = Set<AnyCancellable>()
     private var isShowingWelcome = true
 
+    private static let sidebarCollapsedKey = "ForgeSidebarCollapsed"
+    private static let inspectorCollapsedKey = "ForgeInspectorCollapsed"
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -18,8 +21,6 @@ class MainSplitViewController: NSSplitViewController {
         view.layer?.backgroundColor = NSColor.clear.cgColor
         splitView.dividerStyle = .thin
         splitView.isVertical = true
-        // Set autosaveName to restore saved positions (if any exist)
-        splitView.autosaveName = "ForgeSplitView"
 
         // Left sidebar — resizable, collapsible
         let sidebarItem = NSSplitViewItem(sidebarWithViewController: sidebarVC)
@@ -35,6 +36,12 @@ class MainSplitViewController: NSSplitViewController {
             addWelcomeItem()
             isShowingWelcome = true
         }
+
+        // Set autosaveName AFTER all items are added so restore sees the correct count
+        splitView.autosaveName = "ForgeSplitView"
+
+        // Restore collapsed state (not handled by NSSplitView autosave)
+        restoreCollapsedState()
 
         observeActiveProject()
     }
@@ -129,6 +136,8 @@ class MainSplitViewController: NSSplitViewController {
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.2
             item.animator().isCollapsed = !item.isCollapsed
+        } completionHandler: { [weak self] in
+            self?.saveCollapsedState()
         }
     }
 
@@ -138,6 +147,34 @@ class MainSplitViewController: NSSplitViewController {
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.2
             item.animator().isCollapsed = !item.isCollapsed
+        } completionHandler: { [weak self] in
+            self?.saveCollapsedState()
+        }
+    }
+
+    // MARK: - Collapsed State Persistence
+
+    private func saveCollapsedState() {
+        let defaults = UserDefaults.standard
+        if splitViewItems.count > 0 {
+            defaults.set(splitViewItems[0].isCollapsed, forKey: Self.sidebarCollapsedKey)
+        }
+        if splitViewItems.count > 2 {
+            defaults.set(splitViewItems[2].isCollapsed, forKey: Self.inspectorCollapsedKey)
+        }
+    }
+
+    private func restoreCollapsedState() {
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: Self.sidebarCollapsedKey) != nil,
+           splitViewItems.count > 0
+        {
+            splitViewItems[0].isCollapsed = defaults.bool(forKey: Self.sidebarCollapsedKey)
+        }
+        if defaults.object(forKey: Self.inspectorCollapsedKey) != nil,
+           splitViewItems.count > 2
+        {
+            splitViewItems[2].isCollapsed = defaults.bool(forKey: Self.inspectorCollapsedKey)
         }
     }
 }

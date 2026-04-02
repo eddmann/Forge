@@ -98,6 +98,23 @@ struct SessionStateFile: Codable {
     var summaries: [String: String] = [:]
     var scopes: [String: ScopeState] = [:]
     var scrollback: [String: String] = [:]
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        activeProjectID = try c.decodeIfPresent(UUID.self, forKey: .activeProjectID)
+        activeWorkspaceID = try c.decodeIfPresent(UUID.self, forKey: .activeWorkspaceID)
+        diffViewMode = try c.decodeIfPresent(String.self, forKey: .diffViewMode) ?? "Unified"
+        collapsedProjects = try c.decodeIfPresent(Set<UUID>.self, forKey: .collapsedProjects) ?? []
+        hooksDeclined = try c.decodeIfPresent(Bool.self, forKey: .hooksDeclined) ?? false
+        workspaceSummariesEnabled = try c.decodeIfPresent(Bool.self, forKey: .workspaceSummariesEnabled) ?? true
+        summarizerCommand = try c.decodeIfPresent(String.self, forKey: .summarizerCommand) ?? "claude -p --model haiku"
+        restoreScrollback = try c.decodeIfPresent(Bool.self, forKey: .restoreScrollback) ?? false
+        summaries = try c.decodeIfPresent([String: String].self, forKey: .summaries) ?? [:]
+        scopes = try c.decodeIfPresent([String: ScopeState].self, forKey: .scopes) ?? [:]
+        scrollback = try c.decodeIfPresent([String: String].self, forKey: .scrollback) ?? [:]
+    }
 }
 
 struct ScopeState: Codable {
