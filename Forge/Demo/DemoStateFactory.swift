@@ -85,7 +85,7 @@
             store.currentBranch = "forge/charmander"
 
             let statuses = DemoData.fileStatuses()
-            StatusViewModel.shared.setDemo(statuses: statuses, selectedPath: "src/handlers/auth.ts")
+            StatusViewModel.shared.setDemo(statuses: statuses)
 
             // Agent idle — review in progress
             let tabID = DemoData.tabIDs.tab1

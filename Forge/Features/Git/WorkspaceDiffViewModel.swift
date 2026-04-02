@@ -14,7 +14,6 @@ final class WorkspaceDiffViewModel: ObservableObject {
     @Published var stats: GitDiffStats?
     @Published var isLoading = false
     @Published var error: String?
-    @Published var selectedFilePath: String?
 
     // MARK: - Private
 
@@ -141,7 +140,6 @@ final class WorkspaceDiffViewModel: ObservableObject {
     // MARK: - File Selection
 
     func selectFile(_ filePath: String) {
-        selectedFilePath = filePath
         guard let repoPath, let workspace else { return }
 
         // Find merge-base for the center panel diff

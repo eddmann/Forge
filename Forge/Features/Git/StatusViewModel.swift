@@ -10,7 +10,6 @@ final class StatusViewModel: ObservableObject {
 
     @Published var statuses: [FileStatus] = []
     @Published var grouped: [WorkingTreeGroup: [FileStatus]] = [:]
-    @Published var selectedFilePath: String?
     @Published var isLoading = false
     @Published var commitMessage = ""
     @Published var isAmend = false
@@ -138,7 +137,6 @@ final class StatusViewModel: ObservableObject {
     // MARK: - Selection
 
     func selectFile(_ file: FileStatus, staged _: Bool) {
-        selectedFilePath = file.path
         guard let repoPath else { return }
         TerminalSessionManager.shared.openChangesTab(
             repoPath: repoPath,
@@ -374,10 +372,9 @@ final class StatusViewModel: ObservableObject {
     }
 
     #if DEBUG
-        func setDemo(statuses demoStatuses: [FileStatus], selectedPath: String? = nil) {
+        func setDemo(statuses demoStatuses: [FileStatus]) {
             statuses = demoStatuses
             grouped = FileStatus.categorize(demoStatuses)
-            selectedFilePath = selectedPath
         }
     #endif
 

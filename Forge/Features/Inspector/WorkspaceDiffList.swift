@@ -119,7 +119,6 @@ struct WorkspaceDiffList: View {
                 ForEach(viewModel.fileDiffs) { fileDiff in
                     WorkspaceFileRow(
                         fileDiff: fileDiff,
-                        isSelected: viewModel.selectedFilePath == (fileDiff.newPath ?? fileDiff.oldPath),
                         onSelect: {
                             viewModel.selectFile(fileDiff.newPath ?? fileDiff.oldPath ?? "")
                         }
@@ -205,7 +204,6 @@ private struct WorkspaceCommitRow: View {
 
 private struct WorkspaceFileRow: View {
     let fileDiff: GitFileDiff
-    let isSelected: Bool
     let onSelect: () -> Void
 
     @State private var isHovered = false
@@ -248,11 +246,7 @@ private struct WorkspaceFileRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 5)
-        .background(
-            isSelected
-                ? Color.accentColor.opacity(0.15)
-                : (isHovered ? Color.white.opacity(0.04) : .clear)
-        )
+        .background(isHovered ? Color.white.opacity(0.04) : .clear)
         .cornerRadius(4)
         .contentShape(Rectangle())
         .onHover { isHovered = $0 }

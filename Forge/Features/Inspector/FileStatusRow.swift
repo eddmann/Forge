@@ -3,7 +3,6 @@ import SwiftUI
 struct FileStatusRow: View {
     let file: FileStatus
     let group: WorkingTreeGroup
-    let isSelected: Bool
     let commentCount: Int
     let onSelect: () -> Void
     let onStageToggle: () -> Void
@@ -72,11 +71,7 @@ struct FileStatusRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 5)
-        .background(
-            isSelected
-                ? Color.accentColor.opacity(0.15)
-                : (isHovered ? Color.white.opacity(0.04) : .clear)
-        )
+        .background(isHovered ? Color.white.opacity(0.04) : .clear)
         .cornerRadius(4)
         .contentShape(Rectangle())
         .onHover { isHovered = $0 }

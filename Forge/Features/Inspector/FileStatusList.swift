@@ -100,7 +100,6 @@ struct FileStatusList: View {
                 FileStatusRow(
                     file: file,
                     group: group,
-                    isSelected: viewModel.selectedFilePath == file.path,
                     commentCount: fileCommentCount(for: file),
                     onSelect: { viewModel.selectFile(file, staged: group == .staged) },
                     onStageToggle: {
