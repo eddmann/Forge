@@ -301,7 +301,7 @@ struct PaneContainerView<Content: View, EmptyContent: View>: View {
                 .allowsHitTesting(!isTabDragActive)
 
             Color.clear
-                .onDrop(of: [.tabTransfer], delegate: UnifiedPaneDropDelegate(
+                .onDrop(of: [.tabTransfer, .fileURL], delegate: UnifiedPaneDropDelegate(
                     size: size,
                     pane: pane,
                     controller: controller,
@@ -394,6 +394,35 @@ struct UnifiedPaneDropDelegate: DropDelegate {
             return DispatchQueue.main.sync {
                 performDrop(info: info)
             }
+        }
+
+        // Handle file URL drops (e.g. dragging files from Finder into a terminal pane).
+        if info.hasItemsConforming(to: [.fileURL]),
+           !info.hasItemsConforming(to: [.tabTransfer]) {
+            let providers = info.itemProviders(for: [.fileURL])
+            guard !providers.isEmpty, let onFileDrop = controller.onFileDrop else {
+                return false
+            }
+            let group = DispatchGroup()
+            var urls: [URL] = []
+            for provider in providers {
+                group.enter()
+                provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { item, _ in
+                    if let data = item as? Data, let url = URL(dataRepresentation: data, relativeTo: nil) {
+                        DispatchQueue.main.async { urls.append(url) }
+                    } else if let url = item as? URL {
+                        DispatchQueue.main.async { urls.append(url) }
+                    }
+                    group.leave()
+                }
+            }
+            group.notify(queue: .main) {
+                _ = onFileDrop(urls, pane.id)
+            }
+#if DEBUG
+            dlog("pane.drop.fileURL pane=\(pane.id.id.uuidString.prefix(5)) providerCount=\(providers.count)")
+#endif
+            return true
         }
 
         let zone = effectiveZone(for: info)
@@ -506,6 +535,11 @@ struct UnifiedPaneDropDelegate: DropDelegate {
     }
 
     func dropUpdated(info: DropInfo) -> DropProposal? {
+        // File URL drops go straight to the pane — no split zone overlay needed.
+        if info.hasItemsConforming(to: [.fileURL]),
+           !info.hasItemsConforming(to: [.tabTransfer]) {
+            return DropProposal(operation: .copy)
+        }
         // Guard against dropUpdated firing after performDrop/dropExited
         guard dropLifecycle == .hovering else {
 #if DEBUG
@@ -529,6 +563,15 @@ struct UnifiedPaneDropDelegate: DropDelegate {
 #endif
             return false
         }
+
+        // Accept file URL drops (e.g. dragging images/files from Finder into a terminal).
+        if info.hasItemsConforming(to: [.fileURL]) {
+#if DEBUG
+            dlog("pane.validateDrop pane=\(pane.id.id.uuidString.prefix(5)) allowed=1 reason=fileURL")
+#endif
+            return controller.onFileDrop != nil
+        }
+
         // The custom UTType alone is sufficient — only Bonsplit tab drags produce it.
         // Do NOT gate on draggingTab != nil: @Observable changes from createItemProvider
         // may not have propagated to the drop delegate yet, causing false rejections.

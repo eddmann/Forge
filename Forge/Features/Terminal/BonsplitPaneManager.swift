@@ -41,6 +41,26 @@ class BonsplitPaneManager: NSObject, BonsplitDelegate {
         controller = BonsplitController(configuration: config)
         super.init()
         controller.delegate = self
+
+        controller.onFileDrop = { [weak self] urls, paneId in
+            guard let self,
+                  let tab = controller.selectedTab(inPane: paneId),
+                  let sessionID = tabIDToSession[tab.id],
+                  let termView = TerminalCache.shared.view(for: sessionID),
+                  !urls.isEmpty
+            else {
+                return false
+            }
+            let paths = urls.map { url -> String in
+                let path = url.path
+                if path.rangeOfCharacter(from: .init(charactersIn: " '\"\\$`!#&|;(){}[]<>?*~")) != nil {
+                    return "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
+                }
+                return path
+            }
+            termView.sendInput(paths.joined(separator: " "))
+            return true
+        }
     }
 
     // MARK: - Session Management
