@@ -1,7 +1,8 @@
 import Foundation
 
 enum PokemonBanner {
-    /// Returns raw terminal output text (with ANSI escape codes) for the Pokémon welcome banner.
+    /// Returns raw terminal output text (with ANSI escape codes and Kitty image protocol)
+    /// for the Pokémon welcome banner.
     /// Written directly to the terminal via `writeOutput`, so no command is visible.
     static func bannerText(pokemonName: String, workspacePath: String, branch: String) -> String? {
         guard let entry = PokemonDex.lookup(pokemonName) else { return nil }
@@ -16,39 +17,109 @@ enum PokemonBanner {
         let numberStr = String(format: "#%03d", entry.number)
         let shortPath = workspacePath.replacingOccurrences(of: NSHomeDirectory(), with: "~")
 
-        // Load sprite from bundled resources
-        let sprite = PokemonDex.sprite(for: entry.number)
+        // Build info lines (without cursor positioning — we add that below)
+        var infoLines: [String] = []
+        infoLines.append("")
+        infoLines.append("\(bold)\(color)\(numberStr) \(entry.name.uppercased())\(reset)")
+        infoLines.append("\(dim)Type: \(typeString)\(reset)")
+        infoLines.append("\(dim)─────────────────────────────\(reset)")
+        infoLines.append(
+            "\(dim)HP \(entry.hp)  ·  ATK \(entry.attack)  ·  DEF \(entry.defense)  ·  SPD \(entry.speed)\(reset)"
+        )
+        infoLines.append("")
+
+        let wrappedFlavor = wordWrap(entry.flavor, width: 40)
+        for (i, line) in wrappedFlavor.enumerated() {
+            let prefix = i == 0 ? "\(dim)\"" : " "
+            let suffix = i == wrappedFlavor.count - 1 ? "\"\(reset)" : ""
+            infoLines.append("\(prefix)\(line)\(suffix)")
+        }
+
+        infoLines.append("")
+        infoLines.append("\(dim)Workspace: \(shortPath)\(reset)")
+        infoLines.append("\(dim)Branch:    \(branch)\(reset)")
 
         var output = "\r\n"
 
-        // Sprite on top
-        if let sprite {
-            output += sprite.replacingOccurrences(of: "\r\n", with: "\n")
-                .replacingOccurrences(of: "\n", with: "\r\n")
-            if !sprite.hasSuffix("\n") { output += "\r\n" }
+        // Sprite via Kitty image protocol, with text alongside
+        if let imageData = PokemonDex.spriteData(for: entry.number) {
+            let (imageColumns, imageRows) = estimateImageCells(imagePixels: 512)
+
+            output += kittyImageSequence(data: imageData)
+
+            // Cursor up to the top of the image, then print text lines alongside
+            output += "\(esc)[\(imageRows)A"
+
+            let textPad = imageColumns + 2
+            for line in infoLines {
+                output += "\(esc)[\(textPad)C\(line)\r\n"
+            }
+
+            // Move cursor below the image if text was shorter
+            let remaining = imageRows - infoLines.count
+            if remaining > 0 {
+                output += "\(esc)[\(remaining)B"
+            }
+        } else {
+            // Fallback: text only
+            for line in infoLines {
+                output += "  \(line)\r\n"
+            }
         }
 
-        // Info below
         output += "\r\n"
-        output += "  \(bold)\(color)\(numberStr) \(entry.name.uppercased())\(reset)\r\n"
-        output += "  \(dim)Type: \(typeString)\(reset)\r\n"
-        output += "  \(dim)─────────────────────────────\(reset)\r\n"
-        output += "  \(dim)HP \(entry.hp)  ·  ATK \(entry.attack)  ·  DEF \(entry.defense)  ·  SPD \(entry.speed)\(reset)\r\n"
-        output += "\r\n"
-
-        let wrappedFlavor = wordWrap(entry.flavor, width: 50)
-        for (i, line) in wrappedFlavor.enumerated() {
-            let prefix = i == 0 ? "  \(dim)\"" : "   "
-            let suffix = i == wrappedFlavor.count - 1 ? "\"\(reset)" : ""
-            output += "\(prefix)\(line)\(suffix)\r\n"
-        }
-
-        output += "\r\n"
-        output += "  \(dim)Workspace: \(shortPath)\(reset)\r\n"
-        output += "  \(dim)Branch:    \(branch)\(reset)\r\n"
-        output += "\r\n"
-
         return output
+    }
+
+    // MARK: - Image Cell Estimation
+
+    /// Estimate how many terminal columns and rows a square image occupies.
+    /// On Retina (2×), 512 image pixels = 256 points.
+    /// Cell width ≈ fontSize × 0.6, cell height ≈ fontSize × lineHeightMultiple.
+    private static func estimateImageCells(imagePixels: Int) -> (columns: Int, rows: Int) {
+        let config = TerminalAppearanceStore.shared.config
+        let pointSize = Double(imagePixels) / 2.0 // Retina 2×
+        let cellWidth = Double(config.fontSize) * 0.6
+        let cellHeight = Double(config.fontSize) * Double(config.lineHeightMultiple)
+        let columns = Int(ceil(pointSize / cellWidth))
+        let rows = Int(ceil(pointSize / cellHeight))
+        return (columns, rows)
+    }
+
+    // MARK: - Kitty Image Protocol
+
+    /// Encode PNG data as a Kitty graphics protocol escape sequence.
+    /// Uses direct transmission (a=T) with PNG format (f=100).
+    private static func kittyImageSequence(data: Data) -> String {
+        let base64 = data.base64EncodedString()
+        let esc = "\u{1B}"
+
+        // Kitty protocol sends in chunks of up to 4096 base64 chars.
+        let chunkSize = 4096
+        var chunks: [String] = []
+        var offset = base64.startIndex
+
+        while offset < base64.endIndex {
+            let end = base64.index(offset, offsetBy: chunkSize, limitedBy: base64.endIndex) ?? base64.endIndex
+            let chunk = String(base64[offset ..< end])
+            chunks.append(chunk)
+            offset = end
+        }
+
+        var result = ""
+        for (i, chunk) in chunks.enumerated() {
+            let isFirst = i == 0
+            let isLast = i == chunks.count - 1
+            let more = isLast ? 0 : 1
+
+            if isFirst {
+                result += "\(esc)_Gf=100,a=T,m=\(more);\(chunk)\(esc)\\"
+            } else {
+                result += "\(esc)_Gm=\(more);\(chunk)\(esc)\\"
+            }
+        }
+
+        return result
     }
 
     // MARK: - Type → ANSI Color

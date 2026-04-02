@@ -18,14 +18,13 @@ enum PokemonDex {
         entries[name.lowercased()]
     }
 
-    /// Load the sprite ANSI art from bundled resources. Returns nil if not found.
-    static func sprite(for number: Int) -> String? {
+    /// Load the sprite PNG data from bundled resources. Returns nil if not found.
+    static func spriteData(for number: Int) -> Data? {
         let filename = String(format: "%03d", number)
-        guard let url = Bundle.main.url(forResource: filename, withExtension: "txt", subdirectory: "pokemon-sprites"),
-              let data = try? Data(contentsOf: url),
-              let text = String(data: data, encoding: .utf8)
+        guard let url = Bundle.main.url(forResource: filename, withExtension: "png", subdirectory: "pokemon-sprites"),
+              let data = try? Data(contentsOf: url)
         else { return nil }
-        return text
+        return data
     }
 
     // MARK: - Gen 1 Pokédex (151 entries)
