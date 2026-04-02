@@ -74,7 +74,9 @@ enum WordDiff {
         guard let pairContent else {
             return [WordDiffSegment(id: 0, text: content, kind: isAddition ? .added : .removed)]
         }
-        let (oldSegments, newSegments) = compute(oldLine: pairContent, newLine: content)
+        let (oldSegments, newSegments) = isAddition
+            ? compute(oldLine: pairContent, newLine: content)
+            : compute(oldLine: content, newLine: pairContent)
         return isAddition ? newSegments : oldSegments
     }
 
