@@ -35,7 +35,7 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
         wantsLayer = true
         layer?.masksToBounds = true
         updateTrackingAreas()
-        registerForDraggedTypes([.fileURL])
+        registerForDraggedTypes([.fileURL, .png, .tiff])
     }
 
     // MARK: - Layer
@@ -727,31 +727,70 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
     // MARK: - Drag & Drop
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        guard sender.draggingPasteboard.canReadObject(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) else {
-            return []
+        let pb = sender.draggingPasteboard
+        if pb.canReadObject(forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) {
+            return .copy
         }
-        return .copy
+        if pb.types?.contains(where: { $0 == .png || $0 == .tiff }) == true {
+            return .copy
+        }
+        return []
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        guard let urls = sender.draggingPasteboard.readObjects(
+        let pb = sender.draggingPasteboard
+
+        // Try file URLs first (e.g. files dragged from Finder).
+        if let urls = pb.readObjects(
             forClasses: [NSURL.self],
             options: [.urlReadingFileURLsOnly: true]
-        ) as? [URL], !urls.isEmpty else {
-            return false
+        ) as? [URL], !urls.isEmpty {
+            sendInput(Self.shellEscapedPaths(urls))
+            return true
         }
 
-        let paths = urls.map { url in
+        // Fall back to raw image data (e.g. macOS screenshot thumbnail drag).
+        if let url = Self.writeDroppedImageToTemp(pasteboard: pb) {
+            sendInput(Self.shellEscapedPaths([url]))
+            return true
+        }
+
+        return false
+    }
+
+    /// Write raw image data from the pasteboard to a temporary file and return its URL.
+    private static func writeDroppedImageToTemp(pasteboard: NSPasteboard) -> URL? {
+        let data: Data?
+        let ext: String
+        if let png = pasteboard.data(forType: .png) {
+            data = png
+            ext = "png"
+        } else if let tiff = pasteboard.data(forType: .tiff) {
+            data = tiff
+            ext = "tiff"
+        } else {
+            return nil
+        }
+        guard let imageData = data else { return nil }
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("drop-\(UUID().uuidString.prefix(8)).\(ext)")
+        do {
+            try imageData.write(to: url)
+            return url
+        } catch {
+            return nil
+        }
+    }
+
+    /// Shell-escape an array of URLs and join them with spaces.
+    private static func shellEscapedPaths(_ urls: [URL]) -> String {
+        urls.map { url -> String in
             let path = url.path
-            // Shell-escape paths containing spaces or special characters
             if path.rangeOfCharacter(from: .init(charactersIn: " '\"\\$`!#&|;(){}[]<>?*~")) != nil {
                 return "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
             }
             return path
-        }
-
-        sendInput(paths.joined(separator: " "))
-        return true
+        }.joined(separator: " ")
     }
 
     // MARK: - Tracking Areas

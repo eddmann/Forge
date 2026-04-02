@@ -302,7 +302,7 @@ struct PaneContainerView<Content: View, EmptyContent: View>: View {
                 .allowsHitTesting(!isTabDragActive)
 
             Color.clear
-                .onDrop(of: [.tabTransfer, .fileURL], delegate: UnifiedPaneDropDelegate(
+                .onDrop(of: [.tabTransfer, .fileURL, .image], delegate: UnifiedPaneDropDelegate(
                     size: size,
                     pane: pane,
                     controller: controller,
@@ -397,28 +397,71 @@ struct UnifiedPaneDropDelegate: DropDelegate {
             }
         }
 
-        // Handle file URL drops (e.g. dragging files from Finder into a terminal pane).
-        if info.hasItemsConforming(to: [.fileURL]),
-           !info.hasItemsConforming(to: [.tabTransfer]) {
-            let providers = info.itemProviders(for: [.fileURL])
-            guard !providers.isEmpty, let onFileDrop = controller.onFileDrop else {
-                return false
-            }
+        // Handle file URL and image drops (e.g. dragging files from Finder or screenshot thumbnails).
+        if !info.hasItemsConforming(to: [.tabTransfer]),
+           (info.hasItemsConforming(to: [.fileURL]) || info.hasItemsConforming(to: [.image])) {
+            guard let onFileDrop = controller.onFileDrop else { return false }
+
+            let fileProviders = info.itemProviders(for: [.fileURL])
+            let imageProviders = info.itemProviders(for: [.image])
+
             let group = DispatchGroup()
-            var urls: [URL] = []
-            for provider in providers {
+            var fileURLs: [URL] = []
+
+            // Try loading file URLs first.
+            for provider in fileProviders {
                 group.enter()
                 provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { item, _ in
                     if let data = item as? Data, let url = URL(dataRepresentation: data, relativeTo: nil) {
-                        DispatchQueue.main.async { urls.append(url) }
+                        DispatchQueue.main.async { fileURLs.append(url) }
                     } else if let url = item as? URL {
-                        DispatchQueue.main.async { urls.append(url) }
+                        DispatchQueue.main.async { fileURLs.append(url) }
                     }
                     group.leave()
                 }
             }
+
             group.notify(queue: .main) {
-                _ = onFileDrop(urls, pane.id)
+                // Use file URLs if any resolved to existing files.
+                let validURLs = fileURLs.filter { FileManager.default.fileExists(atPath: $0.path) }
+                if !validURLs.isEmpty {
+                    _ = onFileDrop(validURLs, pane.id)
+                    return
+                }
+
+                // Fall back to raw image data (e.g. screenshot thumbnail where file doesn't exist yet).
+                guard let provider = imageProviders.first else { return }
+                let typeID: String
+                let ext: String
+                if provider.hasItemConformingToTypeIdentifier(UTType.png.identifier) {
+                    typeID = UTType.png.identifier; ext = "png"
+                } else if provider.hasItemConformingToTypeIdentifier(UTType.tiff.identifier) {
+                    typeID = UTType.tiff.identifier; ext = "tiff"
+                } else {
+                    typeID = UTType.image.identifier; ext = "png"
+                }
+                provider.loadItem(forTypeIdentifier: typeID, options: nil) { item, _ in
+                    let data: Data?
+                    if let d = item as? Data {
+                        data = d
+                    } else if let url = item as? URL {
+                        data = try? Data(contentsOf: url)
+                    } else if let img = item as? NSImage, let tiff = img.tiffRepresentation {
+                        let rep = NSBitmapImageRep(data: tiff)
+                        data = rep?.representation(using: .png, properties: [:])
+                    } else {
+                        data = nil
+                    }
+                    guard let imageData = data else { return }
+                    let url = FileManager.default.temporaryDirectory
+                        .appendingPathComponent("drop-\(UUID().uuidString.prefix(8)).\(ext)")
+                    do {
+                        try imageData.write(to: url)
+                        DispatchQueue.main.async {
+                            _ = onFileDrop([url], pane.id)
+                        }
+                    } catch {}
+                }
             }
             return true
         }
@@ -513,11 +556,14 @@ struct UnifiedPaneDropDelegate: DropDelegate {
 
     func dropEntered(info: DropInfo) {
         dropLifecycle = .hovering
-        let zone = effectiveZone(for: info)
+        // File/image drops highlight the full pane (center) instead of showing split zones.
+        let isFileDrop = !info.hasItemsConforming(to: [.tabTransfer]) &&
+            (info.hasItemsConforming(to: [.fileURL]) || info.hasItemsConforming(to: [.image]))
+        let zone: DropZone? = isFileDrop ? .center : effectiveZone(for: info)
         activeDropZone = zone
 #if DEBUG
         dlog(
-            "pane.dropEntered pane=\(pane.id.id.uuidString.prefix(5)) zone=\(zone) " +
+            "pane.dropEntered pane=\(pane.id.id.uuidString.prefix(5)) zone=\(zone.map(String.init(describing:)) ?? "none") " +
             "hasDrag=\(controller.draggingTab != nil ? 1 : 0) " +
             "hasActive=\(controller.activeDragTab != nil ? 1 : 0)"
         )
@@ -533,9 +579,10 @@ struct UnifiedPaneDropDelegate: DropDelegate {
     }
 
     func dropUpdated(info: DropInfo) -> DropProposal? {
-        // File URL drops go straight to the pane — no split zone overlay needed.
-        if info.hasItemsConforming(to: [.fileURL]),
-           !info.hasItemsConforming(to: [.tabTransfer]) {
+        // File URL and image drops highlight the full pane — no split zone overlay.
+        if !info.hasItemsConforming(to: [.tabTransfer]),
+           (info.hasItemsConforming(to: [.fileURL]) || info.hasItemsConforming(to: [.image])) {
+            activeDropZone = .center
             return DropProposal(operation: .copy)
         }
         // Guard against dropUpdated firing after performDrop/dropExited
@@ -562,9 +609,10 @@ struct UnifiedPaneDropDelegate: DropDelegate {
             return false
         }
 
-        // Accept file URL drops (e.g. dragging images/files from Finder into a terminal).
-        if info.hasItemsConforming(to: [.fileURL]),
-           !info.hasItemsConforming(to: [.tabTransfer]) {
+        // Accept file URL or raw image drops (e.g. files from Finder, screenshot thumbnails).
+        if !info.hasItemsConforming(to: [.tabTransfer]),
+           (info.hasItemsConforming(to: [.fileURL]) ||
+            info.hasItemsConforming(to: [.image])) {
             return controller.onFileDrop != nil
         }
 
