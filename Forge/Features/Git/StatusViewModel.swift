@@ -230,7 +230,6 @@ final class StatusViewModel: ObservableObject {
                 guard let self else { return }
                 if result.success {
                     self.setFeedback("Discarded \(file.fileName)", isError: false)
-                    self.recordActivity()
                     self.refresh()
                 } else {
                     self.setFeedback(self.cleanError(result.stderr), isError: true)

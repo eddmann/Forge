@@ -70,10 +70,6 @@ final class ReviewStore: ObservableObject {
         repoComments[filePath] = fileComments.sorted(by: ReviewStore.commentSort)
         next[rootPath] = repoComments
         commentsByRoot = next
-
-        if let pid = ProjectStore.shared.activeProjectID {
-            ProjectStore.shared.recordActivity(for: pid)
-        }
     }
 
     func updateComment(

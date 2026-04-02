@@ -236,6 +236,7 @@ struct ProjectListView: View {
                 let message = try WorkspaceCloner.mergeWorkspaceIntoProject(workspace, projectPath: projectPath)
                 DispatchQueue.main.async {
                     store.updateWorkspaceStatus(id: workspace.id, status: .merged)
+                    store.recordActivity(for: workspace.projectID)
                     store.requestGitRefresh()
                     // Clear any previous error
                     errorMessage = nil

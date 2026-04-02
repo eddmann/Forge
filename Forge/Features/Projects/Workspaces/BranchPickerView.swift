@@ -218,6 +218,7 @@ struct BranchPickerView: View {
                 DispatchQueue.main.async {
                     store.addWorkspace(workspace)
                     store.activeWorkspaceID = workspace.id
+                    ProjectStore.shared.recordActivity(for: project.id)
                     successMessage = "Created workspace '\(workspace.name)'"
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                         onDismiss()

@@ -348,8 +348,6 @@ class TerminalSessionManager: ObservableObject {
         activeTabID = tab.id
         focusedSessionID = nil
 
-        if let activeProjectID { ProjectStore.shared.recordActivity(for: activeProjectID) }
-
         // Post scroll request after a brief delay to let the view appear
         if let file = scrollToFile {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -393,8 +391,6 @@ class TerminalSessionManager: ObservableObject {
         tabs.append(tab)
         activeTabID = tab.id
         focusedSessionID = nil
-
-        if let activeProjectID { ProjectStore.shared.recordActivity(for: activeProjectID) }
 
         if let file = scrollToFile {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
