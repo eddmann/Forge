@@ -13,6 +13,7 @@ class TerminalContainerViewController: NSViewController {
 
     // Status bar at bottom — glass effect
     private let statusBar = NSVisualEffectView()
+    private let activityDot = NSView()
     private let statusLabel = NSTextField(labelWithString: "")
     private let agentInfoStack = NSStackView()
     private var currentCapabilities: AgentCapabilities?
@@ -38,6 +39,12 @@ class TerminalContainerViewController: NSViewController {
         statusBar.blendingMode = .behindWindow
         statusBar.state = .inactive
         view.addSubview(statusBar)
+
+        activityDot.translatesAutoresizingMaskIntoConstraints = false
+        activityDot.wantsLayer = true
+        activityDot.layer?.cornerRadius = 3.5
+        activityDot.isHidden = true
+        statusBar.addSubview(activityDot)
 
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         statusLabel.font = .systemFont(ofSize: 11, weight: .medium)
@@ -66,7 +73,12 @@ class TerminalContainerViewController: NSViewController {
             statusBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             statusBar.heightAnchor.constraint(equalToConstant: 24),
 
-            statusLabel.leadingAnchor.constraint(equalTo: statusBar.leadingAnchor, constant: 12),
+            activityDot.leadingAnchor.constraint(equalTo: statusBar.leadingAnchor, constant: 12),
+            activityDot.centerYAnchor.constraint(equalTo: statusBar.centerYAnchor),
+            activityDot.widthAnchor.constraint(equalToConstant: 7),
+            activityDot.heightAnchor.constraint(equalToConstant: 7),
+
+            statusLabel.leadingAnchor.constraint(equalTo: activityDot.trailingAnchor, constant: 5),
             statusLabel.centerYAnchor.constraint(equalTo: statusBar.centerYAnchor),
 
             agentInfoStack.trailingAnchor.constraint(equalTo: statusBar.trailingAnchor, constant: -8),
@@ -163,12 +175,20 @@ class TerminalContainerViewController: NSViewController {
 
         AgentEventStore.shared.$activityByTab
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.updateTabBar() }
+            .sink { [weak self] _ in
+                self?.updateTabBar()
+                self?.updateActivityIndicator()
+            }
             .store(in: &cancellables)
 
         AgentEventStore.shared.$unreadCountByTab
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.updateTabBar() }
+            .store(in: &cancellables)
+
+        AgentEventStore.shared.$stateByTab
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.updateActivityIndicator() }
             .store(in: &cancellables)
 
         ProjectStore.shared.$activeProjectID
@@ -368,9 +388,79 @@ class TerminalContainerViewController: NSViewController {
         updateTabBar()
     }
 
+    private var activityPulseTimer: Timer?
+
     private func updateStatusBar() {
-        statusLabel.stringValue = ""
+        updateActivityIndicator()
         updateAgentInfo()
+    }
+
+    private func updateActivityIndicator() {
+        guard let tabID = sessionManager.activeTabID else {
+            activityDot.isHidden = true
+            statusLabel.stringValue = ""
+            stopPulse()
+            return
+        }
+
+        let activity = AgentEventStore.shared.activityByTab[tabID] ?? .idle
+        let state = AgentEventStore.shared.stateByTab[tabID]
+
+        switch activity {
+        case .thinking:
+            showActivity(color: .systemBlue, label: "Thinking…", pulse: true)
+        case .toolExecuting:
+            let toolName = state?.currentTool?.name
+            let label = toolName.map { "Running \($0)…" } ?? "Running tool…"
+            showActivity(color: .systemGreen, label: label, pulse: true)
+        case .waitingForPermission:
+            showActivity(color: .systemOrange, label: "Waiting for permission", pulse: false)
+        case .waitingForInput:
+            showActivity(color: .systemOrange, label: "Waiting for input", pulse: false)
+        case .retrying:
+            showActivity(color: .systemRed, label: "Retrying…", pulse: true)
+        case .compacting:
+            showActivity(color: .systemPurple, label: "Compacting…", pulse: true)
+        case .idle, .complete:
+            activityDot.isHidden = true
+            statusLabel.stringValue = ""
+            stopPulse()
+        }
+    }
+
+    private func showActivity(color: NSColor, label: String, pulse: Bool) {
+        activityDot.isHidden = false
+        activityDot.layer?.backgroundColor = color.cgColor
+        statusLabel.stringValue = label
+
+        if pulse {
+            startPulse()
+        } else {
+            stopPulse()
+            activityDot.layer?.opacity = 1.0
+        }
+    }
+
+    private func startPulse() {
+        guard activityPulseTimer == nil else { return }
+        activityPulseTimer = Timer.scheduledTimer(withTimeInterval: 0.6, repeats: true) { [weak self] _ in
+            guard let dot = self?.activityDot.layer else { return }
+            let anim = CABasicAnimation(keyPath: "opacity")
+            anim.fromValue = dot.presentation()?.opacity ?? dot.opacity
+            let target: Float = dot.opacity < 0.5 ? 1.0 : 0.3
+            anim.toValue = target
+            anim.duration = 0.6
+            anim.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            dot.opacity = target
+            dot.add(anim, forKey: "pulse")
+        }
+    }
+
+    private func stopPulse() {
+        activityPulseTimer?.invalidate()
+        activityPulseTimer = nil
+        activityDot.layer?.removeAnimation(forKey: "pulse")
+        activityDot.layer?.opacity = 1.0
     }
 
     private func updateAgentInfo() {
