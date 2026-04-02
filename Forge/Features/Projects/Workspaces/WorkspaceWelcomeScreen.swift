@@ -190,7 +190,7 @@ enum WorkspaceWelcomeScreen {
                                 ;;
                         esac
                         ;;
-                    "")
+                    $'\\r'|$'\\n'|"")
                         stty "$_old_stty" 2>/dev/null
                         printf '%s%s' "$_show_cursor" "${_esc}[2J${_esc}[H"
                         forge open-agent "${_cmds[$_sel]}"
