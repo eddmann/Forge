@@ -45,26 +45,35 @@ class TerminalCache {
             } else {
                 TerminalSessionManager.shared.restoredScrollback.removeValue(forKey: sessionKey)
             }
+
+            // Ensure welcome function exists for this workspace, then pass path
+            if let tab = TerminalSessionManager.shared.tabs.first(where: {
+                $0.sessionIDs.contains(session.id) || $0.paneManager?.allSessionIDs.contains(session.id) == true
+            }),
+                let wsID = tab.workspaceID
+            {
+                TerminalSessionManager.shared.ensureWelcomeFunction(workspaceID: wsID)
+                if let fnPath = TerminalSessionManager.shared.welcomeFunctionPaths[wsID] {
+                    additionalEnv["FORGE_WELCOME_FN_PATH"] = fnPath
+                }
+            }
+
+            // Auto-run welcome on new workspace sessions
+            if TerminalSessionManager.shared.pendingShowWelcome.remove(session.id) != nil {
+                additionalEnv["FORGE_SHOW_WELCOME"] = "1"
+            }
         }
 
         view.startShell(in: session.workingDirectory, sessionID: session.id, additionalEnv: additionalEnv)
 
         cache[session.id] = view
 
-        // Send launch command or welcome banner after shell starts.
+        // Send launch command after shell starts.
         let isRestored = MainActor.assumeIsolated {
             TerminalSessionManager.shared.restoredSessionIDs.remove(session.id) != nil
         }
-        let welcomeBanner = MainActor.assumeIsolated {
-            TerminalSessionManager.shared.pendingWelcomeBanners.removeValue(forKey: session.id)
-        }
 
-        if let banner = welcomeBanner {
-            // Write banner directly to terminal display (no command shown)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                view.writeOutput(banner)
-            }
-        } else if let command = session.launchCommand {
+        if let command = session.launchCommand {
             if isRestored {
                 // Restored session: inject command into prompt without executing.
                 // If the agent reported a session ID, append --resume so the user

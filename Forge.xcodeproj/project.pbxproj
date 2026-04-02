@@ -45,7 +45,6 @@
 		56CF6611305E42E7DE701ACD /* WorkspaceDiffList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B74FE47A67DD9F4A0C7684B /* WorkspaceDiffList.swift */; };
 		5756BA39E77383BFCAF37803 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3839390BDE8DD11221E196 /* SettingsView.swift */; };
 		5B2ADA71AF99EE2B0D9A802A /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28C3575AE17D6490A76432 /* Workspace.swift */; };
-		61319AAC54E362354F7B9074 /* PokemonBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32AB1DEF104F595024B77578 /* PokemonBanner.swift */; };
 		61EAB7F9E8DBF4632D654669 /* BonsplitController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7519165D08DFDF8192EA8F7C /* BonsplitController.swift */; };
 		6301D6142F066E246ADA5117 /* SplitContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */; };
 		636833B4508AD5E5520B0E57 /* TerminalSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */; };
@@ -78,6 +77,7 @@
 		A2858A5B2AAD0956FC54CA0B /* forge-cli in Resources */ = {isa = PBXBuildFile; fileRef = 0DC2B1C4E2E0CE097908C96B /* forge-cli */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A5E0E33106E041E304409673 /* AgentSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014017376795403DB6AD56A /* AgentSetup.swift */; };
 		A6AC1E458EE45F2D0FDC703C /* SplitAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 243460106C0C757CFFBF6D4E /* SplitAnimator.swift */; };
+		AB404BEE7FC486153DD784A2 /* WorkspaceWelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A33F98B22ADD7CD5183A9E /* WorkspaceWelcomeScreen.swift */; };
 		AD12FBB49FFE0B110FA16F4D /* SplitNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBFCA5701CEE5E34D6C159E /* SplitNode.swift */; };
 		B2A94F3E550AC00F336C7D1D /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFD8D52036236C912F9A75B /* MainWindowController.swift */; };
 		B2C65263AB86E25FD03ED68E /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1D2E8F62597C740B62B4D0 /* Project.swift */; };
@@ -137,6 +137,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00A33F98B22ADD7CD5183A9E /* WorkspaceWelcomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceWelcomeScreen.swift; sourceTree = "<group>"; };
 		027D11694354B37A74D44611 /* SummaryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryLog.swift; sourceTree = "<group>"; };
 		07F919EC60D33B385F139603 /* Forge-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Forge-Bridging-Header.h"; sourceTree = "<group>"; };
 		09E805EE38B5FF260D35CE21 /* TerminalObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalObserver.swift; sourceTree = "<group>"; };
@@ -159,7 +160,6 @@
 		27A6CD1CBB80B47266E1EF60 /* DemoStateFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoStateFactory.swift; sourceTree = "<group>"; };
 		2B48636B23896A11A9644925 /* GitClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitClient.swift; sourceTree = "<group>"; };
 		324C6BF661A3B57C7A0FE4DC /* TabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItem.swift; sourceTree = "<group>"; };
-		32AB1DEF104F595024B77578 /* PokemonBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonBanner.swift; sourceTree = "<group>"; };
 		33009813506A712F05C01586 /* WorkspaceNaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceNaming.swift; sourceTree = "<group>"; };
 		33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentReviewPayloadBuilder.swift; sourceTree = "<group>"; };
 		37D513FDDCFEDCD851ADC4A6 /* PokemonDex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonDex.swift; sourceTree = "<group>"; };
@@ -409,10 +409,10 @@
 			isa = PBXGroup;
 			children = (
 				F2BD7C813556607AFCF0EAFB /* BranchPickerView.swift */,
-				32AB1DEF104F595024B77578 /* PokemonBanner.swift */,
 				37D513FDDCFEDCD851ADC4A6 /* PokemonDex.swift */,
 				93EA6848CBC1E2DEE1295EDC /* WorkspaceCloner.swift */,
 				33009813506A712F05C01586 /* WorkspaceNaming.swift */,
+				00A33F98B22ADD7CD5183A9E /* WorkspaceWelcomeScreen.swift */,
 			);
 			path = Workspaces;
 			sourceTree = "<group>";
@@ -901,7 +901,6 @@
 				F351A2997F2AFC7ADB235655 /* PaneContainerView.swift in Sources */,
 				676341BCA86E78A23161ED1B /* PaneID.swift in Sources */,
 				694668C2FDEE836BC7B3F22D /* PaneState.swift in Sources */,
-				61319AAC54E362354F7B9074 /* PokemonBanner.swift in Sources */,
 				F93FF39D3D7CEB1B46F970C2 /* PokemonDex.swift in Sources */,
 				FB4440F0A92FCE49B7117580 /* ProcessGitClient.swift in Sources */,
 				B2C65263AB86E25FD03ED68E /* Project.swift in Sources */,
@@ -958,6 +957,7 @@
 				56CF6611305E42E7DE701ACD /* WorkspaceDiffList.swift in Sources */,
 				766D9CF7612E3BE9CEC14A9E /* WorkspaceDiffViewModel.swift in Sources */,
 				F4F6CC41FF265C9DA098D17E /* WorkspaceNaming.swift in Sources */,
+				AB404BEE7FC486153DD784A2 /* WorkspaceWelcomeScreen.swift in Sources */,
 				D3B75B31144F373A322543BD /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

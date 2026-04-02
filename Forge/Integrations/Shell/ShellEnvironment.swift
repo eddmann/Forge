@@ -87,6 +87,27 @@ enum ShellEnvironment {
             _forge_apply_histfile
         fi
     fi
+
+    # Source the workspace welcome function (makes `welcome` available in all terminals)
+    if [[ -n "${FORGE_WELCOME_FN_PATH:-}" && -r "${FORGE_WELCOME_FN_PATH}" ]]; then
+        source "$FORGE_WELCOME_FN_PATH"
+    fi
+
+    # Auto-run welcome on new workspaces
+    if [[ -n "${FORGE_SHOW_WELCOME:-}" ]]; then
+        unset FORGE_SHOW_WELCOME
+        _forge_auto_welcome() {
+            if [[ -n "${ZSH_VERSION:-}" ]]; then
+                precmd_functions=(${precmd_functions:#_forge_auto_welcome})
+            fi
+            welcome
+        }
+        if [[ -n "${ZSH_VERSION:-}" ]]; then
+            precmd_functions+=(_forge_auto_welcome)
+        else
+            _forge_auto_welcome
+        fi
+    fi
     """
 
     /// Write ZDOTDIR wrapper + integration scripts to ~/.forge/state/shell/

@@ -22,6 +22,13 @@ case "event":
     let eventType = args[3]
     sendEvent(agent: agent, eventType: eventType)
 
+case "open-agent":
+    guard args.count >= 3 else {
+        FileHandle.standardError.write(Data("Usage: forge open-agent <agent-command>\n".utf8))
+        exit(1)
+    }
+    openAgent(command: args[2])
+
 case "--help", "-h", "help":
     printUsage()
     exit(0)
@@ -74,7 +81,38 @@ func sendEvent(agent: String, eventType: String) {
     }
     json += "\n"
 
-    // Connect to Unix socket
+    sendToSocket(json, socketPath: socketPath)
+}
+
+// MARK: - Open Agent
+
+func openAgent(command: String) {
+    let socketPath = ProcessInfo.processInfo.environment["FORGE_SOCKET"]
+        ?? NSHomeDirectory() + "/.forge/state/forge.sock"
+    let sessionID = ProcessInfo.processInfo.environment["FORGE_SESSION"]
+
+    var payload: [String: Any] = [
+        "command": "open_agent",
+        "agent_command": command
+    ]
+    if let sessionID {
+        payload["session"] = sessionID
+    }
+
+    guard let data = try? JSONSerialization.data(withJSONObject: payload),
+          var json = String(data: data, encoding: .utf8)
+    else {
+        FileHandle.standardError.write(Data("Failed to encode JSON\n".utf8))
+        exit(1)
+    }
+    json += "\n"
+
+    sendToSocket(json, socketPath: socketPath)
+}
+
+// MARK: - Socket
+
+func sendToSocket(_ message: String, socketPath: String) {
     let fd = socket(AF_UNIX, SOCK_STREAM, 0)
     guard fd >= 0 else {
         FileHandle.standardError.write(Data("Failed to create socket\n".utf8))
@@ -102,7 +140,7 @@ func sendEvent(agent: String, eventType: String) {
         exit(0)
     }
 
-    json.withCString { ptr in
+    message.withCString { ptr in
         _ = Darwin.write(fd, ptr, strlen(ptr))
     }
 }
@@ -115,6 +153,7 @@ func printUsage() {
 
     Commands:
       event <agent> <event_type>    Pipe agent hook JSON from stdin to Forge
+      open-agent <agent-command>    Open a new agent tab in Forge
 
     Environment:
       FORGE_SOCKET    Path to Forge socket (default: ~/.forge/state/forge.sock)
@@ -122,7 +161,7 @@ func printUsage() {
 
     Examples:
       echo '{"tool_name":"Bash"}' | forge event claude tool_start
-      forge event codex stop < /dev/stdin
+      forge open-agent claude
 
     """
     FileHandle.standardError.write(Data(usage.utf8))

@@ -66,12 +66,15 @@ class TerminalSessionManager: ObservableObject {
     var restoredSessionIDs: Set<UUID> = []
 
     /// Workspace IDs for newly created workspaces. Consumed once when the first
-    /// terminal session is created, to show a Pokémon welcome banner.
+    /// terminal session is created, to auto-run the welcome screen.
     var newlyCreatedWorkspaceIDs: Set<UUID> = []
 
-    /// Welcome banner text to write directly to the terminal, keyed by session ID.
-    /// Consumed once during terminal view creation, then cleared per-session.
-    var pendingWelcomeBanners: [UUID: String] = [:]
+    /// Paths to welcome function files, keyed by workspace ID.
+    /// Every terminal in a workspace sources this file to get the `welcome` command.
+    var welcomeFunctionPaths: [UUID: String] = [:]
+
+    /// Session IDs that should auto-run `welcome` on first prompt.
+    var pendingShowWelcome: Set<UUID> = []
 
     private init() {
         loadPersistedState()
@@ -497,22 +500,15 @@ class TerminalSessionManager: ObservableObject {
                 projectID: pid,
                 workspaceID: workspaceID
             ) ?? NSHomeDirectory()
-            var bannerText: String?
-            if let wsID = workspaceID, newlyCreatedWorkspaceIDs.remove(wsID) != nil,
-               let ws = ProjectStore.shared.workspaces.first(where: { $0.id == wsID })
-            {
-                bannerText = PokemonBanner.bannerText(
-                    pokemonName: ws.name,
-                    workspacePath: ws.path
-                )
-            }
+            let isNewWorkspace = workspaceID.map { newlyCreatedWorkspaceIDs.remove($0) != nil } ?? false
+
             let session = createSession(
                 workingDirectory: dir,
                 projectID: pid,
                 workspaceID: workspaceID
             )
-            if let bannerText {
-                pendingWelcomeBanners[session.id] = bannerText
+            if isNewWorkspace {
+                pendingShowWelcome.insert(session.id)
             }
         } else {
             activeTabID = nil
@@ -572,6 +568,26 @@ class TerminalSessionManager: ObservableObject {
 
     func workspaceID(for tabID: UUID) -> UUID? {
         tabs.first(where: { $0.id == tabID })?.workspaceID
+    }
+
+    // MARK: - Welcome Function
+
+    /// Ensure the welcome function file exists for a workspace.
+    /// Called lazily when creating terminal views so all terminals get it.
+    func ensureWelcomeFunction(workspaceID: UUID) {
+        guard welcomeFunctionPaths[workspaceID] == nil else { return }
+        guard let ws = ProjectStore.shared.workspaces.first(where: { $0.id == workspaceID }) else { return }
+
+        let agents = AgentStore.shared.agents
+            .filter(\.isInstalled)
+            .map { (name: $0.name, command: $0.command) }
+
+        welcomeFunctionPaths[workspaceID] = WorkspaceWelcomeScreen.writeFunction(
+            workspaceID: workspaceID,
+            workspaceName: ws.name,
+            workspacePath: ws.path,
+            agents: agents
+        )
     }
 
     // MARK: - Private helpers

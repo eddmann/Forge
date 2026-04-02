@@ -179,9 +179,42 @@ final class ForgeSocketServer {
                     data: eventData
                 )
             }
+
+        case "open_agent":
+            guard let agentCommand = dict["agent_command"] as? String else { return }
+            DispatchQueue.main.async {
+                Self.openAgentTab(agentCommand: agentCommand, sessionID: sessionID)
+            }
+
         default:
             break
         }
+    }
+
+    // MARK: - Open Agent Tab
+
+    @MainActor
+    private static func openAgentTab(agentCommand: String, sessionID: UUID?) {
+        guard let agent = AgentStore.shared.agents.first(where: { $0.command == agentCommand }) else { return }
+
+        let store = ProjectStore.shared
+        let dir = store.effectivePath ?? NSHomeDirectory()
+        let resolved = store.activeProject.map { agent.applying(projectID: $0.id) } ?? agent
+
+        // Close the shell tab that invoked the welcome command
+        if let sessionID {
+            TerminalSessionManager.shared.closeSession(id: sessionID)
+        }
+
+        TerminalSessionManager.shared.createSession(
+            workingDirectory: dir,
+            title: resolved.name,
+            launchCommand: resolved.fullCommand,
+            closeOnExit: true,
+            projectID: store.activeProjectID,
+            workspaceID: store.activeWorkspaceID,
+            icon: resolved.icon
+        )
     }
 
     // MARK: - Helpers
