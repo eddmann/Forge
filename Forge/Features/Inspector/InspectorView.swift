@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Inspector Tab
 
 enum InspectorTab: String, CaseIterable {
-    case working = "Working"
+    case working = "Pending"
     case workspace = "Workspace"
 }
 

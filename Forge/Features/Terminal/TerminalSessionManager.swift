@@ -339,7 +339,7 @@ class TerminalSessionManager: ObservableObject {
             projectID: activeProjectID,
             workspaceID: activeWorkspaceID,
             sessionID: UUID(),
-            title: "Changes",
+            title: "Pending Changes",
             icon: "doc.text.magnifyingglass",
             kind: .changes(repoPath: repoPath)
         )

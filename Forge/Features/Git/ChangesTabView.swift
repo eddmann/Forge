@@ -109,7 +109,7 @@ struct ChangesTabView: View {
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
 
-            Text("Changes")
+            Text(viewModel.branchDiffRequest != nil ? "Workspace Changes" : "Pending Changes")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundColor(.primary)
 

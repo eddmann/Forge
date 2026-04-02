@@ -505,6 +505,7 @@ private struct WorkspaceRow: View {
 
     @ObservedObject private var agentEventStore = AgentEventStore.shared
     @ObservedObject private var summaryStore = SummaryStore.shared
+    @ObservedObject private var commitCountStore = CommitCountStore.shared
     @State private var isEditing = false
     @State private var editName = ""
     @State private var showDeleteConfirmation = false
@@ -557,6 +558,19 @@ private struct WorkspaceRow: View {
                             .strikethrough(workspace.status == .merged, color: Color(nsColor: .tertiaryLabelColor))
                             .opacity(workspaceAgentStatus == .toolExecuting ? 1.0 : 1.0)
                         Spacer()
+
+                        // Commit count ahead of parent branch
+                        if let count = commitCountStore.countByWorkspace[workspace.id], count > 0,
+                           workspace.status != .merged
+                        {
+                            HStack(spacing: 1) {
+                                Image(systemName: "arrow.up")
+                                    .font(.system(size: 8, weight: .bold))
+                                Text("\(count)")
+                                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                            }
+                            .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+                        }
 
                         if workspace.status == .merged {
                             Image(systemName: "checkmark.circle.fill")

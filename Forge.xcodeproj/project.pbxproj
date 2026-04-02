@@ -114,6 +114,7 @@
 		EA6AE32F44FB744BAB361458 /* GhosttyTerminalViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F9A1C5B81DD1DFC08BE0BD /* GhosttyTerminalViewRepresentable.swift */; };
 		EB14AF51A502923B533D3ABE /* DebugEventLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A913D1CB5E730CFBA223F25D /* DebugEventLog.swift */; };
 		EBE6970C1FAB16099C16176C /* ReviewStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C30B829376599F48CCB5C7 /* ReviewStore.swift */; };
+		ECC026CA6E87EFC21793377A /* CommitCountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B205456E82CD816617F8385 /* CommitCountStore.swift */; };
 		F07F1370F96DC83D03EFC104 /* TabItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D189E7C10808C8DFEA133A5C /* TabItemView.swift */; };
 		F351A2997F2AFC7ADB235655 /* PaneContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13DD0F1CF1BF5AEB2EB8042 /* PaneContainerView.swift */; };
 		F4F6CC41FF265C9DA098D17E /* WorkspaceNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33009813506A712F05C01586 /* WorkspaceNaming.swift */; };
@@ -139,6 +140,7 @@
 		027D11694354B37A74D44611 /* SummaryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryLog.swift; sourceTree = "<group>"; };
 		07F919EC60D33B385F139603 /* Forge-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Forge-Bridging-Header.h"; sourceTree = "<group>"; };
 		09E805EE38B5FF260D35CE21 /* TerminalObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalObserver.swift; sourceTree = "<group>"; };
+		0B205456E82CD816617F8385 /* CommitCountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitCountStore.swift; sourceTree = "<group>"; };
 		0C342594BAD505C190C0CAB5 /* TabBarColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarColors.swift; sourceTree = "<group>"; };
 		0C67F3ACD4D8E2FD015C9B5E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0DC2B1C4E2E0CE097908C96B /* forge-cli */ = {isa = PBXFileReference; includeInIndex = 0; path = "forge-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -431,6 +433,7 @@
 			children = (
 				71607C511F2A39E630507479 /* AgentEventStore.swift */,
 				FDE1F53D3088D83C929C6089 /* AgentStore.swift */,
+				0B205456E82CD816617F8385 /* CommitCountStore.swift */,
 				A918DA6D12D11F5510C604BB /* ProjectStore.swift */,
 				E8C30B829376599F48CCB5C7 /* ReviewStore.swift */,
 				BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */,
@@ -869,6 +872,7 @@
 				DAB078E282A2AEC5CE9E5284 /* ChangesViewModel.swift in Sources */,
 				BF0BCA07938D96A6D897E1C8 /* CommandDiscovery.swift in Sources */,
 				70C18486C2C2B8BCCF6EF853 /* CommandPalette.swift in Sources */,
+				ECC026CA6E87EFC21793377A /* CommitCountStore.swift in Sources */,
 				EB14AF51A502923B533D3ABE /* DebugEventLog.swift in Sources */,
 				CADD824CA25F9BC7DC4C07CF /* DemoData.swift in Sources */,
 				1A651B037477F4DBA2ED094E /* DemoMode.swift in Sources */,
