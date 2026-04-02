@@ -38,8 +38,12 @@ struct AgentStatusDot: View {
 
     private var spinnerColor: Color? {
         switch activity {
-        case .thinking, .toolExecuting, .waitingForPermission, .waitingForInput:
+        case .thinking:
             .blue
+        case .toolExecuting:
+            .green
+        case .waitingForPermission, .waitingForInput:
+            .orange
         case .retrying:
             .red
         case .compacting:
