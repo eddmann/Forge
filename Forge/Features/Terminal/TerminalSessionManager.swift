@@ -503,8 +503,7 @@ class TerminalSessionManager: ObservableObject {
             {
                 bannerText = PokemonBanner.bannerText(
                     pokemonName: ws.name,
-                    workspacePath: ws.path,
-                    branch: ws.branch
+                    workspacePath: ws.path
                 )
             }
             let session = createSession(

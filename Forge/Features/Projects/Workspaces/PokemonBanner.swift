@@ -4,7 +4,7 @@ enum PokemonBanner {
     /// Returns raw terminal output text (with ANSI escape codes and Kitty image protocol)
     /// for the Pokémon welcome banner.
     /// Written directly to the terminal via `writeOutput`, so no command is visible.
-    static func bannerText(pokemonName: String, workspacePath: String, branch: String) -> String? {
+    static func bannerText(pokemonName: String, workspacePath: String) -> String? {
         guard let entry = PokemonDex.lookup(pokemonName) else { return nil }
 
         let esc = "\u{1B}"
@@ -37,7 +37,6 @@ enum PokemonBanner {
 
         infoLines.append("")
         infoLines.append("\(dim)Workspace: \(shortPath)\(reset)")
-        infoLines.append("\(dim)Branch:    \(branch)\(reset)")
 
         var output = "\r\n"
 
