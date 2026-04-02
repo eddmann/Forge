@@ -37,12 +37,10 @@ class GhosttyApp {
 
         let result = ghostty_init(UInt(CommandLine.argc), CommandLine.unsafeArgv)
         if result != GHOSTTY_SUCCESS {
-            print("[Forge] Failed to initialize ghostty: \(result)")
             return
         }
 
         guard let primaryConfig = ghostty_config_new() else {
-            print("[Forge] Failed to create ghostty config")
             return
         }
 
@@ -72,12 +70,10 @@ class GhosttyApp {
         } else {
             ghostty_config_free(primaryConfig)
             guard let fallbackConfig = ghostty_config_new() else {
-                print("[Forge] Failed to create ghostty fallback config")
                 return
             }
             ghostty_config_finalize(fallbackConfig)
             guard let created = ghostty_app_new(&runtimeConfig, fallbackConfig) else {
-                print("[Forge] Failed to create ghostty app")
                 ghostty_config_free(fallbackConfig)
                 return
             }

@@ -27,7 +27,6 @@ final class ForgeSocketServer {
             if isStaleSocket() {
                 unlink(socketPath)
             } else {
-                print("[Forge] Another instance owns the socket at \(socketPath)")
                 return
             }
         }
@@ -35,7 +34,6 @@ final class ForgeSocketServer {
         // Create socket
         let fd = socket(AF_UNIX, SOCK_STREAM, 0)
         guard fd >= 0 else {
-            print("[Forge] Failed to create socket: \(errno)")
             return
         }
 
@@ -56,7 +54,6 @@ final class ForgeSocketServer {
             }
         }
         guard bindResult >= 0 else {
-            print("[Forge] Failed to bind socket: \(errno)")
             close(fd)
             return
         }
@@ -65,7 +62,6 @@ final class ForgeSocketServer {
         chmod(socketPath, 0o600)
 
         guard listen(fd, 16) >= 0 else {
-            print("[Forge] Failed to listen on socket: \(errno)")
             close(fd)
             unlink(socketPath)
             return

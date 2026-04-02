@@ -191,7 +191,6 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
 
     private func createSurface(command: String?, directory: String, env: [String: String]) {
         guard let app = GhosttyApp.shared.app else {
-            print("[Forge] Ghostty app not initialized")
             return
         }
 

@@ -344,9 +344,6 @@ struct TabBarView: View {
     // MARK: - Item Provider
 
     private func createItemProvider(for tab: TabItem) -> NSItemProvider {
-        #if DEBUG
-        NSLog("[Bonsplit Drag] createItemProvider for tab: \(tab.title)")
-        #endif
 #if DEBUG
         dlog("tab.dragStart pane=\(pane.id.id.uuidString.prefix(5)) tab=\(tab.id.uuidString.prefix(5)) title=\"\(tab.title)\"")
 #endif
@@ -1058,9 +1055,6 @@ struct TabDropDelegate: DropDelegate {
     @Binding var dropLifecycle: TabDropLifecycle
 
     func performDrop(info: DropInfo) -> Bool {
-        #if DEBUG
-        NSLog("[Bonsplit Drag] performDrop called, targetIndex: \(targetIndex)")
-        #endif
 #if DEBUG
         dlog("tab.drop pane=\(pane.id.id.uuidString.prefix(5)) targetIndex=\(targetIndex)")
 #endif
@@ -1132,7 +1126,6 @@ struct TabDropDelegate: DropDelegate {
 
     func dropEntered(info: DropInfo) {
         #if DEBUG
-        NSLog("[Bonsplit Drag] dropEntered at index: \(targetIndex)")
         dlog(
             "tab.dropEntered pane=\(pane.id.id.uuidString.prefix(5)) targetIndex=\(targetIndex) " +
             "hasDrag=\(controller.draggingTab != nil ? 1 : 0) " +
@@ -1149,7 +1142,6 @@ struct TabDropDelegate: DropDelegate {
 
     func dropExited(info: DropInfo) {
         #if DEBUG
-        NSLog("[Bonsplit Drag] dropExited from index: \(targetIndex)")
         dlog("tab.dropExited pane=\(pane.id.id.uuidString.prefix(5)) targetIndex=\(targetIndex)")
         #endif
         dropLifecycle = .idle
