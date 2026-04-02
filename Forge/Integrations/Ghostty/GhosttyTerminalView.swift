@@ -633,6 +633,13 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
         0
     }
 
+    override func doCommand(by _: Selector) {
+        // Intentionally empty. The key event is already forwarded to the
+        // Ghostty surface via ghostty_surface_key. Swallowing the command
+        // here prevents AppKit from calling NSBeep() for unhandled
+        // selectors like deleteBackward:.
+    }
+
     // MARK: - Mouse Input
 
     override func mouseDown(with event: NSEvent) {
