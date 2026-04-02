@@ -48,7 +48,7 @@ struct ChangesTabView: View {
             } else {
                 ScrollViewReader { proxy in
                     ScrollView {
-                        VStack(spacing: 0) {
+                        LazyVStack(spacing: 0) {
                             ForEach(viewModel.fileDiffs) { fileDiff in
                                 let filePath = fileDiff.newPath ?? fileDiff.oldPath ?? ""
                                 let isCollapsed = viewModel.collapsedFiles.contains(filePath)

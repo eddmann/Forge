@@ -90,17 +90,15 @@ struct WorkspaceDiffList: View {
     @ViewBuilder
     private var commitsSection: some View {
         if !viewModel.commits.isEmpty {
-            VStack(spacing: 0) {
-                sectionHeader(
-                    title: "Commits",
-                    count: viewModel.commits.count,
-                    expanded: $commitsExpanded
-                )
+            sectionHeader(
+                title: "Commits",
+                count: viewModel.commits.count,
+                expanded: $commitsExpanded
+            )
 
-                if commitsExpanded {
-                    ForEach(viewModel.commits) { commit in
-                        WorkspaceCommitRow(commit: commit)
-                    }
+            if commitsExpanded {
+                ForEach(viewModel.commits) { commit in
+                    WorkspaceCommitRow(commit: commit)
                 }
             }
         }
@@ -111,23 +109,21 @@ struct WorkspaceDiffList: View {
     @ViewBuilder
     private var filesSection: some View {
         if !viewModel.fileDiffs.isEmpty {
-            VStack(spacing: 0) {
-                sectionHeader(
-                    title: "Changed Files",
-                    count: viewModel.fileDiffs.count,
-                    expanded: $filesExpanded
-                )
+            sectionHeader(
+                title: "Changed Files",
+                count: viewModel.fileDiffs.count,
+                expanded: $filesExpanded
+            )
 
-                if filesExpanded {
-                    ForEach(viewModel.fileDiffs) { fileDiff in
-                        WorkspaceFileRow(
-                            fileDiff: fileDiff,
-                            isSelected: viewModel.selectedFilePath == (fileDiff.newPath ?? fileDiff.oldPath),
-                            onSelect: {
-                                viewModel.selectFile(fileDiff.newPath ?? fileDiff.oldPath ?? "")
-                            }
-                        )
-                    }
+            if filesExpanded {
+                ForEach(viewModel.fileDiffs) { fileDiff in
+                    WorkspaceFileRow(
+                        fileDiff: fileDiff,
+                        isSelected: viewModel.selectedFilePath == (fileDiff.newPath ?? fileDiff.oldPath),
+                        onSelect: {
+                            viewModel.selectFile(fileDiff.newPath ?? fileDiff.oldPath ?? "")
+                        }
+                    )
                 }
             }
         }

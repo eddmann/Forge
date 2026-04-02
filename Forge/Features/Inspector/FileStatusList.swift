@@ -62,60 +62,58 @@ struct FileStatusList: View {
     private func section(for group: WorkingTreeGroup) -> some View {
         let files = viewModel.grouped[group] ?? []
         if !files.isEmpty {
-            VStack(spacing: 0) {
-                // Section header
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(group.accentColor)
-                        .frame(width: 6, height: 6)
+            // Section header
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(group.accentColor)
+                    .frame(width: 6, height: 6)
 
-                    Text(group.label)
-                        .font(.system(size: 11, weight: .semibold))
+                Text(group.label)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.secondary)
+
+                Text("\(files.count)")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .background(Color.white.opacity(0.06))
+                    .cornerRadius(3)
+
+                Spacer()
+
+                // Bulk action
+                Button(action: { bulkAction(for: group) }) {
+                    Text(group == .staged ? "Unstage All" : "Stage All")
+                        .font(.system(size: 11))
                         .foregroundColor(.secondary)
-
-                    Text("\(files.count)")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(Color(nsColor: .tertiaryLabelColor))
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1)
-                        .background(Color.white.opacity(0.06))
-                        .cornerRadius(3)
-
-                    Spacer()
-
-                    // Bulk action
-                    Button(action: { bulkAction(for: group) }) {
-                        Text(group == .staged ? "Unstage All" : "Stage All")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-                    .buttonStyle(.borderless)
                 }
-                .padding(.horizontal, 14)
-                .padding(.top, 12)
-                .padding(.bottom, 4)
+                .buttonStyle(.borderless)
+            }
+            .padding(.horizontal, 14)
+            .padding(.top, 12)
+            .padding(.bottom, 4)
 
-                // File rows
-                ForEach(files) { file in
-                    FileStatusRow(
-                        file: file,
-                        group: group,
-                        isSelected: viewModel.selectedFilePath == file.path,
-                        commentCount: fileCommentCount(for: file),
-                        onSelect: { viewModel.selectFile(file, staged: group == .staged) },
-                        onStageToggle: {
-                            if group == .staged {
-                                viewModel.unstage(file: file)
-                            } else {
-                                viewModel.stage(file: file)
-                            }
-                        },
-                        onDiscard: group == .conflicts ? nil : {
-                            pendingDiscard = (file, group)
-                            showDiscardConfirmation = true
+            // File rows
+            ForEach(files) { file in
+                FileStatusRow(
+                    file: file,
+                    group: group,
+                    isSelected: viewModel.selectedFilePath == file.path,
+                    commentCount: fileCommentCount(for: file),
+                    onSelect: { viewModel.selectFile(file, staged: group == .staged) },
+                    onStageToggle: {
+                        if group == .staged {
+                            viewModel.unstage(file: file)
+                        } else {
+                            viewModel.stage(file: file)
                         }
-                    )
-                }
+                    },
+                    onDiscard: group == .conflicts ? nil : {
+                        pendingDiscard = (file, group)
+                        showDiscardConfirmation = true
+                    }
+                )
             }
         }
     }
