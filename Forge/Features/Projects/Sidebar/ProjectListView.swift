@@ -12,6 +12,7 @@ struct ProjectListView: View {
     @State private var errorMessage: String?
     @State private var creatingWorkspaceForProject: Set<UUID> = []
     @State private var deletingWorkspaceIDs: Set<UUID> = []
+    @State private var mergingWorkspaceIDs: Set<UUID> = []
 
     private var sortedProjects: [Project] {
         store.projects.sorted {
@@ -117,6 +118,7 @@ struct ProjectListView: View {
                                     activeWorkspaceID: store.activeProjectID == project.id ? store.activeWorkspaceID : nil,
                                     isCreatingWorkspace: creatingWorkspaceForProject.contains(project.id),
                                     deletingWorkspaceIDs: deletingWorkspaceIDs,
+                                    mergingWorkspaceIDs: mergingWorkspaceIDs,
                                     onSelectProject: { selectProject(project) },
                                     onSelectWorkspace: { selectWorkspace($0) },
                                     onCreateWorkspaceFromDefault: { createWorkspace(for: project, branch: project.defaultBranch) },
@@ -231,10 +233,12 @@ struct ProjectListView: View {
 
     private func mergeWorkspace(_ workspace: Workspace, projectPath: String) {
         errorMessage = nil
+        mergingWorkspaceIDs.insert(workspace.id)
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 let message = try WorkspaceCloner.mergeWorkspaceIntoProject(workspace, projectPath: projectPath)
                 DispatchQueue.main.async {
+                    mergingWorkspaceIDs.remove(workspace.id)
                     store.updateWorkspaceStatus(id: workspace.id, status: .merged)
                     store.recordActivity(for: workspace.projectID)
                     store.requestGitRefresh()
@@ -243,6 +247,7 @@ struct ProjectListView: View {
                 }
             } catch {
                 DispatchQueue.main.async {
+                    mergingWorkspaceIDs.remove(workspace.id)
                     errorMessage = error.localizedDescription
                 }
             }
@@ -264,6 +269,7 @@ private struct ProjectSection: View {
     let activeWorkspaceID: UUID?
     let isCreatingWorkspace: Bool
     let deletingWorkspaceIDs: Set<UUID>
+    let mergingWorkspaceIDs: Set<UUID>
     let onSelectProject: () -> Void
     let onSelectWorkspace: (Workspace) -> Void
     let onCreateWorkspaceFromDefault: () -> Void
@@ -288,6 +294,7 @@ private struct ProjectSection: View {
         activeWorkspaceID: UUID?,
         isCreatingWorkspace: Bool,
         deletingWorkspaceIDs: Set<UUID>,
+        mergingWorkspaceIDs: Set<UUID>,
         onSelectProject: @escaping () -> Void,
         onSelectWorkspace: @escaping (Workspace) -> Void,
         onCreateWorkspaceFromDefault: @escaping () -> Void,
@@ -302,6 +309,7 @@ private struct ProjectSection: View {
         self.activeWorkspaceID = activeWorkspaceID
         self.isCreatingWorkspace = isCreatingWorkspace
         self.deletingWorkspaceIDs = deletingWorkspaceIDs
+        self.mergingWorkspaceIDs = mergingWorkspaceIDs
         self.onSelectProject = onSelectProject
         self.onSelectWorkspace = onSelectWorkspace
         self.onCreateWorkspaceFromDefault = onCreateWorkspaceFromDefault
@@ -421,6 +429,7 @@ private struct ProjectSection: View {
                         workspace: workspace,
                         isActive: activeWorkspaceID == workspace.id,
                         isDeleting: deletingWorkspaceIDs.contains(workspace.id),
+                        isMerging: mergingWorkspaceIDs.contains(workspace.id),
                         onSelect: { onSelectWorkspace(workspace) },
                         onMerge: { onMergeWorkspace(workspace) },
                         onDelete: { onDeleteWorkspace(workspace) },
@@ -488,6 +497,7 @@ private struct WorkspaceRow: View {
     let workspace: Workspace
     let isActive: Bool
     let isDeleting: Bool
+    let isMerging: Bool
     let onSelect: () -> Void
     let onMerge: () -> Void
     let onDelete: () -> Void
@@ -597,7 +607,7 @@ private struct WorkspaceRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .opacity(isDeleting ? 0.4 : 1.0)
+        .opacity(isDeleting || isMerging ? 0.4 : 1.0)
         .overlay {
             if isDeleting {
                 HStack(spacing: 6) {
@@ -607,9 +617,17 @@ private struct WorkspaceRow: View {
                         .font(.system(size: 13))
                         .foregroundColor(Color(nsColor: .secondaryLabelColor))
                 }
+            } else if isMerging {
+                HStack(spacing: 6) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Merging…")
+                        .font(.system(size: 13))
+                        .foregroundColor(Color(nsColor: .secondaryLabelColor))
+                }
             }
         }
-        .allowsHitTesting(!isDeleting)
+        .allowsHitTesting(!isDeleting && !isMerging)
         .contextMenu {
             if workspace.status == .active {
                 Button("Merge into Project") { onMerge() }
