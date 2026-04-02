@@ -26,11 +26,21 @@ final class ChangesViewModel: ObservableObject {
 
     private let diffService = GitDiffService.shared
     private var scrollCancellable: AnyCancellable?
+    private var cancellables = Set<AnyCancellable>()
 
     init(repoPath: String) {
         self.repoPath = repoPath
         loadAllDiffs()
         listenForScrollRequests()
+
+        StatusViewModel.shared.$statuses
+            .dropFirst()
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.reload()
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Load All Diffs
