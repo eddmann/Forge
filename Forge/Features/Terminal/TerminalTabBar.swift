@@ -354,7 +354,7 @@ private class TabCell: NSView, NSTextFieldDelegate {
         spinnerLayer.removeAllAnimations()
         let rotation = CABasicAnimation(keyPath: "transform.rotation.z")
         rotation.fromValue = 0
-        rotation.toValue = CGFloat.pi * 2
+        rotation.toValue = -CGFloat.pi * 2
         rotation.duration = 0.9
         rotation.repeatCount = .infinity
         rotation.timingFunction = CAMediaTimingFunction(name: .linear)

@@ -563,26 +563,11 @@ private struct WorkspaceRow: View {
                             Circle()
                                 .fill(Color.orange)
                                 .frame(width: 6, height: 6)
-                        } else if workspaceAgentStatus == .thinking {
-                            Circle()
-                                .fill(Color.blue)
-                                .frame(width: 6, height: 6)
-                                .modifier(PulseModifier())
-                        } else if workspaceAgentStatus == .toolExecuting {
-                            Circle()
-                                .fill(Color.green)
-                                .frame(width: 6, height: 6)
-                                .modifier(PulseModifier())
-                        } else if workspaceAgentStatus == .retrying {
-                            Circle()
-                                .fill(Color.red)
-                                .frame(width: 6, height: 6)
-                                .modifier(PulseModifier())
-                        } else if workspaceAgentStatus == .compacting {
-                            Circle()
-                                .fill(Color.purple)
-                                .frame(width: 6, height: 6)
-                                .modifier(PulseModifier())
+                        } else if workspaceAgentStatus == .thinking
+                                    || workspaceAgentStatus == .toolExecuting
+                                    || workspaceAgentStatus == .retrying
+                                    || workspaceAgentStatus == .compacting {
+                            AgentStatusDot(activity: workspaceAgentStatus)
                         }
                     }
                     .padding(.leading, 34)
@@ -647,21 +632,6 @@ private struct WorkspaceRow: View {
     }
 }
 
-// MARK: - Pulse Animation Modifier
-
-private struct PulseModifier: ViewModifier {
-    @State private var isPulsing = false
-
-    func body(content: Content) -> some View {
-        content
-            .opacity(isPulsing ? 0.3 : 1.0)
-            .animation(
-                .easeInOut(duration: 1.2).repeatForever(autoreverses: true),
-                value: isPulsing
-            )
-            .onAppear { isPulsing = true }
-    }
-}
 
 extension Notification.Name {
     static let openProjectRequested = Notification.Name("openProjectRequested")
