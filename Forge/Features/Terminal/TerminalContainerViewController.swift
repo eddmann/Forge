@@ -271,6 +271,8 @@ class TerminalContainerViewController: NSViewController {
             showTerminalTab(at: tabIndex)
         case let .changes(repoPath):
             showChangesTab(repoPath: repoPath, tabID: tab.id)
+        case let .workspaceDiff(repoPath, baseRef):
+            showWorkspaceDiffTab(repoPath: repoPath, baseRef: baseRef, tabID: tab.id)
         }
 
         renderedTabID = sessionManager.activeTabID
@@ -319,6 +321,33 @@ class TerminalContainerViewController: NSViewController {
         }
 
         let viewModel = ChangesViewModel(repoPath: repoPath)
+        let changesView = ChangesTabView(viewModel: viewModel)
+        let hostingView = NSHostingView(rootView: changesView)
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(hostingView)
+
+        NSLayoutConstraint.activate([
+            hostingView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            hostingView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+        ])
+
+        cachedHostingViews[tabID] = hostingView
+        currentHostingView = hostingView
+    }
+
+    private func showWorkspaceDiffTab(repoPath: String, baseRef: String, tabID: UUID) {
+        if let cached = cachedHostingViews[tabID] {
+            cached.isHidden = false
+            currentHostingView = cached
+            return
+        }
+
+        let viewModel = ChangesViewModel(
+            repoPath: repoPath,
+            branchDiffRequest: .between(baseRef, "HEAD")
+        )
         let changesView = ChangesTabView(viewModel: viewModel)
         let hostingView = NSHostingView(rootView: changesView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false

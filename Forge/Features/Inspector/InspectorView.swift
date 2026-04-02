@@ -1,15 +1,39 @@
 import SwiftUI
 
+// MARK: - Inspector Tab
+
+enum InspectorTab: String, CaseIterable {
+    case working = "Working"
+    case workspace = "Workspace"
+}
+
 struct InspectorView: View {
     @ObservedObject private var store = ProjectStore.shared
     @State private var commandsExpanded = false
     @State private var commands: [ProjectCommand] = []
+    @State private var activeTab: InspectorTab = .working
 
     var body: some View {
         VStack(spacing: 0) {
-            // Git file status list
-            FileStatusList()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // Tab bar — only show when a workspace is active
+            if store.activeWorkspace != nil {
+                InspectorTabBar(activeTab: $activeTab)
+            }
+
+            // Tab content
+            switch activeTab {
+            case .working:
+                FileStatusList()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .workspace:
+                if store.activeWorkspace != nil {
+                    WorkspaceDiffList()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    FileStatusList()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
 
             // Commands drawer pinned to bottom
             CommandsDrawer(
@@ -23,10 +47,12 @@ struct InspectorView: View {
             discoverCommands()
             Task { @MainActor in
                 StatusViewModel.shared.startAutoRefresh()
+                WorkspaceDiffViewModel.shared.startAutoRefresh()
             }
         }
         .onDisappear {
             StatusViewModel.shared.stopAutoRefresh()
+            WorkspaceDiffViewModel.shared.stopAutoRefresh()
         }
         .onChange(of: store.activeProjectID) { _, _ in
             discoverCommands()
@@ -36,8 +62,10 @@ struct InspectorView: View {
         }
         .onChange(of: store.activeWorkspaceID) { _, _ in
             discoverCommands()
+            activeTab = .working
             Task { @MainActor in
                 StatusViewModel.shared.refresh()
+                WorkspaceDiffViewModel.shared.refresh()
             }
         }
     }
@@ -60,6 +88,69 @@ struct InspectorView: View {
             projectID: store.activeProjectID,
             workspaceID: store.activeWorkspaceID
         )
+    }
+}
+
+// MARK: - Inspector Tab Bar
+
+private struct InspectorTabBar: View {
+    @Binding var activeTab: InspectorTab
+    private let theme = TerminalAppearanceStore.shared.config.theme
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                ForEach(InspectorTab.allCases, id: \.self) { tab in
+                    tabCell(tab)
+                }
+            }
+            .frame(height: 32)
+            .background(Color(nsColor: theme.chromeBackground))
+
+            // Bottom hairline
+            Rectangle()
+                .fill(Color(nsColor: theme.chromeBorder))
+                .frame(height: 0.5)
+        }
+    }
+
+    private func tabCell(_ tab: InspectorTab) -> some View {
+        InspectorTabCell(
+            title: tab.rawValue,
+            isActive: activeTab == tab,
+            theme: theme,
+            onSelect: { activeTab = tab }
+        )
+    }
+}
+
+private struct InspectorTabCell: View {
+    let title: String
+    let isActive: Bool
+    let theme: TerminalTheme
+    let onSelect: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Text(title)
+            .font(.system(size: 12, weight: .regular))
+            .foregroundColor(Color(nsColor: isActive ? theme.chromePrimaryText : theme.chromeSecondaryText))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(cellBackground)
+            .contentShape(Rectangle())
+            .onHover { isHovered = $0 }
+            .onTapGesture { onSelect() }
+    }
+
+    private var cellBackground: Color {
+        if isActive {
+            Color(nsColor: theme.chromeActiveBackground)
+        } else if isHovered {
+            Color(nsColor: theme.chromeHoverBackground)
+        } else {
+            Color(nsColor: theme.chromeBackground)
+        }
     }
 }
 

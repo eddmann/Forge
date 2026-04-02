@@ -347,6 +347,51 @@ class TerminalSessionManager: ObservableObject {
         }
     }
 
+    // MARK: - Workspace Diff Tab
+
+    /// Opens (or reuses) the workspace diff tab, optionally scrolling to a file.
+    func openWorkspaceDiffTab(repoPath: String, baseRef: String, scrollToFile: String? = nil) {
+        // Reuse existing workspace diff tab
+        if let existing = visibleTabs.first(where: { $0.kind.isWorkspaceDiff }) {
+            activeTabID = existing.id
+            focusedSessionID = nil
+            if let file = scrollToFile {
+                NotificationCenter.default.post(
+                    name: .scrollToFileInWorkspaceDiff,
+                    object: nil,
+                    userInfo: ["filePath": file]
+                )
+            }
+            return
+        }
+
+        let tab = TerminalTab(
+            id: UUID(),
+            projectID: activeProjectID,
+            workspaceID: activeWorkspaceID,
+            sessionID: UUID(),
+            title: "Workspace Changes",
+            icon: "arrow.triangle.branch",
+            kind: .workspaceDiff(repoPath: repoPath, baseRef: baseRef)
+        )
+
+        tabs.append(tab)
+        activeTabID = tab.id
+        focusedSessionID = nil
+
+        if let activeProjectID { ProjectStore.shared.recordActivity(for: activeProjectID) }
+
+        if let file = scrollToFile {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                NotificationCenter.default.post(
+                    name: .scrollToFileInWorkspaceDiff,
+                    object: nil,
+                    userInfo: ["filePath": file]
+                )
+            }
+        }
+    }
+
     // MARK: - Tab activation
 
     func activateSession(id: UUID) {
@@ -651,4 +696,5 @@ class TerminalSessionManager: ObservableObject {
 extension Notification.Name {
     static let paneSplitLayoutChanged = Notification.Name("paneSplitLayoutChanged")
     static let scrollToFileInChanges = Notification.Name("scrollToFileInChanges")
+    static let scrollToFileInWorkspaceDiff = Notification.Name("scrollToFileInWorkspaceDiff")
 }

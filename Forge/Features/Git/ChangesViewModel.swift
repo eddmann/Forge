@@ -3,9 +3,12 @@ import Foundation
 import SwiftUI
 
 /// ViewModel for the shared Changes tab — loads ALL file diffs in one scroll.
+/// When `branchDiffRequest` is set, loads a single revision-to-revision diff instead
+/// of the working tree staged/unstaged flow (used for workspace diff view).
 @MainActor
 final class ChangesViewModel: ObservableObject {
     let repoPath: String
+    let branchDiffRequest: GitDiffRequest?
 
     @Published var fileDiffs: [GitFileDiff] = []
     @Published var isLoading = true
@@ -28,19 +31,27 @@ final class ChangesViewModel: ObservableObject {
     private var scrollCancellable: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
 
-    init(repoPath: String) {
+    init(repoPath: String, branchDiffRequest: GitDiffRequest? = nil) {
         self.repoPath = repoPath
+        self.branchDiffRequest = branchDiffRequest
         loadAllDiffs()
-        listenForScrollRequests()
 
-        StatusViewModel.shared.$statuses
-            .dropFirst()
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.reload()
-            }
-            .store(in: &cancellables)
+        let scrollNotification: Notification.Name = branchDiffRequest != nil
+            ? .scrollToFileInWorkspaceDiff
+            : .scrollToFileInChanges
+        listenForScrollRequests(notification: scrollNotification)
+
+        // Only auto-reload from StatusViewModel for working tree diffs
+        if branchDiffRequest == nil {
+            StatusViewModel.shared.$statuses
+                .dropFirst()
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] _ in
+                    self?.reload()
+                }
+                .store(in: &cancellables)
+        }
     }
 
     // MARK: - Load All Diffs
@@ -48,6 +59,11 @@ final class ChangesViewModel: ObservableObject {
     func loadAllDiffs() {
         isLoading = true
         error = nil
+
+        if let branchDiffRequest {
+            loadBranchDiffs(request: branchDiffRequest)
+            return
+        }
 
         let statusVM = StatusViewModel.shared
         let statuses = statusVM.statuses
@@ -96,14 +112,29 @@ final class ChangesViewModel: ObservableObject {
         }
     }
 
+    private func loadBranchDiffs(request: GitDiffRequest) {
+        diffService.diffAsync(in: repoPath, request: request) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.isLoading = false
+                switch result {
+                case let .success(diffResult):
+                    self.fileDiffs = diffResult.files
+                case let .failure(err):
+                    self.error = err.localizedDescription
+                }
+            }
+        }
+    }
+
     func reload() {
         loadAllDiffs()
     }
 
     // MARK: - Scroll To File
 
-    private func listenForScrollRequests() {
-        scrollCancellable = NotificationCenter.default.publisher(for: .scrollToFileInChanges)
+    private func listenForScrollRequests(notification: Notification.Name) {
+        scrollCancellable = NotificationCenter.default.publisher(for: notification)
             .compactMap { $0.userInfo?["filePath"] as? String }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] filePath in

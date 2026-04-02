@@ -20,6 +20,7 @@
 		2642F6F94CF38C2D37E37D83 /* AgentConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = E79EB0D856F2E78068B504FC /* AgentConfig.swift */; };
 		268611429A1A8DAD935BBCAA /* BonsplitDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20F68C9DCE5D98462D21881D /* BonsplitDelegate.swift */; };
 		2822496228736C7358FF2727 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB98837939F9B485797E3A7 /* SettingsWindowController.swift */; };
+		2B397FF767CF6F8ADE761955 /* WorkspaceCommit.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CA93EABEB76A8CDDB0D8A4 /* WorkspaceCommit.swift */; };
 		2D45B233B746EEEEFB436AEF /* TabBarColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C342594BAD505C190C0CAB5 /* TabBarColors.swift */; };
 		32AA8DE2E57C810B1FC02B29 /* GitDiffService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447E8085460F22791A2E2002 /* GitDiffService.swift */; };
 		35DDF4BBBAADD20B50582174 /* SplitOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688827BF577108EF9FFD38F8 /* SplitOrientation.swift */; };
@@ -41,6 +42,7 @@
 		5050EFE698D87918D89621C2 /* DiffViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27615076A6D6DC12ADBB86E /* DiffViewModel.swift */; };
 		519F6930B3D931C69681CE4E /* SummaryCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E518EB16255BC5AC4967951 /* SummaryCommand.swift */; };
 		5250AFE57FA4E85444DAF169 /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10150AB1CC6C4F8AE3423ABD /* SidebarViewController.swift */; };
+		56CF6611305E42E7DE701ACD /* WorkspaceDiffList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B74FE47A67DD9F4A0C7684B /* WorkspaceDiffList.swift */; };
 		5756BA39E77383BFCAF37803 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3839390BDE8DD11221E196 /* SettingsView.swift */; };
 		5B2ADA71AF99EE2B0D9A802A /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28C3575AE17D6490A76432 /* Workspace.swift */; };
 		61EAB7F9E8DBF4632D654669 /* BonsplitController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7519165D08DFDF8192EA8F7C /* BonsplitController.swift */; };
@@ -60,6 +62,7 @@
 		6E66D7FFCF8DFBB0390ECD49 /* FileStatusList.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC582D54CE2623E5734E1EEE /* FileStatusList.swift */; };
 		70C18486C2C2B8BCCF6EF853 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E2BA9B896F72867C2704FC /* CommandPalette.swift */; };
 		7135B8F57163B17958BAAA26 /* ChangesTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FF87CF5EC77FF694158BAC /* ChangesTabView.swift */; };
+		766D9CF7612E3BE9CEC14A9E /* WorkspaceDiffViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */; };
 		792DB5B7CE3CD212E63347F3 /* JetBrainsMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */; };
 		8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */; };
 		83C38DE811797FDEC108A310 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB6C83CAC1F911908568BD7 /* StatusBarController.swift */; };
@@ -164,6 +167,7 @@
 		58123122FDD0E29B7DBF9352 /* SplitViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewContainer.swift; sourceTree = "<group>"; };
 		599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandDiscovery.swift; sourceTree = "<group>"; };
 		59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiffLineView.swift; sourceTree = "<group>"; };
+		5B74FE47A67DD9F4A0C7684B /* WorkspaceDiffList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceDiffList.swift; sourceTree = "<group>"; };
 		5F9518B116ACF472BAE659D2 /* libghostty.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libghostty.a; path = "Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64/libghostty.a"; sourceTree = "<group>"; };
 		5FDA55941BDB098A23EAE9CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		63A477301682EA23DAA59E81 /* NavigationDirection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationDirection.swift; sourceTree = "<group>"; };
@@ -201,6 +205,7 @@
 		9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarMetrics.swift; sourceTree = "<group>"; };
 		A014017376795403DB6AD56A /* AgentSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSetup.swift; sourceTree = "<group>"; };
 		A0FE24D12EFC16A9E835DFD3 /* BonsplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitView.swift; sourceTree = "<group>"; };
+		A1CA93EABEB76A8CDDB0D8A4 /* WorkspaceCommit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceCommit.swift; sourceTree = "<group>"; };
 		A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeSocketServer.swift; sourceTree = "<group>"; };
 		A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentInfoPopoverView.swift; sourceTree = "<group>"; };
 		A913D1CB5E730CFBA223F25D /* DebugEventLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugEventLog.swift; sourceTree = "<group>"; };
@@ -230,6 +235,7 @@
 		D8B6352ABACD0556576E6674 /* WordDiff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiff.swift; sourceTree = "<group>"; };
 		DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitContainerView.swift; sourceTree = "<group>"; };
 		DCF2655CE07FECC563390787 /* FileStatusRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusRow.swift; sourceTree = "<group>"; };
+		DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceDiffViewModel.swift; sourceTree = "<group>"; };
 		E462273D87AE64CBBE7EB1F3 /* AgentActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentActivity.swift; sourceTree = "<group>"; };
 		E79EB0D856F2E78068B504FC /* AgentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentConfig.swift; sourceTree = "<group>"; };
 		E8C30B829376599F48CCB5C7 /* ReviewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewStore.swift; sourceTree = "<group>"; };
@@ -461,6 +467,7 @@
 				33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */,
 				D557D56D0DBFDC04108086ED /* FileStatus.swift */,
 				D50575BD258BDA402F95EE53 /* GitDiffModels.swift */,
+				A1CA93EABEB76A8CDDB0D8A4 /* WorkspaceCommit.swift */,
 			);
 			path = Git;
 			sourceTree = "<group>";
@@ -487,6 +494,7 @@
 				DCF2655CE07FECC563390787 /* FileStatusRow.swift */,
 				CDD54FF735F21B48ED884859 /* InspectorView.swift */,
 				67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */,
+				5B74FE47A67DD9F4A0C7684B /* WorkspaceDiffList.swift */,
 			);
 			path = Inspector;
 			sourceTree = "<group>";
@@ -562,6 +570,7 @@
 				8ED7ECF021E249100D45C7B2 /* UnifiedDiffView.swift */,
 				D8B6352ABACD0556576E6674 /* WordDiff.swift */,
 				59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */,
+				DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */,
 			);
 			path = Git;
 			sourceTree = "<group>";
@@ -929,6 +938,9 @@
 				8932C47CE7A9158D452B4E4E /* WordDiffLineView.swift in Sources */,
 				5B2ADA71AF99EE2B0D9A802A /* Workspace.swift in Sources */,
 				6D10E1C247D18BA59E04D540 /* WorkspaceCloner.swift in Sources */,
+				2B397FF767CF6F8ADE761955 /* WorkspaceCommit.swift in Sources */,
+				56CF6611305E42E7DE701ACD /* WorkspaceDiffList.swift in Sources */,
+				766D9CF7612E3BE9CEC14A9E /* WorkspaceDiffViewModel.swift in Sources */,
 				F4F6CC41FF265C9DA098D17E /* WorkspaceNaming.swift in Sources */,
 				D3B75B31144F373A322543BD /* main.swift in Sources */,
 			);

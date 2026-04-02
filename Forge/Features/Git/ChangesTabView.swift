@@ -84,6 +84,12 @@ struct ChangesTabView: View {
                             proxy.scrollTo("file-\(filePath)", anchor: .top)
                         }
                     }
+                    .onReceive(NotificationCenter.default.publisher(for: .scrollToFileInWorkspaceDiff)) { notification in
+                        guard let filePath = notification.userInfo?["filePath"] as? String else { return }
+                        withAnimation {
+                            proxy.scrollTo("file-\(filePath)", anchor: .top)
+                        }
+                    }
                 }
             }
 

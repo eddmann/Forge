@@ -5,6 +5,7 @@ import Foundation
 enum TabKind: Codable, Hashable {
     case terminal
     case changes(repoPath: String)
+    case workspaceDiff(repoPath: String, baseRef: String)
 
     /// Diff tabs are transient — default to terminal when decoding
     init(from decoder: Decoder) throws {
@@ -23,6 +24,8 @@ enum TabKind: Codable, Hashable {
             try container.encode("terminal")
         case .changes:
             try container.encode("terminal") // Don't persist diff tabs
+        case .workspaceDiff:
+            try container.encode("terminal") // Don't persist diff tabs
         }
     }
 
@@ -33,6 +36,11 @@ enum TabKind: Codable, Hashable {
 
     var isChanges: Bool {
         if case .changes = self { return true }
+        return false
+    }
+
+    var isWorkspaceDiff: Bool {
+        if case .workspaceDiff = self { return true }
         return false
     }
 }
