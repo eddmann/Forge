@@ -173,6 +173,7 @@ class ProjectStore: ObservableObject {
         // Remove associated workspaces
         let projectWorkspaces = workspaces.filter { $0.projectID == id }
         for ws in projectWorkspaces {
+            AgentSetup.shared.untrustCodexProject(path: ws.path)
             try? FileManager.default.removeItem(atPath: ws.path)
         }
         workspaces.removeAll { $0.projectID == id }
@@ -198,6 +199,9 @@ class ProjectStore: ObservableObject {
 
     func deleteWorkspace(id: UUID) {
         guard let workspace = workspaces.first(where: { $0.id == id }) else { return }
+
+        // Clean up agent trust entries
+        AgentSetup.shared.untrustCodexProject(path: workspace.path)
 
         // Remove directory
         if FileManager.default.fileExists(atPath: workspace.path) {

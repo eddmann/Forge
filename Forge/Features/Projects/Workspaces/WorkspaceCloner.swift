@@ -22,6 +22,9 @@ enum WorkspaceCloner {
 
         let result = try cloneProject(source: projectPath, dest: destPath)
 
+        // Pre-seed Codex trust for this workspace (Codex doesn't walk parent dirs)
+        AgentSetup.shared.trustCodexProject(path: destPath)
+
         // Make the selected branch the base for the workspace branch.
         try checkoutWorkspaceBaseBranch(in: destPath, parentBranch: parentBranch)
 
@@ -85,6 +88,7 @@ enum WorkspaceCloner {
     // MARK: - Delete Workspace
 
     static func deleteWorkspace(_ workspace: Workspace) {
+        AgentSetup.shared.untrustCodexProject(path: workspace.path)
         if FileManager.default.fileExists(atPath: workspace.path) {
             try? FileManager.default.removeItem(atPath: workspace.path)
         }

@@ -16,6 +16,7 @@ class AgentSetup {
         installCodexHooks()
         installPiExtension()
         installOpenCodePlugin()
+        trustClaudeCodeClonesDir()
     }
 
     // MARK: - Claude Code
@@ -322,5 +323,82 @@ class AgentSetup {
         } else if !fm.fileExists(atPath: pluginPath) {
             try? pluginCode.write(toFile: pluginPath, atomically: true, encoding: .utf8)
         }
+    }
+
+    // MARK: - Workspace Trust
+
+    /// Trusts the Forge clones directory in Claude Code's config so new workspaces
+    /// skip the interactive trust dialog. Claude Code walks up parent directories
+    /// when checking trust, so a single entry for the clones dir covers all children.
+    private func trustClaudeCodeClonesDir() {
+        let configPath = NSHomeDirectory() + "/.claude/config.json"
+        let claudeDir = (configPath as NSString).deletingLastPathComponent
+        let fm = FileManager.default
+
+        guard fm.fileExists(atPath: claudeDir) else { return }
+
+        var config: [String: Any] = [:]
+        if let data = fm.contents(atPath: configPath),
+           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        {
+            config = json
+        }
+
+        let clonesPath = ForgeStore.shared.clonesDir.path
+        var projects = config["projects"] as? [String: Any] ?? [:]
+        var projectEntry = projects[clonesPath] as? [String: Any] ?? [:]
+
+        guard projectEntry["hasTrustDialogAccepted"] as? Bool != true else { return }
+
+        projectEntry["hasTrustDialogAccepted"] = true
+        projects[clonesPath] = projectEntry
+        config["projects"] = projects
+
+        if let data = try? JSONSerialization.data(withJSONObject: config, options: [.prettyPrinted, .sortedKeys]) {
+            try? data.write(to: URL(fileURLWithPath: configPath))
+        }
+    }
+
+    /// Trusts a specific project path in Codex's config. Codex does not walk parent
+    /// directories, so each workspace must be trusted individually at clone time.
+    func trustCodexProject(path: String) {
+        let configPath = NSHomeDirectory() + "/.codex/config.toml"
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: (configPath as NSString).deletingLastPathComponent) else { return }
+
+        var content = (try? String(contentsOfFile: configPath, encoding: .utf8)) ?? ""
+
+        let tomlKey = "[projects.\"\(path)\"]"
+        guard !content.contains(tomlKey) else { return }
+
+        content += "\n\(tomlKey)\ntrust_level = \"trusted\"\n"
+        try? content.write(toFile: configPath, atomically: true, encoding: .utf8)
+    }
+
+    /// Removes trust for a workspace path from Codex's config when the workspace is deleted.
+    func untrustCodexProject(path: String) {
+        let configPath = NSHomeDirectory() + "/.codex/config.toml"
+        guard let content = try? String(contentsOfFile: configPath, encoding: .utf8) else { return }
+
+        let tomlKey = "[projects.\"\(path)\"]"
+        guard content.contains(tomlKey) else { return }
+
+        // Remove the section header and its trust_level line
+        var lines = content.components(separatedBy: "\n")
+        if let idx = lines.firstIndex(where: { $0 == tomlKey }) {
+            lines.remove(at: idx)
+            // Remove the trust_level line immediately following
+            if idx < lines.count, lines[idx].trimmingCharacters(in: .whitespaces).hasPrefix("trust_level") {
+                lines.remove(at: idx)
+            }
+            // Remove any leftover blank line
+            if idx < lines.count, lines[idx].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+               idx > 0, lines[idx - 1].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            {
+                lines.remove(at: idx)
+            }
+        }
+
+        try? lines.joined(separator: "\n").write(toFile: configPath, atomically: true, encoding: .utf8)
     }
 }
