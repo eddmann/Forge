@@ -318,37 +318,36 @@ private struct ProjectSection: View {
         VStack(alignment: .leading, spacing: 0) {
             // Project row
             HStack(spacing: 0) {
-                if !workspaces.isEmpty {
-                    Button(action: { withAnimation(.easeInOut(duration: 0.12)) { toggleExpanded() } }) {
+                HStack(spacing: 0) {
+                    if !workspaces.isEmpty {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 9, weight: .semibold))
                             .foregroundColor(Color(nsColor: .secondaryLabelColor))
                             .rotationEffect(.degrees(expanded ? 90 : 0))
+                            .frame(width: 24, height: 28)
+                    } else {
+                        Spacer().frame(width: 24)
                     }
-                    .buttonStyle(.plain)
-                    .frame(width: 24, height: 28)
-                } else {
-                    Spacer().frame(width: 24)
+
+                    Text(project.name)
+                        .font(.system(size: 13))
+                        .foregroundColor(
+                            isProjectActive
+                                ? .white
+                                : Color(nsColor: .labelColor)
+                        )
+                        .lineLimit(1)
+
+                    Spacer(minLength: 8)
                 }
-
-                Text(project.name)
-                    .font(.system(size: 13))
-                    .foregroundColor(
-                        isProjectActive
-                            ? .white
-                            : Color(nsColor: .labelColor)
-                    )
-                    .lineLimit(1)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        if workspaces.isEmpty {
-                            onSelectProject()
-                        } else {
-                            withAnimation(.easeInOut(duration: 0.12)) { toggleExpanded() }
-                        }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    if workspaces.isEmpty {
+                        onSelectProject()
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.12)) { toggleExpanded() }
                     }
-
-                Spacer(minLength: 8)
+                }
 
                 // Arrow to open project terminal (only when workspaces exist)
                 if !workspaces.isEmpty {
