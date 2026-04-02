@@ -235,7 +235,6 @@ class GhosttyApp {
             }
             return true
         case GHOSTTY_ACTION_RING_BELL:
-            NSSound.beep()
             return true
         default:
             return false
