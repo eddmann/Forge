@@ -2,6 +2,7 @@
 SHELL := /bin/bash
 
 XCODEBUILD := xcodebuild -project Forge.xcodeproj -scheme Forge
+DEV_BUILD_DIR := build/dev
 BUILD_DIR := build/release
 DIST_DIR := dist
 APP_NAME := Forge.app
@@ -12,7 +13,7 @@ GHOSTTY_ARCHIVE_SHA256 := 073ea7f8ee5f889b3208365942373b53fa9cd71d0406d4599f7f15
 GHOSTTY_XCFRAMEWORK := Dependencies/GhosttyKit.xcframework
 GHOSTTY_STAMP := $(GHOSTTY_XCFRAMEWORK)/.forge-$(GHOSTTY_RELEASE_TAG)
 
-.PHONY: help deps project test build release demo lint format fmt clean can-release \
+.PHONY: help deps project test build dev release demo lint format fmt clean can-release \
 	_require-curl _require-shasum _require-tar _require-xcodebuild _require-xcodegen \
 	_require-swiftformat _require-swiftlint
 
@@ -59,6 +60,13 @@ test: project _require-xcodebuild ## Run current validation build (no XCTest bun
 
 build: test ## Build the app in Debug configuration
 
+dev: project _require-xcodebuild ## Build and open a Dev build alongside the current Forge
+	@echo "==> Building Dev..."
+	@$(XCODEBUILD) -configuration Debug -derivedDataPath "$(DEV_BUILD_DIR)" -quiet
+	@killall "Forge Dev" 2>/dev/null || true
+	@echo "==> Opening Forge Dev..."
+	@open "$(DEV_BUILD_DIR)/Build/Products/Debug/Forge Dev.app"
+
 release: project _require-xcodebuild ## Build the release app into dist/
 	@echo "==> Building Release..."
 	@$(XCODEBUILD) -configuration Release -derivedDataPath "$(BUILD_DIR)" -quiet
@@ -75,6 +83,7 @@ demo: project _require-xcodebuild ## Launch interactive demo mode for screenshot
 
 clean: _require-xcodebuild ## Remove generated artifacts and clean Xcode outputs
 	@rm -rf build dist
+	@killall "Forge Dev" 2>/dev/null || true
 	@$(XCODEBUILD) clean
 
 ##@ Quality

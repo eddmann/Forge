@@ -77,6 +77,8 @@ targets:
         Debug:
           SWIFT_OPTIMIZATION_LEVEL: "-Onone"
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG"
+          PRODUCT_BUNDLE_IDENTIFIER: com.eddmann.forge.dev
+          PRODUCT_NAME: Forge Dev
         Release:
           SWIFT_OPTIMIZATION_LEVEL: "-O"
 
