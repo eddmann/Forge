@@ -269,7 +269,7 @@ class GhosttyApp {
         lines.append("selection-foreground = \(hexString(theme.selectionForeground))")
 
         // Background opacity
-        lines.append("background-opacity = \(String(format: "%.2f", config.backgroundOpacity))")
+        lines.append("background-opacity = 1.00")
 
         // Cursor
         lines.append("cursor-style = \(config.cursorStyle.ghosttyValue)")
@@ -281,19 +281,19 @@ class GhosttyApp {
         }
 
         // Split pane styling
-        lines.append("unfocused-split-opacity = \(String(format: "%.2f", config.unfocusedSplitOpacity))")
+        lines.append("unfocused-split-opacity = 0.70")
 
         // Scrollback
         lines.append("scrollback-limit = \(config.scrollbackLines)")
 
         // Window padding
-        lines.append("window-padding-x = \(config.windowPadding)")
-        lines.append("window-padding-y = \(config.windowPadding)")
+        lines.append("window-padding-x = 2")
+        lines.append("window-padding-y = 2")
 
         // UX behavior
-        lines.append("mouse-hide-while-typing = \(config.mouseHideWhileTyping)")
-        lines.append("copy-on-select = \(config.copyOnSelect ? "clipboard" : "false")")
-        lines.append("macos-option-as-alt = \(config.optionAsAlt)")
+        lines.append("mouse-hide-while-typing = true")
+        lines.append("copy-on-select = clipboard")
+        lines.append("macos-option-as-alt = true")
         lines.append("shell-integration = detect")
         lines.append("bell = none")
 

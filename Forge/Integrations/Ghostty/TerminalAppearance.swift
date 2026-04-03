@@ -167,10 +167,6 @@ enum TerminalTheme: String, Codable, CaseIterable {
         }
     }
 
-    var unfocusedSplitOpacity: Double {
-        0.7
-    }
-
     /// 16-color ANSI palette — Xcode-style for light, standard for dark.
     var ansiColorTuples: [(r: UInt8, g: UInt8, b: UInt8)] {
         switch self {
@@ -247,24 +243,15 @@ struct TerminalAppearanceConfig: Equatable {
     var fontSize: CGFloat = 16
     var lineHeightMultiple: CGFloat = 1.4
     var theme: TerminalTheme = .dark
-    var backgroundOpacity: Double = 1.0
     var cursorStyle: CursorStyle = .block
     var cursorBlink: Bool = false
     var scrollbackLines: Int = 50000
-    var copyOnSelect: Bool = true
-    var optionAsAlt: Bool = true
-    var mouseHideWhileTyping: Bool = true
-    var unfocusedSplitOpacity: Double = 0.7
-    var windowPadding: Int = 2
     var diffFontSize: Double = 16
 
     private enum CodingKeys: String, CodingKey {
-        case font, fontSize, theme, cursorStyle, cursorBlink, copyOnSelect, optionAsAlt, mouseHideWhileTyping, diffFontSize
+        case font, fontSize, theme, cursorStyle, cursorBlink, diffFontSize
         case lineHeightMultiple = "lineHeight"
-        case backgroundOpacity = "opacity"
         case scrollbackLines = "scrollback"
-        case unfocusedSplitOpacity = "unfocusedOpacity"
-        case windowPadding = "padding"
     }
 }
 
@@ -276,15 +263,9 @@ extension TerminalAppearanceConfig: Codable {
         lineHeightMultiple = (try? c.decode(CGFloat.self, forKey: .lineHeightMultiple)) ?? 1.4
         // Gracefully handle removed themes (dracula, oneDark, nord) by falling back to .dark
         theme = (try? c.decode(TerminalTheme.self, forKey: .theme)) ?? .dark
-        backgroundOpacity = (try? c.decode(Double.self, forKey: .backgroundOpacity)) ?? 0.85
         cursorStyle = (try? c.decode(CursorStyle.self, forKey: .cursorStyle)) ?? .block
         cursorBlink = (try? c.decode(Bool.self, forKey: .cursorBlink)) ?? false
         scrollbackLines = (try? c.decode(Int.self, forKey: .scrollbackLines)) ?? 50000
-        copyOnSelect = (try? c.decode(Bool.self, forKey: .copyOnSelect)) ?? true
-        optionAsAlt = (try? c.decode(Bool.self, forKey: .optionAsAlt)) ?? true
-        mouseHideWhileTyping = (try? c.decode(Bool.self, forKey: .mouseHideWhileTyping)) ?? true
-        unfocusedSplitOpacity = (try? c.decode(Double.self, forKey: .unfocusedSplitOpacity)) ?? 0.7
-        windowPadding = (try? c.decode(Int.self, forKey: .windowPadding)) ?? 2
         diffFontSize = (try? c.decode(Double.self, forKey: .diffFontSize)) ?? 16
     }
 }

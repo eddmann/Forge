@@ -88,6 +88,11 @@ class AgentStore: ObservableObject {
         }
     }
 
+    func resetToDefaults() {
+        seedDefaults()
+        detectAvailability()
+    }
+
     func addAgent(_ agent: AgentConfig) {
         var newAgent = agent
         newAgent.isInstalled = isCommandAvailable(newAgent.command)

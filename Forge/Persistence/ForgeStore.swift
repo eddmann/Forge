@@ -91,7 +91,6 @@ struct SessionStateFile: Codable {
     var activeWorkspaceID: UUID?
     var diffViewMode: String = "Unified"
     var collapsedProjects: Set<UUID> = []
-    var hooksDeclined: Bool = false
     var workspaceSummariesEnabled: Bool = true
     var summarizerCommand: String = "claude -p --model haiku"
     var restoreScrollback: Bool = false
@@ -107,7 +106,6 @@ struct SessionStateFile: Codable {
         activeWorkspaceID = try c.decodeIfPresent(UUID.self, forKey: .activeWorkspaceID)
         diffViewMode = try c.decodeIfPresent(String.self, forKey: .diffViewMode) ?? "Unified"
         collapsedProjects = try c.decodeIfPresent(Set<UUID>.self, forKey: .collapsedProjects) ?? []
-        hooksDeclined = try c.decodeIfPresent(Bool.self, forKey: .hooksDeclined) ?? false
         workspaceSummariesEnabled = try c.decodeIfPresent(Bool.self, forKey: .workspaceSummariesEnabled) ?? true
         summarizerCommand = try c.decodeIfPresent(String.self, forKey: .summarizerCommand) ?? "claude -p --model haiku"
         restoreScrollback = try c.decodeIfPresent(Bool.self, forKey: .restoreScrollback) ?? false

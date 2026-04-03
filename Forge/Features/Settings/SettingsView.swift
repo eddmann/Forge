@@ -203,6 +203,13 @@ private struct GeneralSettingsContent: View {
                     Button("Cancel", role: .cancel) {}
                     Button("Reset") {
                         TerminalAppearanceStore.shared.config = TerminalAppearanceConfig()
+                        AgentStore.shared.resetToDefaults()
+                        ForgeStore.shared.updateStateFields { state in
+                            state.workspaceSummariesEnabled = true
+                            state.summarizerCommand = "claude -p --model haiku"
+                            state.restoreScrollback = false
+                            state.diffViewMode = "Unified"
+                        }
                     }
                 } message: {
                     Text("This will delete all Forge settings. Projects and workspaces will not be affected.")
