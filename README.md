@@ -30,7 +30,7 @@ Forge is [living personal software](#living-personal-software) built to make loc
 
 ## Features
 
-- GPU-accelerated terminal via Ghostty, with tabs and arbitrarily nested split panes
+- GPU-accelerated terminal via [Ghostty](https://ghostty.org), with tabs and arbitrarily nested split panes
 - Project and workspace management with lightweight APFS CoW workspace cloning
 - Agent-aware terminal sessions with live status, notifications, and agent launching
 - Built-in Git status, diff, and review workflows
@@ -92,8 +92,8 @@ open Forge.xcodeproj
 
 ## Dependencies
 
-- [GhosttyKit](https://ghostty.org) for GPU-accelerated terminal rendering, fetched by `make deps`
-- Bonsplit for split-pane management
+- [GhosttyKit](https://github.com/manaflow-ai/ghostty/releases) for GPU-accelerated terminal rendering, fetched by `make deps`
+- [Bonsplit](https://bonsplit.alasdairmonk.com/) for split-pane management
 
 `make project`, `make build`, and `make release` fetch the pinned GhosttyKit artifact automatically when it is missing.
 
