@@ -19,6 +19,19 @@
             return DemoMode(rawValue: args[index + 1])
         }
 
+        /// Returns (width, height) parsed from --width / --height CLI args, if provided.
+        static func windowSize() -> (width: CGFloat, height: CGFloat)? {
+            let args = CommandLine.arguments
+            guard let wi = args.firstIndex(of: "--width"), wi + 1 < args.count,
+                  let hi = args.firstIndex(of: "--height"), hi + 1 < args.count,
+                  let w = Double(args[wi + 1]),
+                  let h = Double(args[hi + 1])
+            else {
+                return nil
+            }
+            return (CGFloat(w), CGFloat(h))
+        }
+
         var description: String {
             switch self {
             case .projectList: "Sidebar with projects and workspaces"

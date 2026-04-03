@@ -18,6 +18,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         mainWindowController = MainWindowController()
         mainWindowController?.showWindow(nil)
+
+        #if DEBUG
+            if let size = DemoMode.windowSize(), let window = mainWindowController?.window {
+                window.setFrameAutosaveName("")
+                window.setContentSize(NSSize(width: size.width, height: size.height))
+                window.center()
+            }
+        #endif
+
         mainWindowController?.window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
 

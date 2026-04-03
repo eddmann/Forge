@@ -9,6 +9,10 @@ PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 echo "=== Forge Demo Mode Launcher ==="
 echo ""
 
+# Screenshot dimensions (default: 1400x900)
+WIDTH="${DEMO_WIDTH:-1400}"
+HEIGHT="${DEMO_HEIGHT:-900}"
+
 MODES=(
     "projectList|Sidebar with projects and workspaces"
     "splitDiff|Side-by-side diff view with file changes"
@@ -53,15 +57,16 @@ xcodebuild -project Forge.xcodeproj \
     -derivedDataPath build/demo \
     -quiet
 
-APP_PATH="build/demo/Build/Products/Debug/Forge.app"
+APP_PATH="build/demo/Build/Products/Debug/Forge Dev.app"
 
 if [ ! -d "$APP_PATH" ]; then
     echo "Error: Forge.app not found at $APP_PATH"
     exit 1
 fi
 
-echo "Launching with --demo $SELECTED_MODE..."
-open "$APP_PATH" --args --demo "$SELECTED_MODE"
+echo "Launching with --demo $SELECTED_MODE (${WIDTH}x${HEIGHT})..."
+open "$APP_PATH" --args --demo "$SELECTED_MODE" --width "$WIDTH" --height "$HEIGHT"
 
 echo ""
-echo "Done! Forge launched with demo mode: $SELECTED_MODE"
+echo "Done! Forge launched with demo mode: $SELECTED_MODE (${WIDTH}x${HEIGHT})"
+echo "Override with: DEMO_WIDTH=1600 DEMO_HEIGHT=1000 $0"
