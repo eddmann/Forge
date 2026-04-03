@@ -4,9 +4,9 @@ import SwiftUI
 enum SettingsSection: String, CaseIterable, Identifiable {
     case general = "General"
     case appearance = "Terminal"
+    case workspace = "Workspace"
     case agents = "Agents"
     case shortcuts = "Shortcuts"
-    case advanced = "Advanced"
 
     var id: String {
         rawValue
@@ -16,9 +16,9 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         switch self {
         case .general: "gearshape"
         case .appearance: "terminal"
+        case .workspace: "folder.badge.gearshape"
         case .agents: "cpu"
         case .shortcuts: "keyboard"
-        case .advanced: "wrench.and.screwdriver"
         }
     }
 }
@@ -52,12 +52,12 @@ struct SettingsView: View {
                         GeneralSettingsContent()
                     case .appearance:
                         AppearanceSettingsContent()
+                    case .workspace:
+                        WorkspaceSettingsContent()
                     case .agents:
                         CodingAgentsSettingsContent()
                     case .shortcuts:
                         ShortcutsSettingsContent()
-                    case .advanced:
-                        AdvancedSettingsContent()
                     }
                 }
                 .padding(24)
@@ -140,10 +140,7 @@ private struct SettingDivider: View {
 
 private struct GeneralSettingsContent: View {
     @ObservedObject private var appearanceStore = TerminalAppearanceStore.shared
-    @State private var defaultShell: String = ""
-    @State private var cloneDirectory: String = ""
-    @State private var workspaceSummariesEnabled: Bool = true
-    @State private var summarizerCommand: String = SummaryCommand.defaultCommand
+    @State private var showResetConfirm = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -163,20 +160,9 @@ private struct GeneralSettingsContent: View {
 
             SettingDivider()
 
-            SettingRow(title: "Default shell", description: "Shell used for new terminal sessions.") {
-                Picker("", selection: $defaultShell) {
-                    Text("zsh").tag("/bin/zsh")
-                    Text("bash").tag("/bin/bash")
-                }
-                .pickerStyle(.menu)
-                .frame(width: 160)
-            }
-
-            SettingDivider()
-
             SettingRow(title: "Clone directory", description: "Where workspace clones are stored.") {
                 HStack(spacing: 6) {
-                    Text(abbreviate(cloneDirectory))
+                    Text(abbreviate(ForgeStore.shared.clonesDir.path))
                         .font(.system(size: 12, design: .monospaced))
                         .foregroundColor(.secondary)
                         .lineLimit(1)
@@ -191,54 +177,50 @@ private struct GeneralSettingsContent: View {
 
             SettingDivider()
 
-            // Workspace Summaries — grouped card
-            VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Workspace summaries")
-                            .font(.system(size: 13, weight: .semibold))
-                        Text("Summarize workspace activity in the sidebar when agents finish tasks.")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-                    Spacer()
-                    Toggle("", isOn: $workspaceSummariesEnabled)
-                        .toggleStyle(.switch)
-                        .labelsHidden()
-                        .onChange(of: workspaceSummariesEnabled) { newValue in
-                            ForgeStore.shared.updateStateFields { $0.workspaceSummariesEnabled = newValue }
-                        }
-                }
-                .padding(.vertical, 12)
+            SettingRow(title: "Data directory", description: "Where Forge stores configuration and state.") {
+                HStack(spacing: 6) {
+                    Text(abbreviate(dataDir))
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
 
-                if workspaceSummariesEnabled {
-                    Divider()
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Command")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(.secondary)
-                        TextField("", text: $summarizerCommand)
-                            .textFieldStyle(.roundedBorder)
-                            .font(.system(size: 12, design: .monospaced))
-                            .onSubmit {
-                                ForgeStore.shared.updateStateFields { $0.summarizerCommand = summarizerCommand }
-                            }
-                        Text("Terminal context is piped via stdin. Press Enter to save.")
-                            .font(.system(size: 10))
-                            .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+                    Button("Open") {
+                        NSWorkspace.shared.open(URL(fileURLWithPath: dataDir))
                     }
-                    .padding(.vertical, 10)
+                    .controlSize(.small)
                 }
             }
+
+            SettingDivider()
+
+            SettingRow(title: "Reset settings", description: "Reset all settings to their defaults.") {
+                Button("Reset", role: .destructive) {
+                    showResetConfirm = true
+                }
+                .controlSize(.small)
+                .alert("Reset all settings?", isPresented: $showResetConfirm) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Reset") {
+                        TerminalAppearanceStore.shared.config = TerminalAppearanceConfig()
+                    }
+                } message: {
+                    Text("This will delete all Forge settings. Projects and workspaces will not be affected.")
+                }
+            }
+
+            SettingDivider()
+
+            SettingRow(title: "Version", description: "Current Forge version.") {
+                Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+            }
         }
-        .onAppear {
-            defaultShell = ShellEnvironment.defaultShell
-            cloneDirectory = ForgeStore.shared.clonesDir.path
-            let state = ForgeStore.shared.loadStateFields()
-            workspaceSummariesEnabled = state.workspaceSummariesEnabled
-            summarizerCommand = state.summarizerCommand
-        }
+    }
+
+    private var dataDir: String {
+        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".forge").path
     }
 
     private func abbreviate(_ path: String) -> String {
@@ -262,7 +244,7 @@ private struct AppearanceSettingsContent: View {
                 .font(.system(size: 20, weight: .bold))
                 .padding(.bottom, 20)
 
-            SettingRow(title: "Terminal font", description: "Font family for the terminal.") {
+            SettingRow(title: "Font", description: "Font family used in terminal sessions.") {
                 Picker("", selection: $store.config.font) {
                     ForEach(TerminalFont.allCases, id: \.self) { font in
                         Text(font.displayName).tag(font)
@@ -274,7 +256,7 @@ private struct AppearanceSettingsContent: View {
 
             SettingDivider()
 
-            SettingRow(title: "Font size", description: "Terminal font size in points.") {
+            SettingRow(title: "Font size", description: "Size in points.") {
                 HStack(spacing: 8) {
                     Button(action: { if store.config.fontSize > 10 { store.config.fontSize -= 1 } }) {
                         Image(systemName: "minus")
@@ -298,7 +280,7 @@ private struct AppearanceSettingsContent: View {
 
             SettingDivider()
 
-            SettingRow(title: "Line height", description: "Line height multiplier for the terminal.") {
+            SettingRow(title: "Line height", description: "Spacing between lines.") {
                 HStack(spacing: 8) {
                     Button(action: { if store.config.lineHeightMultiple > 1.0 { store.config.lineHeightMultiple -= 0.1 } }) {
                         Image(systemName: "minus")
@@ -322,7 +304,7 @@ private struct AppearanceSettingsContent: View {
 
             SettingDivider()
 
-            SettingRow(title: "Diff font size", description: "Font size for the diff/review viewer.") {
+            SettingRow(title: "Diff font size", description: "Font size used in the review viewer.") {
                 HStack(spacing: 8) {
                     Button(action: { if store.config.diffFontSize > 10 { store.config.diffFontSize -= 1 } }) {
                         Image(systemName: "minus")
@@ -346,7 +328,7 @@ private struct AppearanceSettingsContent: View {
 
             SettingDivider()
 
-            SettingRow(title: "Cursor style", description: "Shape of the terminal cursor.") {
+            SettingRow(title: "Cursor style", description: "Cursor shape.") {
                 Picker("", selection: $store.config.cursorStyle) {
                     ForEach(CursorStyle.allCases, id: \.self) { style in
                         Text(style.displayName).tag(style)
@@ -358,7 +340,7 @@ private struct AppearanceSettingsContent: View {
 
             SettingDivider()
 
-            SettingRow(title: "Cursor blink", description: "Whether the cursor blinks.") {
+            SettingRow(title: "Cursor blink", description: "Animate the cursor.") {
                 Toggle("", isOn: $store.config.cursorBlink)
                     .toggleStyle(.switch)
                     .controlSize(.small)
@@ -366,7 +348,7 @@ private struct AppearanceSettingsContent: View {
 
             SettingDivider()
 
-            SettingRow(title: "Scrollback lines", description: "Number of lines kept in terminal history.") {
+            SettingRow(title: "Scrollback lines", description: "Maximum lines retained in history.") {
                 HStack(spacing: 8) {
                     Button(action: {
                         store.config.scrollbackLines = max(1000, store.config.scrollbackLines - 10000)
@@ -394,7 +376,7 @@ private struct AppearanceSettingsContent: View {
 
             SettingDivider()
 
-            SettingRow(title: "Restore scrollback", description: "Restore previous terminal output when reopening sessions.") {
+            SettingRow(title: "Restore scrollback", description: "Restore terminal output when reopening a session.") {
                 Toggle("", isOn: $restoreScrollback)
                     .toggleStyle(.switch)
                     .controlSize(.small)
@@ -411,6 +393,61 @@ private struct AppearanceSettingsContent: View {
     private func formatNumber(_ n: Int) -> String {
         if n >= 1000 { return "\(n / 1000)K" }
         return "\(n)"
+    }
+}
+
+// MARK: - Workspace
+
+private struct WorkspaceSettingsContent: View {
+    @State private var workspaceSummariesEnabled: Bool = true
+    @State private var summarizerCommand: String = SummaryCommand.defaultCommand
+    @State private var debounceTask: DispatchWorkItem?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Workspace")
+                .font(.system(size: 20, weight: .bold))
+                .padding(.bottom, 20)
+
+            SettingRow(title: "Summaries", description: "Summarize workspace activity in the sidebar when agents finish tasks.") {
+                Toggle("", isOn: $workspaceSummariesEnabled)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+                    .onChange(of: workspaceSummariesEnabled) { newValue in
+                        ForgeStore.shared.updateStateFields { $0.workspaceSummariesEnabled = newValue }
+                    }
+            }
+
+            if workspaceSummariesEnabled {
+                SettingDivider()
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Command")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.secondary)
+                    TextField("", text: $summarizerCommand)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.system(size: 12, design: .monospaced))
+                        .onChange(of: summarizerCommand) { newValue in
+                            debounceTask?.cancel()
+                            let task = DispatchWorkItem {
+                                ForgeStore.shared.updateStateFields { $0.summarizerCommand = newValue }
+                            }
+                            debounceTask = task
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: task)
+                        }
+                    Text("The command receives terminal context via stdin.")
+                        .font(.system(size: 10))
+                        .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+                }
+                .padding(.vertical, 10)
+            }
+        }
+        .onAppear {
+            let state = ForgeStore.shared.loadStateFields()
+            workspaceSummariesEnabled = state.workspaceSummariesEnabled
+            summarizerCommand = state.summarizerCommand
+        }
     }
 }
 
@@ -450,7 +487,7 @@ private struct CodingAgentsSettingsContent: View {
                 .controlSize(.small)
 
                 Button(action: { store.detectAvailability() }) {
-                    Label("Re-detect", systemImage: "arrow.clockwise")
+                    Label("Check Availability", systemImage: "arrow.clockwise")
                 }
                 .controlSize(.small)
 
@@ -593,7 +630,7 @@ private struct AgentEditorInline: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Review Command").font(.system(size: 11, weight: .medium)).foregroundColor(.secondary)
-                Text("Command to launch with a review file. Use $REVIEW_FILE as placeholder for the file path.")
+                Text("Use $REVIEW_FILE as a placeholder for the file path.")
                     .font(.system(size: 10))
                     .foregroundColor(Color(nsColor: .tertiaryLabelColor))
                 TextField("e.g. claude $REVIEW_FILE", text: $reviewCommand)
@@ -603,9 +640,14 @@ private struct AgentEditorInline: View {
 
             HStack {
                 Spacer()
-                Button("Save") { save() }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
+                Button(action: { save() }) {
+                    Text("Save")
+                        .font(.system(size: 12, weight: .medium))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
             }
         }
     }
@@ -628,19 +670,29 @@ private struct AgentEditorInline: View {
 // MARK: - Shortcuts
 
 private struct ShortcutsSettingsContent: View {
-    private let shortcuts: [(String, String)] = [
-        ("New Tab", "\u{2318}T"),
-        ("Close Tab", "\u{2318}W"),
-        ("Open Project", "\u{2318}\u{21E7}O"),
-        ("Settings", "\u{2318},"),
-        ("Split Vertically", "\u{2318}D"),
-        ("Split Horizontally", "\u{2318}\u{21E7}D"),
-        ("Close Pane", "\u{2318}\u{2325}W"),
-        ("Next Pane", "\u{2318}]"),
-        ("Previous Pane", "\u{2318}["),
-        ("Toggle Sidebar", "\u{2318}0"),
-        ("Toggle Inspector", "\u{2318}\u{2325}0"),
-        ("Tab 1–9", "\u{2318}1–9")
+    private let sections: [(String, [(String, String)])] = [
+        ("Tabs", [
+            ("New Tab", "\u{2318}T"),
+            ("Close Tab", "\u{2318}W"),
+            ("Tab 1–9", "\u{2318}1–9"),
+            ("Previous Tab", "\u{2318}\u{21E7}["),
+            ("Next Tab", "\u{2318}\u{21E7}]")
+        ]),
+        ("Panes", [
+            ("Split Vertically", "\u{2318}D"),
+            ("Split Horizontally", "\u{2318}\u{21E7}D"),
+            ("Close Pane", "\u{2318}\u{2325}W"),
+            ("Next Pane", "\u{2318}]"),
+            ("Previous Pane", "\u{2318}[")
+        ]),
+        ("View", [
+            ("Toggle Sidebar", "\u{2318}0"),
+            ("Toggle Inspector", "\u{2318}\u{2325}0")
+        ]),
+        ("Other", [
+            ("Open Project", "\u{2318}\u{21E7}O"),
+            ("Settings", "\u{2318},")
+        ])
     ]
 
     var body: some View {
@@ -649,86 +701,34 @@ private struct ShortcutsSettingsContent: View {
                 .font(.system(size: 20, weight: .bold))
                 .padding(.bottom, 20)
 
-            ForEach(shortcuts, id: \.0) { shortcut in
-                HStack {
-                    Text(shortcut.0)
-                        .font(.system(size: 13))
-                    Spacer()
-                    Text(shortcut.1)
-                        .font(.system(size: 13, design: .monospaced))
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.white.opacity(0.06))
-                        .cornerRadius(4)
-                }
-                .padding(.vertical, 6)
-
-                if shortcut.0 != shortcuts.last?.0 {
-                    SettingDivider()
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Advanced
-
-private struct AdvancedSettingsContent: View {
-    @State private var showResetConfirm = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Advanced")
-                .font(.system(size: 20, weight: .bold))
-                .padding(.bottom, 20)
-
-            SettingRow(title: "Data directory", description: "Where Forge stores configuration and state.") {
-                Text(abbreviate(dataDir))
-                    .font(.system(size: 12, design: .monospaced))
+            ForEach(sections, id: \.0) { section in
+                Text(section.0)
+                    .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.secondary)
-            }
+                    .textCase(.uppercase)
+                    .padding(.top, section.0 == sections.first?.0 ? 0 : 16)
+                    .padding(.bottom, 8)
 
-            SettingDivider()
-
-            SettingRow(title: "Version", description: "Current Forge version.") {
-                Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev")
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
-            }
-
-            SettingDivider()
-
-            SettingRow(title: "Reset settings", description: "Delete all settings and restart fresh.") {
-                Button("Reset", role: .destructive) {
-                    showResetConfirm = true
-                }
-                .controlSize(.small)
-                .alert("Reset all settings?", isPresented: $showResetConfirm) {
-                    Button("Cancel", role: .cancel) {}
-                    Button("Reset") {
-                        resetSettings()
+                ForEach(section.1, id: \.0) { shortcut in
+                    HStack {
+                        Text(shortcut.0)
+                            .font(.system(size: 13))
+                        Spacer()
+                        Text(shortcut.1)
+                            .font(.system(size: 13, design: .monospaced))
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.white.opacity(0.06))
+                            .cornerRadius(4)
                     }
-                } message: {
-                    Text("This will delete all Forge settings. Projects and workspaces will not be affected.")
+                    .padding(.vertical, 6)
+
+                    if shortcut.0 != section.1.last?.0 {
+                        SettingDivider()
+                    }
                 }
             }
         }
-    }
-
-    private var dataDir: String {
-        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".forge").path
-    }
-
-    private func abbreviate(_ path: String) -> String {
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        if path.hasPrefix(home) {
-            return "~" + path.dropFirst(home.count)
-        }
-        return path
-    }
-
-    private func resetSettings() {
-        TerminalAppearanceStore.shared.config = TerminalAppearanceConfig()
     }
 }
