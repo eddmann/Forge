@@ -7,7 +7,7 @@
 > [!WARNING]
 > Lots of running to explore features — expect clanker slop underneath for now.
 
-A native macOS tool for managing local coding-agent workflows.
+A native macOS terminal for local coding-agent workflows.
 
 <p align="center">
   <img src="docs/screenshot.png" alt="Forge screenshot" width="800">
@@ -15,9 +15,7 @@ A native macOS tool for managing local coding-agent workflows.
 
 ## Why
 
-Forge is [living personal software](#living-personal-software) built to make local coding-agent workflows easier to manage, with isolated workspaces, local diff review, feedback, and merge-back into the project.
-
-It focuses on:
+Forge is [living personal software](#living-personal-software) built to make local coding-agent workflows easier to manage, focusing on:
 
 - Running multiple agent sessions without losing track of what each one is doing
 - Giving agents isolated workspaces for local changes
