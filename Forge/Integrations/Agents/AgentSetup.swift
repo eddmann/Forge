@@ -216,6 +216,11 @@ class AgentSetup {
             } catch {}
           }
 
+          // Set terminal title so Forge's TerminalObserver can detect the agent
+          function setTitle(t: string) { process.stdout.write(`\\x1b]0;${t}\\x07`); }
+
+          pi.on("session_start", () => setTitle("pi"));
+          pi.on("session_shutdown", () => setTitle(""));
           pi.on("agent_start", () => send("agent_start"));
           pi.on("agent_end", (e: any) => send("stop", { messages: e.messages?.length }));
           pi.on("turn_start", (e: any) => send("turn_start", { turnIndex: e.turnIndex }));
