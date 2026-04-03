@@ -205,6 +205,130 @@
             )
         }
 
+        // MARK: - Additional File Diffs
+
+        /// Multiple file diffs for the changes tab / workspace diff view.
+        static func fileDiffs() -> [GitFileDiff] {
+            [
+                sampleDiff().files.first!, // auth.ts (reuse existing)
+                barcodeDiff(),
+                rateLimitDiff()
+            ]
+        }
+
+        private static func barcodeDiff() -> GitFileDiff {
+            let hunks = [
+                GitDiffHunk(
+                    id: "barcode-hunk-1",
+                    oldStart: 1,
+                    oldCount: 6,
+                    newStart: 1,
+                    newCount: 9,
+                    header: "import { createCanvas } from 'canvas'",
+                    rawHeader: "@@ -1,6 +1,9 @@",
+                    lines: [
+                        GitDiffLine(id: "b-1", kind: .context, oldLineNumber: 1, newLineNumber: 1, text: "import { createCanvas } from 'canvas'", rawLine: " import { createCanvas } from 'canvas'"),
+                        GitDiffLine(id: "b-2", kind: .added, oldLineNumber: nil, newLineNumber: 2, text: "import { validateInput } from '../utils/validation'", rawLine: "+import { validateInput } from '../utils/validation'"),
+                        GitDiffLine(id: "b-3", kind: .added, oldLineNumber: nil, newLineNumber: 3, text: "import { BarcodeFormat } from '../types'", rawLine: "+import { BarcodeFormat } from '../types'"),
+                        GitDiffLine(id: "b-4", kind: .context, oldLineNumber: 2, newLineNumber: 4, text: "", rawLine: " "),
+                        GitDiffLine(id: "b-5", kind: .removed, oldLineNumber: 3, newLineNumber: nil, text: "export function generateBarcode(data: string) {", rawLine: "-export function generateBarcode(data: string) {"),
+                        GitDiffLine(id: "b-6", kind: .added, oldLineNumber: nil, newLineNumber: 5, text: "export function generateBarcode(data: string, format: BarcodeFormat = 'code128') {", rawLine: "+export function generateBarcode(data: string, format: BarcodeFormat = 'code128') {"),
+                        GitDiffLine(id: "b-7", kind: .added, oldLineNumber: nil, newLineNumber: 6, text: "  validateInput(data, format)", rawLine: "+  validateInput(data, format)"),
+                        GitDiffLine(id: "b-8", kind: .context, oldLineNumber: 4, newLineNumber: 7, text: "  const canvas = createCanvas(200, 80)", rawLine: "   const canvas = createCanvas(200, 80)"),
+                        GitDiffLine(id: "b-9", kind: .context, oldLineNumber: 5, newLineNumber: 8, text: "  const ctx = canvas.getContext('2d')", rawLine: "   const ctx = canvas.getContext('2d')"),
+                        GitDiffLine(id: "b-10", kind: .context, oldLineNumber: 6, newLineNumber: 9, text: "", rawLine: " ")
+                    ]
+                )
+            ]
+
+            return GitFileDiff(
+                oldPath: "src/handlers/barcode.ts",
+                newPath: "src/handlers/barcode.ts",
+                change: .modified,
+                isBinary: false,
+                hunks: hunks,
+                patch: "",
+                similarity: nil
+            )
+        }
+
+        private static func rateLimitDiff() -> GitFileDiff {
+            let hunks = [
+                GitDiffHunk(
+                    id: "rate-hunk-1",
+                    oldStart: 0,
+                    oldCount: 0,
+                    newStart: 1,
+                    newCount: 18,
+                    header: "",
+                    rawHeader: "@@ -0,0 +1,18 @@",
+                    lines: [
+                        GitDiffLine(id: "r-1", kind: .added, oldLineNumber: nil, newLineNumber: 1, text: "import { Request, Response, NextFunction } from 'express'", rawLine: "+import { Request, Response, NextFunction } from 'express'"),
+                        GitDiffLine(id: "r-2", kind: .added, oldLineNumber: nil, newLineNumber: 2, text: "", rawLine: "+"),
+                        GitDiffLine(id: "r-3", kind: .added, oldLineNumber: nil, newLineNumber: 3, text: "const windowMs = 15 * 60 * 1000 // 15 minutes", rawLine: "+const windowMs = 15 * 60 * 1000 // 15 minutes"),
+                        GitDiffLine(id: "r-4", kind: .added, oldLineNumber: nil, newLineNumber: 4, text: "const maxRequests = 100", rawLine: "+const maxRequests = 100"),
+                        GitDiffLine(id: "r-5", kind: .added, oldLineNumber: nil, newLineNumber: 5, text: "const hits = new Map<string, { count: number; resetAt: number }>()", rawLine: "+const hits = new Map<string, { count: number; resetAt: number }>()"),
+                        GitDiffLine(id: "r-6", kind: .added, oldLineNumber: nil, newLineNumber: 6, text: "", rawLine: "+"),
+                        GitDiffLine(id: "r-7", kind: .added, oldLineNumber: nil, newLineNumber: 7, text: "export function rateLimit(handler: Function) {", rawLine: "+export function rateLimit(handler: Function) {"),
+                        GitDiffLine(id: "r-8", kind: .added, oldLineNumber: nil, newLineNumber: 8, text: "  return async (req: Request, res: Response, next: NextFunction) => {", rawLine: "+  return async (req: Request, res: Response, next: NextFunction) => {"),
+                        GitDiffLine(id: "r-9", kind: .added, oldLineNumber: nil, newLineNumber: 9, text: "    const key = req.ip ?? 'unknown'", rawLine: "+    const key = req.ip ?? 'unknown'"),
+                        GitDiffLine(id: "r-10", kind: .added, oldLineNumber: nil, newLineNumber: 10, text: "    const now = Date.now()", rawLine: "+    const now = Date.now()"),
+                        GitDiffLine(id: "r-11", kind: .added, oldLineNumber: nil, newLineNumber: 11, text: "    const entry = hits.get(key)", rawLine: "+    const entry = hits.get(key)"),
+                        GitDiffLine(id: "r-12", kind: .added, oldLineNumber: nil, newLineNumber: 12, text: "", rawLine: "+"),
+                        GitDiffLine(id: "r-13", kind: .added, oldLineNumber: nil, newLineNumber: 13, text: "    if (entry && entry.resetAt > now && entry.count >= maxRequests) {", rawLine: "+    if (entry && entry.resetAt > now && entry.count >= maxRequests) {"),
+                        GitDiffLine(id: "r-14", kind: .added, oldLineNumber: nil, newLineNumber: 14, text: "      return res.status(429).json({ error: 'Too many requests' })", rawLine: "+      return res.status(429).json({ error: 'Too many requests' })"),
+                        GitDiffLine(id: "r-15", kind: .added, oldLineNumber: nil, newLineNumber: 15, text: "    }", rawLine: "+    }"),
+                        GitDiffLine(id: "r-16", kind: .added, oldLineNumber: nil, newLineNumber: 16, text: "", rawLine: "+"),
+                        GitDiffLine(id: "r-17", kind: .added, oldLineNumber: nil, newLineNumber: 17, text: "    hits.set(key, { count: (entry?.count ?? 0) + 1, resetAt: now + windowMs })", rawLine: "+    hits.set(key, { count: (entry?.count ?? 0) + 1, resetAt: now + windowMs })"),
+                        GitDiffLine(id: "r-18", kind: .added, oldLineNumber: nil, newLineNumber: 18, text: "    return handler(req, res, next)", rawLine: "+    return handler(req, res, next)")
+                    ]
+                )
+            ]
+
+            return GitFileDiff(
+                oldPath: nil,
+                newPath: "src/middleware/rateLimit.ts",
+                change: .added,
+                isBinary: false,
+                hunks: hunks,
+                patch: "",
+                similarity: nil
+            )
+        }
+
+        // MARK: - Workspace Commits
+
+        static func workspaceCommits() -> [WorkspaceCommit] {
+            let now = Date()
+            let calendar = Calendar.current
+            return [
+                WorkspaceCommit(
+                    hash: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+                    message: "Add rate limiting middleware with sliding window",
+                    author: "forge/charmander",
+                    date: calendar.date(byAdding: .hour, value: -2, to: now)!
+                ),
+                WorkspaceCommit(
+                    hash: "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1",
+                    message: "Wrap auth handler with rate limiter",
+                    author: "forge/charmander",
+                    date: calendar.date(byAdding: .hour, value: -1, to: now)!
+                ),
+                WorkspaceCommit(
+                    hash: "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2",
+                    message: "Add token claim validation and input sanitization",
+                    author: "forge/charmander",
+                    date: calendar.date(byAdding: .minute, value: -30, to: now)!
+                ),
+                WorkspaceCommit(
+                    hash: "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3",
+                    message: "Add barcode format validation and type safety",
+                    author: "forge/charmander",
+                    date: calendar.date(byAdding: .minute, value: -10, to: now)!
+                )
+            ]
+        }
+
         // MARK: - Summaries
 
         static func summaries() -> [UUID: String] {

@@ -13,8 +13,8 @@
             switch mode {
             case .projectList:
                 configureProjectListMode()
-            case .agentActive:
-                configureAgentActiveMode()
+            case .splitDiff:
+                configureSplitDiffMode()
             case .diffReview:
                 configureDiffReviewMode()
             case .splitPanes:
@@ -59,23 +59,24 @@
             StatusViewModel.shared.setDemo(statuses: statuses)
         }
 
-        private static func configureAgentActiveMode() {
+        private static func configureSplitDiffMode() {
             let store = ProjectStore.shared
             store.activeProjectID = DemoData.projectIDs.api
             store.activeWorkspaceID = DemoData.workspaceIDs.charmander
             store.currentBranch = "forge/charmander"
 
+            // Agent idle — reviewing changes
             let tabID = DemoData.tabIDs.tab1
-            AgentEventStore.shared.activityByTab[tabID] = .toolExecuting
-            AgentEventStore.shared.setDemoState(tabID: tabID, state: AgentSessionState(
-                agent: "claude",
-                activity: .toolExecuting,
-                currentTool: ToolExecution(name: "Edit", input: ["file": "src/handlers/auth.ts"], startedAt: Date()),
-                model: "claude-sonnet-4-20250514"
-            ))
+            AgentEventStore.shared.activityByTab[tabID] = .idle
 
             let statuses = DemoData.fileStatuses()
             StatusViewModel.shared.setDemo(statuses: statuses)
+
+            // Populate workspace diff tab with commits and multiple file diffs
+            WorkspaceDiffViewModel.shared.setDemo(
+                commits: DemoData.workspaceCommits(),
+                fileDiffs: DemoData.fileDiffs()
+            )
         }
 
         private static func configureDiffReviewMode() {
@@ -90,6 +91,12 @@
             // Agent idle — review in progress
             let tabID = DemoData.tabIDs.tab1
             AgentEventStore.shared.activityByTab[tabID] = .idle
+
+            // Populate workspace tab with commits
+            WorkspaceDiffViewModel.shared.setDemo(
+                commits: DemoData.workspaceCommits(),
+                fileDiffs: DemoData.fileDiffs()
+            )
         }
 
         private static func configureSplitPanesMode() {
@@ -119,6 +126,12 @@
 
             let statuses = DemoData.fileStatuses()
             StatusViewModel.shared.setDemo(statuses: statuses)
+
+            // Populate workspace tab with commits
+            WorkspaceDiffViewModel.shared.setDemo(
+                commits: DemoData.workspaceCommits(),
+                fileDiffs: DemoData.fileDiffs()
+            )
         }
     }
 #endif

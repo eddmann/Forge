@@ -137,6 +137,20 @@ final class WorkspaceDiffViewModel: ObservableObject {
         }
     }
 
+    #if DEBUG
+        func setDemo(commits demoCommits: [WorkspaceCommit], fileDiffs demoFileDiffs: [GitFileDiff]) {
+            commits = demoCommits
+            fileDiffs = demoFileDiffs
+            stats = GitDiffStats(
+                filesChanged: demoFileDiffs.count,
+                insertions: demoFileDiffs.reduce(0) { $0 + $1.additions },
+                deletions: demoFileDiffs.reduce(0) { $0 + $1.deletions }
+            )
+            isLoading = false
+            error = nil
+        }
+    #endif
+
     // MARK: - File Selection
 
     func selectFile(_ filePath: String) {

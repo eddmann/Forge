@@ -11,8 +11,8 @@ echo ""
 
 MODES=(
     "projectList|Sidebar with projects and workspaces"
-    "agentActive|Agent mid-task with file changes"
-    "diffReview|Inspector showing unified diff review"
+    "splitDiff|Side-by-side diff view with file changes"
+    "diffReview|Inspector with pending changes and commit composer"
     "splitPanes|Multiple split panes with agent activity"
 )
 

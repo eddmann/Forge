@@ -5,7 +5,7 @@
     /// Launch with `--demo <mode>` to activate.
     enum DemoMode: String, CaseIterable {
         case projectList
-        case agentActive
+        case splitDiff
         case diffReview
         case splitPanes
 
@@ -22,8 +22,8 @@
         var description: String {
             switch self {
             case .projectList: "Sidebar with projects and workspaces"
-            case .agentActive: "Agent mid-task with file changes"
-            case .diffReview: "Inspector showing unified diff review"
+            case .splitDiff: "Side-by-side diff view with file changes"
+            case .diffReview: "Inspector with pending changes and commit composer"
             case .splitPanes: "Multiple split panes with agent activity"
             }
         }
