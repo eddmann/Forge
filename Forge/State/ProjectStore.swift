@@ -23,6 +23,7 @@ class ProjectStore: ObservableObject {
     @Published var allBranches: [String] = []
     @Published var availableEditors: [ExternalEditor] = []
     @Published var gitRefreshTrigger: UInt = 0
+    @Published var creatingWorkspaceForProject: Set<UUID> = []
 
     func requestGitRefresh() {
         gitRefreshTrigger += 1

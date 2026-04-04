@@ -10,7 +10,10 @@ struct ProjectListView: View {
     @ObservedObject private var sessionManager = TerminalSessionManager.shared
     @State private var searchText = ""
     @State private var errorMessage: String?
-    @State private var creatingWorkspaceForProject: Set<UUID> = []
+    private var creatingWorkspaceForProject: Set<UUID> {
+        store.creatingWorkspaceForProject
+    }
+
     @State private var deletingWorkspaceIDs: Set<UUID> = []
     @State private var mergingWorkspaceIDs: Set<UUID> = []
 
@@ -197,7 +200,7 @@ struct ProjectListView: View {
     }
 
     private func createWorkspace(for project: Project, branch: String) {
-        creatingWorkspaceForProject.insert(project.id)
+        store.creatingWorkspaceForProject.insert(project.id)
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 let workspace = try WorkspaceCloner.createWorkspace(
@@ -207,14 +210,14 @@ struct ProjectListView: View {
                     parentBranch: branch
                 )
                 DispatchQueue.main.async {
-                    creatingWorkspaceForProject.remove(project.id)
+                    store.creatingWorkspaceForProject.remove(project.id)
                     store.addWorkspace(workspace)
                     store.activeProjectID = project.id
                     store.activeWorkspaceID = workspace.id
                 }
             } catch {
                 DispatchQueue.main.async {
-                    creatingWorkspaceForProject.remove(project.id)
+                    store.creatingWorkspaceForProject.remove(project.id)
                     errorMessage = error.localizedDescription
                 }
             }
