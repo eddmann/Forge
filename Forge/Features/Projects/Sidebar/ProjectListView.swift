@@ -193,6 +193,7 @@ struct ProjectListView: View {
     private func selectWorkspace(_ workspace: Workspace) {
         store.activeProjectID = workspace.projectID
         store.activeWorkspaceID = workspace.id
+        store.recordActivity(forWorkspace: workspace.id)
     }
 
     private func createWorkspace(for project: Project, branch: String) {
@@ -241,6 +242,7 @@ struct ProjectListView: View {
                     mergingWorkspaceIDs.remove(workspace.id)
                     store.updateWorkspaceStatus(id: workspace.id, status: .merged)
                     store.recordActivity(for: workspace.projectID)
+                    store.recordActivity(forWorkspace: workspace.id)
                     store.requestGitRefresh()
                     // Clear any previous error
                     errorMessage = nil

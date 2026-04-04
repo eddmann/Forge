@@ -387,5 +387,8 @@ final class StatusViewModel: ObservableObject {
         if let pid = ProjectStore.shared.activeProjectID {
             ProjectStore.shared.recordActivity(for: pid)
         }
+        if let wsID = ProjectStore.shared.activeWorkspaceID {
+            ProjectStore.shared.recordActivity(forWorkspace: wsID)
+        }
     }
 }

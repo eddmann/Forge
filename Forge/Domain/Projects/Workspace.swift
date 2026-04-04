@@ -10,6 +10,7 @@ struct Workspace: Identifiable, Codable, Equatable, Hashable {
     var status: Status
     var fullClone: Bool
     var createdAt: Date
+    var lastActiveAt: Date?
 
     enum Status: String, Codable {
         case active
@@ -26,7 +27,8 @@ struct Workspace: Identifiable, Codable, Equatable, Hashable {
         parentBranch: String,
         status: Status = .active,
         fullClone: Bool = false,
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        lastActiveAt: Date? = nil
     ) {
         self.id = id
         self.projectID = projectID
@@ -37,5 +39,6 @@ struct Workspace: Identifiable, Codable, Equatable, Hashable {
         self.status = status
         self.fullClone = fullClone
         self.createdAt = createdAt
+        self.lastActiveAt = lastActiveAt
     }
 }

@@ -253,6 +253,9 @@ struct SendToAgentView: View {
         if let pid = TerminalSessionManager.shared.activeProjectID {
             ProjectStore.shared.recordActivity(for: pid)
         }
+        if let wsID = ProjectStore.shared.activeWorkspaceID {
+            ProjectStore.shared.recordActivity(forWorkspace: wsID)
+        }
     }
 
     private func copyToClipboard() {

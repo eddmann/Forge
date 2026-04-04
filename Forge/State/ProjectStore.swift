@@ -52,9 +52,13 @@ class ProjectStore: ObservableObject {
         effectiveRootPath
     }
 
-    /// Workspaces belonging to a specific project.
+    /// Workspaces belonging to a specific project, sorted by last activity (most recent first).
     func workspaces(for projectID: UUID) -> [Workspace] {
-        workspaces.filter { $0.projectID == projectID }
+        workspaces
+            .filter { $0.projectID == projectID }
+            .sorted {
+                ($0.lastActiveAt ?? $0.createdAt) > ($1.lastActiveAt ?? $1.createdAt)
+            }
     }
 
     private init() {
@@ -90,6 +94,18 @@ class ProjectStore: ObservableObject {
             return
         }
         projects[idx].lastActiveAt = now
+        debouncedSave()
+    }
+
+    func recordActivity(forWorkspace workspaceID: UUID) {
+        guard let idx = workspaces.firstIndex(where: { $0.id == workspaceID }) else { return }
+        let now = Date()
+        if let last = workspaces[idx].lastActiveAt,
+           now.timeIntervalSince(last) < activityThrottleInterval
+        {
+            return
+        }
+        workspaces[idx].lastActiveAt = now
         debouncedSave()
     }
 

@@ -247,6 +247,7 @@ class TerminalSessionManager: ObservableObject {
         focusedSessionID = session.id
 
         if let pid { ProjectStore.shared.recordActivity(for: pid) }
+        if let wsID { ProjectStore.shared.recordActivity(forWorkspace: wsID) }
 
         return session
     }
