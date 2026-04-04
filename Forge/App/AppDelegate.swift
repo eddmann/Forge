@@ -2,8 +2,14 @@ import AppKit
 import CoreText
 import UserNotifications
 
-class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate, NSMenuDelegate {
     var mainWindowController: MainWindowController?
+
+    private var agentSubmenu: NSMenu!
+    private var openRecentSubmenu: NSMenu!
+    private var openInEditorSubmenu: NSMenu!
+    private var windowTabMenu: NSMenu!
+    private let windowMenuStaticItemCount = 3 // Minimize, Zoom, separator
 
     func applicationDidFinishLaunching(_: Notification) {
         registerBundledFonts()
@@ -108,118 +114,308 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         }
     }
 
+    // MARK: - Main Menu
+
     private func setupMainMenu() {
         let mainMenu = NSMenu()
+        mainMenu.addItem(buildAppMenu())
+        mainMenu.addItem(buildFileMenu())
+        mainMenu.addItem(buildEditMenu())
+        mainMenu.addItem(buildViewMenu())
+        mainMenu.addItem(buildWindowMenu())
+        NSApplication.shared.mainMenu = mainMenu
+    }
 
-        // App menu
-        let appMenuItem = NSMenuItem()
-        mainMenu.addItem(appMenuItem)
-        let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "About Forge", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
-        appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Settings…", action: #selector(showSettings(_:)), keyEquivalent: ",")
-        appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Hide Forge", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
+    private func buildAppMenu() -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu()
+        menu.addItem(withTitle: "About Forge", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Settings…", action: #selector(showSettings(_:)), keyEquivalent: ",")
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Hide Forge", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         let hideOthersItem = NSMenuItem(title: "Hide Others", action: #selector(NSApplication.hideOtherApplications(_:)), keyEquivalent: "h")
         hideOthersItem.keyEquivalentModifierMask = [.command, .option]
-        appMenu.addItem(hideOthersItem)
-        appMenu.addItem(withTitle: "Show All", action: #selector(NSApplication.unhideAllApplications(_:)), keyEquivalent: "")
-        appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "Quit Forge", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        appMenuItem.submenu = appMenu
+        menu.addItem(hideOthersItem)
+        menu.addItem(withTitle: "Show All", action: #selector(NSApplication.unhideAllApplications(_:)), keyEquivalent: "")
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Quit Forge", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        item.submenu = menu
+        return item
+    }
 
-        // File menu
-        let fileMenuItem = NSMenuItem()
-        mainMenu.addItem(fileMenuItem)
-        let fileMenu = NSMenu(title: "File")
-        fileMenu.addItem(withTitle: "New Tab", action: #selector(newTab(_:)), keyEquivalent: "t")
-        fileMenu.addItem(withTitle: "Close Tab", action: #selector(closeTab(_:)), keyEquivalent: "w")
-        fileMenu.addItem(.separator())
-        let openProjectItem = NSMenuItem(title: "Open Project…", action: #selector(openProject(_:)), keyEquivalent: "o")
-        openProjectItem.keyEquivalentModifierMask = [.command, .shift]
-        fileMenu.addItem(openProjectItem)
-        fileMenuItem.submenu = fileMenu
+    private func buildFileMenu() -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu(title: "File")
 
-        // Edit menu
-        let editMenuItem = NSMenuItem()
-        mainMenu.addItem(editMenuItem)
-        let editMenu = NSMenu(title: "Edit")
-        editMenu.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
-        editMenu.addItem(withTitle: "Redo", action: Selector(("redo:")), keyEquivalent: "Z")
-        editMenu.addItem(.separator())
-        editMenu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
-        editMenu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
-        editMenu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
-        editMenu.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
-        editMenuItem.submenu = editMenu
+        // New tabs
+        menu.addItem(withTitle: "New Tab", action: #selector(newTab(_:)), keyEquivalent: "t")
+        let agentTabItem = NSMenuItem(title: "New Tab with Agent", action: nil, keyEquivalent: "t")
+        agentTabItem.keyEquivalentModifierMask = [.command, .shift]
+        agentSubmenu = NSMenu()
+        agentSubmenu.delegate = self
+        agentTabItem.submenu = agentSubmenu
+        menu.addItem(agentTabItem)
 
-        // Shell menu (split panes)
-        let shellMenuItem = NSMenuItem()
-        mainMenu.addItem(shellMenuItem)
-        let shellMenu = NSMenu(title: "Shell")
+        menu.addItem(.separator())
 
-        shellMenu.addItem(withTitle: "Split Pane Vertically", action: #selector(splitVertical(_:)), keyEquivalent: "d")
-        let splitHItem = NSMenuItem(title: "Split Pane Horizontally", action: #selector(splitHorizontal(_:)), keyEquivalent: "d")
-        splitHItem.keyEquivalentModifierMask = [.command, .shift]
-        shellMenu.addItem(splitHItem)
-        shellMenu.addItem(.separator())
-
+        // Close operations
+        menu.addItem(withTitle: "Close Tab", action: #selector(closeTab(_:)), keyEquivalent: "w")
         let closePaneItem = NSMenuItem(title: "Close Pane", action: #selector(closePane(_:)), keyEquivalent: "w")
         closePaneItem.keyEquivalentModifierMask = [.command, .option]
-        shellMenu.addItem(closePaneItem)
-        shellMenu.addItem(.separator())
+        menu.addItem(closePaneItem)
+        let closeWindowItem = NSMenuItem(title: "Close Window", action: #selector(closeWindow(_:)), keyEquivalent: "w")
+        closeWindowItem.keyEquivalentModifierMask = [.command, .shift]
+        menu.addItem(closeWindowItem)
 
-        shellMenu.addItem(withTitle: "Next Pane", action: #selector(focusNextPane(_:)), keyEquivalent: "]")
-        shellMenu.addItem(withTitle: "Previous Pane", action: #selector(focusPreviousPane(_:)), keyEquivalent: "[")
+        menu.addItem(.separator())
 
-        shellMenuItem.submenu = shellMenu
+        // Project operations
+        let openProjectItem = NSMenuItem(title: "Open Project…", action: #selector(openProject(_:)), keyEquivalent: "o")
+        openProjectItem.keyEquivalentModifierMask = [.command, .shift]
+        menu.addItem(openProjectItem)
+        let recentItem = NSMenuItem(title: "Open Recent", action: nil, keyEquivalent: "")
+        openRecentSubmenu = NSMenu()
+        openRecentSubmenu.delegate = self
+        recentItem.submenu = openRecentSubmenu
+        menu.addItem(recentItem)
 
-        // View menu
-        let viewMenuItem = NSMenuItem()
-        mainMenu.addItem(viewMenuItem)
-        let viewMenu = NSMenu(title: "View")
+        menu.addItem(.separator())
+
+        // Open in external apps
+        menu.addItem(withTitle: "Open in Finder", action: #selector(openInFinder(_:)), keyEquivalent: "")
+        let editorItem = NSMenuItem(title: "Open in Editor", action: nil, keyEquivalent: "")
+        openInEditorSubmenu = NSMenu()
+        openInEditorSubmenu.delegate = self
+        editorItem.submenu = openInEditorSubmenu
+        menu.addItem(editorItem)
+        menu.addItem(withTitle: "Copy Project Path", action: #selector(copyProjectPath(_:)), keyEquivalent: "")
+
+        item.submenu = menu
+        return item
+    }
+
+    private func buildEditMenu() -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu(title: "Edit")
+        menu.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
+        menu.addItem(withTitle: "Redo", action: Selector(("redo:")), keyEquivalent: "Z")
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        menu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        menu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        menu.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        item.submenu = menu
+        return item
+    }
+
+    private func buildViewMenu() -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu(title: "View")
+
+        // Panels
         let toggleSidebarItem = NSMenuItem(title: "Toggle Sidebar", action: #selector(MainSplitViewController.toggleLeftSidebar(_:)), keyEquivalent: "0")
-        viewMenu.addItem(toggleSidebarItem)
+        menu.addItem(toggleSidebarItem)
         let toggleInspectorItem = NSMenuItem(title: "Toggle Inspector", action: #selector(MainSplitViewController.toggleRightSidebar(_:)), keyEquivalent: "0")
         toggleInspectorItem.keyEquivalentModifierMask = [.command, .option]
-        viewMenu.addItem(toggleInspectorItem)
-        viewMenuItem.submenu = viewMenu
+        menu.addItem(toggleInspectorItem)
 
-        // Window menu (tab switching)
-        let windowMenuItem = NSMenuItem()
-        mainMenu.addItem(windowMenuItem)
-        let windowMenu = NSMenu(title: "Window")
-        windowMenu.addItem(withTitle: "Minimize", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m")
-        windowMenu.addItem(withTitle: "Zoom", action: #selector(NSWindow.performZoom(_:)), keyEquivalent: "")
-        windowMenu.addItem(.separator())
+        menu.addItem(.separator())
 
-        // Tab switching: Cmd+1 through Cmd+9
-        for i in 1 ... 9 {
-            let item = NSMenuItem(title: "Tab \(i)", action: #selector(switchToTab(_:)), keyEquivalent: "\(i)")
-            item.tag = i
-            windowMenu.addItem(item)
-        }
-        windowMenu.addItem(.separator())
+        // Pane splitting
+        menu.addItem(withTitle: "Split Pane Vertically", action: #selector(splitVertical(_:)), keyEquivalent: "d")
+        let splitHItem = NSMenuItem(title: "Split Pane Horizontally", action: #selector(splitHorizontal(_:)), keyEquivalent: "d")
+        splitHItem.keyEquivalentModifierMask = [.command, .shift]
+        menu.addItem(splitHItem)
 
-        let prevTabItem = NSMenuItem(title: "Show Previous Tab", action: #selector(previousTab(_:)), keyEquivalent: "[")
-        prevTabItem.keyEquivalentModifierMask = [.command, .shift]
-        windowMenu.addItem(prevTabItem)
+        menu.addItem(.separator())
 
-        let nextTabItem = NSMenuItem(title: "Show Next Tab", action: #selector(nextTab(_:)), keyEquivalent: "]")
+        // Pane and tab navigation
+        menu.addItem(withTitle: "Next Pane", action: #selector(focusNextPane(_:)), keyEquivalent: "]")
+        menu.addItem(withTitle: "Previous Pane", action: #selector(focusPreviousPane(_:)), keyEquivalent: "[")
+        let nextTabItem = NSMenuItem(title: "Next Tab", action: #selector(nextTab(_:)), keyEquivalent: "]")
         nextTabItem.keyEquivalentModifierMask = [.command, .shift]
-        windowMenu.addItem(nextTabItem)
+        menu.addItem(nextTabItem)
+        let prevTabItem = NSMenuItem(title: "Previous Tab", action: #selector(previousTab(_:)), keyEquivalent: "[")
+        prevTabItem.keyEquivalentModifierMask = [.command, .shift]
+        menu.addItem(prevTabItem)
 
-        windowMenuItem.submenu = windowMenu
-        NSApplication.shared.windowsMenu = windowMenu
+        menu.addItem(.separator())
 
-        // Help menu
-        let helpMenuItem = NSMenuItem()
-        mainMenu.addItem(helpMenuItem)
-        let helpMenu = NSMenu(title: "Help")
-        helpMenuItem.submenu = helpMenu
-        NSApplication.shared.helpMenu = helpMenu
+        // Font size
+        menu.addItem(withTitle: "Bigger", action: #selector(makeFontBigger(_:)), keyEquivalent: "=")
+        let biggerNumpad = NSMenuItem(title: "Bigger", action: #selector(makeFontBigger(_:)), keyEquivalent: "+")
+        biggerNumpad.isHidden = true
+        menu.addItem(biggerNumpad)
+        menu.addItem(withTitle: "Smaller", action: #selector(makeFontSmaller(_:)), keyEquivalent: "-")
+        menu.addItem(withTitle: "Reset Font Size", action: #selector(resetFontSize(_:)), keyEquivalent: "")
 
-        NSApplication.shared.mainMenu = mainMenu
+        menu.addItem(.separator())
+
+        // Full screen
+        let fullScreenItem = NSMenuItem(title: "Enter Full Screen", action: #selector(toggleFullScreen(_:)), keyEquivalent: "f")
+        fullScreenItem.keyEquivalentModifierMask = [.command, .control]
+        menu.addItem(fullScreenItem)
+
+        item.submenu = menu
+        return item
+    }
+
+    private func buildWindowMenu() -> NSMenuItem {
+        let item = NSMenuItem()
+        let menu = NSMenu(title: "Window")
+
+        menu.addItem(withTitle: "Minimize", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m")
+        menu.addItem(withTitle: "Zoom", action: #selector(NSWindow.performZoom(_:)), keyEquivalent: "")
+        menu.addItem(.separator())
+
+        // Dynamic tab list and Bring All to Front are added in menuNeedsUpdate
+
+        menu.delegate = self
+        windowTabMenu = menu
+        item.submenu = menu
+        NSApplication.shared.windowsMenu = menu
+
+        return item
+    }
+
+    // MARK: - NSMenuDelegate
+
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        if menu === agentSubmenu {
+            rebuildAgentMenu(menu)
+        } else if menu === openRecentSubmenu {
+            rebuildOpenRecentMenu(menu)
+        } else if menu === openInEditorSubmenu {
+            rebuildOpenInEditorMenu(menu)
+        } else if menu === windowTabMenu {
+            rebuildWindowTabList(menu)
+        }
+    }
+
+    private func rebuildAgentMenu(_ menu: NSMenu) {
+        menu.removeAllItems()
+        MainActor.assumeIsolated {
+            let installed = AgentStore.shared.agents.filter(\.isInstalled)
+            if installed.isEmpty {
+                let placeholder = NSMenuItem(title: "No Agents Available", action: nil, keyEquivalent: "")
+                placeholder.isEnabled = false
+                menu.addItem(placeholder)
+                return
+            }
+            for agent in installed {
+                let item = NSMenuItem(title: agent.name, action: #selector(newTabWithAgent(_:)), keyEquivalent: "")
+                item.target = self
+                item.representedObject = agent
+                item.image = agent.nsImage(size: 14)
+                menu.addItem(item)
+            }
+        }
+    }
+
+    private func rebuildOpenRecentMenu(_ menu: NSMenu) {
+        menu.removeAllItems()
+        let projects = ProjectStore.shared.projects
+            .sorted { ($0.lastActiveAt ?? .distantPast) > ($1.lastActiveAt ?? .distantPast) }
+            .prefix(10)
+
+        if projects.isEmpty {
+            let placeholder = NSMenuItem(title: "No Recent Projects", action: nil, keyEquivalent: "")
+            placeholder.isEnabled = false
+            menu.addItem(placeholder)
+            return
+        }
+
+        for project in projects {
+            let item = NSMenuItem(title: project.name, action: #selector(openRecentProject(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = project.id
+            menu.addItem(item)
+        }
+    }
+
+    private func rebuildOpenInEditorMenu(_ menu: NSMenu) {
+        menu.removeAllItems()
+        let editors = ProjectStore.shared.availableEditors
+
+        if editors.isEmpty {
+            let placeholder = NSMenuItem(title: "No Editors Found", action: nil, keyEquivalent: "")
+            placeholder.isEnabled = false
+            menu.addItem(placeholder)
+            return
+        }
+
+        for editor in editors {
+            let item = NSMenuItem(title: editor.name, action: #selector(openInEditorAction(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = editor.command
+            menu.addItem(item)
+        }
+    }
+
+    private func rebuildWindowTabList(_ menu: NSMenu) {
+        // Remove everything after the static items (Minimize, Zoom, separator)
+        while menu.items.count > windowMenuStaticItemCount {
+            menu.removeItem(at: windowMenuStaticItemCount)
+        }
+
+        MainActor.assumeIsolated {
+            let mgr = TerminalSessionManager.shared
+            let tabs = mgr.visibleTabs
+
+            for (index, tab) in tabs.enumerated() {
+                let item = NSMenuItem(title: tab.title, action: #selector(switchToTab(_:)), keyEquivalent: index < 9 ? "\(index + 1)" : "")
+                item.target = self
+                item.tag = index + 1
+                if tab.id == mgr.activeTabID {
+                    item.state = .on
+                }
+                menu.addItem(item)
+            }
+
+            if !tabs.isEmpty {
+                menu.addItem(.separator())
+            }
+        }
+
+        menu.addItem(withTitle: "Bring All to Front", action: #selector(NSApplication.arrangeInFront(_:)), keyEquivalent: "")
+    }
+
+    // MARK: - NSMenuItemValidation
+
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        MainActor.assumeIsolated {
+            let mgr = TerminalSessionManager.shared
+            let store = ProjectStore.shared
+            let appearance = TerminalAppearanceStore.shared
+
+            switch menuItem.action {
+            case #selector(closeTab(_:)):
+                return mgr.activeTabID != nil
+            case #selector(closePane(_:)):
+                return (mgr.activeTab?.paneManager?.paneCount ?? 1) > 1
+            case #selector(closeWindow(_:)):
+                return NSApp.mainWindow?.isVisible == true
+            case #selector(openInFinder(_:)), #selector(copyProjectPath(_:)):
+                return store.effectivePath != nil
+            case #selector(splitVertical(_:)), #selector(splitHorizontal(_:)):
+                return mgr.activeTab?.kind.isTerminal == true
+            case #selector(focusNextPane(_:)), #selector(focusPreviousPane(_:)):
+                return (mgr.activeTab?.paneManager?.paneCount ?? 1) > 1
+            case #selector(makeFontBigger(_:)):
+                return appearance.config.fontSize < 24
+            case #selector(makeFontSmaller(_:)):
+                return appearance.config.fontSize > 10
+            case #selector(resetFontSize(_:)):
+                return appearance.config.fontSize != 16
+            case #selector(toggleFullScreen(_:)):
+                let isFS = NSApp.mainWindow?.styleMask.contains(.fullScreen) == true
+                menuItem.title = isFS ? "Exit Full Screen" : "Enter Full Screen"
+                return NSApp.mainWindow != nil
+            default:
+                return true
+            }
+        }
     }
 
     private func registerBundledFonts() {
@@ -351,5 +547,81 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 ProjectStore.shared.addProject(from: url)
             }
         }
+    }
+
+    @objc func newTabWithAgent(_ sender: NSMenuItem) {
+        MainActor.assumeIsolated {
+            guard var agent = sender.representedObject as? AgentConfig else { return }
+            let store = ProjectStore.shared
+            if let pid = store.activeProjectID {
+                agent = agent.applying(projectID: pid)
+            }
+            let dir = store.effectivePath ?? NSHomeDirectory()
+            TerminalSessionManager.shared.createSession(
+                workingDirectory: dir,
+                title: agent.name,
+                launchCommand: agent.fullCommand,
+                closeOnExit: true,
+                projectID: store.activeProjectID,
+                workspaceID: store.activeWorkspaceID,
+                icon: agent.icon
+            )
+        }
+    }
+
+    @objc func closeWindow(_: Any?) {
+        MainActor.assumeIsolated {
+            StatusBarController.shared.hideWindow()
+        }
+    }
+
+    @objc func openRecentProject(_ sender: NSMenuItem) {
+        guard let projectID = sender.representedObject as? UUID else { return }
+        ProjectStore.shared.activeProjectID = projectID
+        ProjectStore.shared.activeWorkspaceID = nil
+    }
+
+    @objc func openInFinder(_: Any?) {
+        guard let path = ProjectStore.shared.effectivePath else { return }
+        NSWorkspace.shared.open(URL(fileURLWithPath: path))
+    }
+
+    @objc func openInEditorAction(_ sender: NSMenuItem) {
+        guard let command = sender.representedObject as? String,
+              let path = ProjectStore.shared.effectivePath else { return }
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        process.arguments = [command, path]
+        try? process.run()
+    }
+
+    @objc func copyProjectPath(_: Any?) {
+        guard let path = ProjectStore.shared.effectivePath else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(path, forType: .string)
+    }
+
+    @objc func makeFontBigger(_: Any?) {
+        MainActor.assumeIsolated {
+            let store = TerminalAppearanceStore.shared
+            store.config.fontSize = min(store.config.fontSize + 1, 24)
+        }
+    }
+
+    @objc func makeFontSmaller(_: Any?) {
+        MainActor.assumeIsolated {
+            let store = TerminalAppearanceStore.shared
+            store.config.fontSize = max(store.config.fontSize - 1, 10)
+        }
+    }
+
+    @objc func resetFontSize(_: Any?) {
+        MainActor.assumeIsolated {
+            TerminalAppearanceStore.shared.config.fontSize = 16
+        }
+    }
+
+    @objc func toggleFullScreen(_: Any?) {
+        NSApp.mainWindow?.toggleFullScreen(nil)
     }
 }
