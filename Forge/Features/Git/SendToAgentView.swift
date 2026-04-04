@@ -213,6 +213,14 @@ struct SendToAgentView: View {
         // Switch to the agent's tab
         TerminalSessionManager.shared.activateSession(id: session.sessionID)
 
+        // Activity log: review sent
+        if let wsID = TerminalSessionManager.shared.activeWorkspaceID {
+            ActivityLogStore.shared.append(workspaceID: wsID, event: ActivityEvent(
+                kind: .reviewSent,
+                title: "Review sent to \(session.tabTitle)"
+            ))
+        }
+
         // Clear review comments — they're now persisted in the XML file
         clearReviewComments()
         recordActivity()
@@ -237,6 +245,14 @@ struct SendToAgentView: View {
             workspaceID: TerminalSessionManager.shared.activeWorkspaceID,
             icon: agent.icon
         )
+
+        // Activity log: review sent
+        if let wsID = TerminalSessionManager.shared.activeWorkspaceID {
+            ActivityLogStore.shared.append(workspaceID: wsID, event: ActivityEvent(
+                kind: .reviewSent,
+                title: "Review sent to \(agent.name)"
+            ))
+        }
 
         // Clear review comments — they're now persisted in the XML file
         clearReviewComments()

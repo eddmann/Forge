@@ -407,6 +407,43 @@ class TerminalSessionManager: ObservableObject {
         }
     }
 
+    // MARK: - Activity Log Tab
+
+    func openActivityLogTab() {
+        // Toggle: if activity log is already showing, switch to first real tab
+        if let existing = visibleTabs.first(where: { $0.kind.isActivityLog }),
+           activeTabID == existing.id
+        {
+            if let first = visibleTabs.first(where: { !$0.kind.isActivityLog }) {
+                activeTabID = first.id
+            }
+            return
+        }
+
+        guard let wsID = activeWorkspaceID else { return }
+
+        // Reuse existing activity log tab
+        if let existing = visibleTabs.first(where: { $0.kind.isActivityLog }) {
+            activeTabID = existing.id
+            focusedSessionID = nil
+            return
+        }
+
+        let tab = TerminalTab(
+            id: UUID(),
+            projectID: activeProjectID,
+            workspaceID: activeWorkspaceID,
+            sessionID: UUID(),
+            title: "Activity",
+            icon: "bolt.horizontal.circle",
+            kind: .activityLog(workspaceID: wsID)
+        )
+
+        tabs.append(tab)
+        activeTabID = tab.id
+        focusedSessionID = nil
+    }
+
     // MARK: - Tab activation
 
     func activateSession(id: UUID) {

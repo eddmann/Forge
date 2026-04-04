@@ -6,8 +6,9 @@ enum TabKind: Codable, Hashable {
     case terminal
     case changes(repoPath: String)
     case workspaceDiff(repoPath: String, baseRef: String)
+    case activityLog(workspaceID: UUID)
 
-    /// Diff tabs are transient — default to terminal when decoding
+    /// Non-terminal tabs are transient — default to terminal when decoding
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let raw = try? container.decode(String.self), raw == "terminal" {
@@ -26,6 +27,8 @@ enum TabKind: Codable, Hashable {
             try container.encode("terminal") // Don't persist diff tabs
         case .workspaceDiff:
             try container.encode("terminal") // Don't persist diff tabs
+        case .activityLog:
+            try container.encode("terminal") // Don't persist activity tab
         }
     }
 
@@ -41,6 +44,11 @@ enum TabKind: Codable, Hashable {
 
     var isWorkspaceDiff: Bool {
         if case .workspaceDiff = self { return true }
+        return false
+    }
+
+    var isActivityLog: Bool {
+        if case .activityLog = self { return true }
         return false
     }
 }

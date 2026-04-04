@@ -73,6 +73,17 @@ class AgentEventStore: ObservableObject {
                 TerminalSessionManager.shared.updateAgentSessionID(sessionID, agentSessionID: agentSID)
             }
 
+            // Activity log: agent session started
+            if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
+                let agentName = AgentStore.shared.agents.first(where: { $0.command == agent })?.name ?? agent
+                let model = data["model"] as? String
+                ActivityLogStore.shared.append(workspaceID: wsID, event: ActivityEvent(
+                    kind: .agentSessionStart,
+                    title: "\(agentName) started",
+                    metadata: model.map { ["model": $0] } ?? [:]
+                ))
+            }
+
         case "prompt":
             stateByTab[tabID]?.lastPrompt = data["prompt"] as? String
             activityByTab[tabID] = .thinking
@@ -108,6 +119,15 @@ class AgentEventStore: ObservableObject {
             if previousActivity == .thinking || previousActivity == .toolExecuting {
                 if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
                     SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID, tabID: tabID)
+
+                    // Activity log: agent session ended + snapshot
+                    ActivityLogStore.shared.append(workspaceID: wsID, event: ActivityEvent(
+                        kind: .agentSessionEnd,
+                        title: "\(agentName) finished"
+                    ))
+                    ActivityLogStore.shared.requestSnapshot(
+                        workspaceID: wsID, tabID: tabID, agent: agent, tense: .past
+                    )
                 }
             }
 
@@ -128,6 +148,13 @@ class AgentEventStore: ObservableObject {
             // Turn finished but agent may continue — set idle
             stateByTab[tabID]?.currentTool = nil
             activityByTab[tabID] = .idle
+
+            // Activity log: periodic snapshot (cooldown-gated in the store)
+            if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
+                ActivityLogStore.shared.requestSnapshot(
+                    workspaceID: wsID, tabID: tabID, agent: agent, tense: .present
+                )
+            }
 
         case "message_start":
             activityByTab[tabID] = .thinking
@@ -212,6 +239,8 @@ class AgentEventStore: ObservableObject {
             }
             if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
                 SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID, tabID: tabID)
+                // Activity log emission handled in handleAgentEvent("stop") — not duplicated here
+                // to avoid double entries for agents that fire both socket and terminal events.
             }
         }
     }

@@ -244,6 +244,9 @@ class TerminalContainerViewController: NSViewController {
                 icon: resolved.icon
             )
         }
+        tabBar.onActivityLogTapped = { [weak self] in
+            self?.sessionManager.openActivityLogTab()
+        }
     }
 
     // MARK: - Active Tab Display
@@ -275,6 +278,8 @@ class TerminalContainerViewController: NSViewController {
             showChangesTab(repoPath: repoPath, tabID: tab.id)
         case let .workspaceDiff(repoPath, baseRef):
             showWorkspaceDiffTab(repoPath: repoPath, baseRef: baseRef, tabID: tab.id)
+        case let .activityLog(workspaceID):
+            showActivityLogTab(workspaceID: workspaceID, tabID: tab.id)
         }
 
         renderedTabID = sessionManager.activeTabID
@@ -370,6 +375,29 @@ class TerminalContainerViewController: NSViewController {
         currentHostingView = hostingView
     }
 
+    private func showActivityLogTab(workspaceID: UUID, tabID: UUID) {
+        if let cached = cachedHostingViews[tabID] {
+            cached.isHidden = false
+            currentHostingView = cached
+            return
+        }
+
+        let activityView = ActivityLogTabView(workspaceID: workspaceID)
+        let hostingView = NSHostingView(rootView: activityView)
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(hostingView)
+
+        NSLayoutConstraint.activate([
+            hostingView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            hostingView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            hostingView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            hostingView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+        ])
+
+        cachedHostingViews[tabID] = hostingView
+        currentHostingView = hostingView
+    }
+
     private func makeFocusedTerminalFirstResponder() {
         // If no session is focused yet (e.g. after restore), pick the first
         // session from the active tab.
@@ -409,12 +437,18 @@ class TerminalContainerViewController: NSViewController {
     // MARK: - Tab Bar & Status
 
     private func updateTabBar() {
+        // Filter activity log tabs out of the tab bar — the bolt icon handles that
+        let barTabs = sessionManager.visibleTabs.filter { !$0.kind.isActivityLog }
+        let isActivityActive = sessionManager.visibleTabs
+            .first(where: { $0.id == sessionManager.activeTabID })?.kind.isActivityLog == true
+
         tabBar.update(
-            tabs: sessionManager.visibleTabs,
-            activeID: sessionManager.activeTabID,
+            tabs: barTabs,
+            activeID: isActivityActive ? nil : sessionManager.activeTabID,
             agentStatuses: AgentEventStore.shared.activityByTab,
             notificationCounts: AgentEventStore.shared.unreadCountByTab
         )
+        tabBar.updateActivityHighlight(isActivityActive)
     }
 
     private func applyTheme(_ theme: TerminalTheme) {

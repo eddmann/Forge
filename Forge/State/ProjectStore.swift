@@ -215,11 +215,24 @@ class ProjectStore: ObservableObject {
         Task { @MainActor in
             TerminalSessionManager.shared.newlyCreatedWorkspaceIDs.insert(wsID)
         }
+        let ws = workspace
+        Task { @MainActor in
+            ActivityLogStore.shared.append(workspaceID: ws.id, event: ActivityEvent(
+                kind: .workspaceCreated,
+                title: "Workspace created",
+                detail: "Created from \(ws.parentBranch)"
+            ))
+        }
         saveAll()
     }
 
     func deleteWorkspace(id: UUID) {
         guard let workspace = workspaces.first(where: { $0.id == id }) else { return }
+
+        // Clean up activity log
+        Task { @MainActor in
+            ActivityLogStore.shared.clearLog(workspaceID: id)
+        }
 
         // Clean up agent trust entries
         AgentSetup.shared.untrustCodexProject(path: workspace.path)
@@ -238,6 +251,15 @@ class ProjectStore: ObservableObject {
 
     func updateWorkspaceStatus(id: UUID, status: Workspace.Status) {
         guard let index = workspaces.firstIndex(where: { $0.id == id }) else { return }
+        if status == .merged {
+            let parentBranch = workspaces[index].parentBranch
+            Task { @MainActor in
+                ActivityLogStore.shared.append(workspaceID: id, event: ActivityEvent(
+                    kind: .workspaceMerged,
+                    title: "Merged into \(parentBranch)"
+                ))
+            }
+        }
         workspaces[index].status = status
         saveAll()
     }

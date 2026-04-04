@@ -54,9 +54,11 @@
 		6620650A4F8E1CB27057FE5B /* TerminalSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03D48F43AB138181D6CD761 /* TerminalSession.swift */; };
 		673D256E6787F286D9EEC05B /* TerminalObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E805EE38B5FF260D35CE21 /* TerminalObserver.swift */; };
 		676341BCA86E78A23161ED1B /* PaneID.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8ADAE09E2AF777777761B7F /* PaneID.swift */; };
+		68F2EED67A1677F528879B69 /* ActivityLogTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96FC34B5B33A1ABC9CC4605 /* ActivityLogTabView.swift */; };
 		694668C2FDEE836BC7B3F22D /* PaneState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7701E79B028746189D17A0A7 /* PaneState.swift */; };
 		69BA6066822D2EC3ECF04AAA /* SummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10E6E44336CA3AE64223EDF /* SummaryStore.swift */; };
 		6A3DE35686696B1253DA0735 /* SafeTooltip.swift in Sources */ = {isa = PBXBuildFile; fileRef = D28C2E3C2AE15E481B8C9FDB /* SafeTooltip.swift */; };
+		6C9D0C7CBC4CAE712D4521C5 /* ActivityEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC624B625847A5A30E6E3068 /* ActivityEvent.swift */; };
 		6CE799C3EC6812DCC3610D63 /* GitClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B48636B23896A11A9644925 /* GitClient.swift */; };
 		6D10E1C247D18BA59E04D540 /* WorkspaceCloner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93EA6848CBC1E2DEE1295EDC /* WorkspaceCloner.swift */; };
 		6D32E213A2DB89468558046F /* BranchPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BD7C813556607AFCF0EAFB /* BranchPickerView.swift */; };
@@ -75,6 +77,7 @@
 		95668F7CED1D165D912E2656 /* AgentInfoPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */; };
 		958919E7AFE933A2ECE729BE /* FileStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557D56D0DBFDC04108086ED /* FileStatus.swift */; };
 		9BF204E729543B6E9E689976 /* TerminalAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A330C61E147E9935FB2584 /* TerminalAppearance.swift */; };
+		9CF85EDE6491F76948C7C1F6 /* ActivityLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E062060F229D0DEFE19EFDA3 /* ActivityLogStore.swift */; };
 		9EC89A28301B55CD351004C8 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E18D8DBAC71B87110136F /* SplitViewController.swift */; };
 		9EDD41D6CE5D3A6834DC9C8C /* BonsplitPaneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17205892BB4CD21C1A347A75 /* BonsplitPaneManager.swift */; };
 		A2858A5B2AAD0956FC54CA0B /* forge-cli in Resources */ = {isa = PBXBuildFile; fileRef = 0DC2B1C4E2E0CE097908C96B /* forge-cli */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -91,6 +94,7 @@
 		B7AEDCC3748C5C2C8E4699E4 /* AgentCapabilityParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E49E4582AFF44F5057030E3 /* AgentCapabilityParser.swift */; };
 		B9210B522CAA640A2E75D1B4 /* ProjectStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A918DA6D12D11F5510C604BB /* ProjectStore.swift */; };
 		B9859F0953678386516F55D4 /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FE53F98FC4ED53EBACE627 /* TabBarView.swift */; };
+		BB210A8945249596BB6F051F /* ActivitySnapshotCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9964C3D3A979B915F2434DAF /* ActivitySnapshotCommand.swift */; };
 		BBD8AE2D99990E0BE2681B70 /* TabBarMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */; };
 		BF0BCA07938D96A6D897E1C8 /* CommandDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */; };
 		C570FF0EF21F8683B536CAC4 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67FC7642C53676D66D0BD42 /* main.swift */; };
@@ -215,6 +219,7 @@
 		94FE53F98FC4ED53EBACE627 /* TabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarView.swift; sourceTree = "<group>"; };
 		95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JetBrainsMono-Regular.ttf"; sourceTree = "<group>"; };
 		95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendToAgentView.swift; sourceTree = "<group>"; };
+		9964C3D3A979B915F2434DAF /* ActivitySnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitySnapshotCommand.swift; sourceTree = "<group>"; };
 		99751F6A0C8860A70146FB8D /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		9E002CD819513C0820D42DF3 /* AgentEventLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentEventLogger.swift; sourceTree = "<group>"; };
 		9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitNodeView.swift; sourceTree = "<group>"; };
@@ -230,6 +235,7 @@
 		B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitUnifiedDiffParser.swift; sourceTree = "<group>"; };
 		B6962054AB32C0DF336214C6 /* LayoutSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSnapshot.swift; sourceTree = "<group>"; };
 		B820530CBC1D596D6A54011E /* TabContextAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabContextAction.swift; sourceTree = "<group>"; };
+		B96FC34B5B33A1ABC9CC4605 /* ActivityLogTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityLogTabView.swift; sourceTree = "<group>"; };
 		B9E4187EE35799D24A79EF0B /* ghostty */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ghostty; path = Forge/Resources/ghostty; sourceTree = SOURCE_ROOT; };
 		BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryScheduler.swift; sourceTree = "<group>"; };
 		BC582D54CE2623E5734E1EEE /* FileStatusList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusList.swift; sourceTree = "<group>"; };
@@ -252,12 +258,14 @@
 		DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitContainerView.swift; sourceTree = "<group>"; };
 		DCF2655CE07FECC563390787 /* FileStatusRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusRow.swift; sourceTree = "<group>"; };
 		DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceDiffViewModel.swift; sourceTree = "<group>"; };
+		E062060F229D0DEFE19EFDA3 /* ActivityLogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityLogStore.swift; sourceTree = "<group>"; };
 		E1BCD87FD2A8EFF1229D24CB /* CommandPaletteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPaletteViewModel.swift; sourceTree = "<group>"; };
 		E462273D87AE64CBBE7EB1F3 /* AgentActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentActivity.swift; sourceTree = "<group>"; };
 		E79EB0D856F2E78068B504FC /* AgentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentConfig.swift; sourceTree = "<group>"; };
 		E8C30B829376599F48CCB5C7 /* ReviewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewStore.swift; sourceTree = "<group>"; };
 		E9F9A1C5B81DD1DFC08BE0BD /* GhosttyTerminalViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyTerminalViewRepresentable.swift; sourceTree = "<group>"; };
 		EAD57FE43439B2C292022C07 /* Forge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Forge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC624B625847A5A30E6E3068 /* ActivityEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityEvent.swift; sourceTree = "<group>"; };
 		EDE6E9898D02521ED5E5A26C /* AgentCapabilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCapabilities.swift; sourceTree = "<group>"; };
 		F03D48F43AB138181D6CD761 /* TerminalSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSession.swift; sourceTree = "<group>"; };
 		F2BD7C813556607AFCF0EAFB /* BranchPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BranchPickerView.swift; sourceTree = "<group>"; };
@@ -434,6 +442,7 @@
 		53D452DE7CE1B2076D48F99B /* Agents */ = {
 			isa = PBXGroup;
 			children = (
+				9964C3D3A979B915F2434DAF /* ActivitySnapshotCommand.swift */,
 				8E49E4582AFF44F5057030E3 /* AgentCapabilityParser.swift */,
 				A014017376795403DB6AD56A /* AgentSetup.swift */,
 				6E518EB16255BC5AC4967951 /* SummaryCommand.swift */,
@@ -445,6 +454,7 @@
 		5DCF51239E4D414F8A138D1C /* State */ = {
 			isa = PBXGroup;
 			children = (
+				E062060F229D0DEFE19EFDA3 /* ActivityLogStore.swift */,
 				71607C511F2A39E630507479 /* AgentEventStore.swift */,
 				FDE1F53D3088D83C929C6089 /* AgentStore.swift */,
 				0B205456E82CD816617F8385 /* CommitCountStore.swift */,
@@ -573,6 +583,14 @@
 			path = Projects;
 			sourceTree = "<group>";
 		};
+		AA3944EF80CF723DBBB01291 /* Activity */ = {
+			isa = PBXGroup;
+			children = (
+				B96FC34B5B33A1ABC9CC4605 /* ActivityLogTabView.swift */,
+			);
+			path = Activity;
+			sourceTree = "<group>";
+		};
 		AAF3AF338100C0CD97CE3B7F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -604,6 +622,7 @@
 		ADC0D26F66EFE7D3E03AF0D7 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				AA3944EF80CF723DBBB01291 /* Activity */,
 				34E8869DDE042D5BA1A87195 /* CommandPalette */,
 				AD521890B3327BF9207A1521 /* Git */,
 				8558CAA6C457F4A3486CCA90 /* Inspector */,
@@ -685,6 +704,14 @@
 			path = Forge;
 			sourceTree = "<group>";
 		};
+		E0C843B03CEE358A33AED346 /* Activity */ = {
+			isa = PBXGroup;
+			children = (
+				EC624B625847A5A30E6E3068 /* ActivityEvent.swift */,
+			);
+			path = Activity;
+			sourceTree = "<group>";
+		};
 		EFCB33EBE3812EE38333409F = {
 			isa = PBXGroup;
 			children = (
@@ -726,6 +753,7 @@
 		F80283DA0A8804F1577DBCBA /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				E0C843B03CEE358A33AED346 /* Activity */,
 				274C08176A1CD73BCA0FFB93 /* Agents */,
 				81F4B98DE5F972A19403C726 /* Git */,
 				D14B0A46FA87914B041BF5F5 /* Projects */,
@@ -865,6 +893,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6C9D0C7CBC4CAE712D4521C5 /* ActivityEvent.swift in Sources */,
+				9CF85EDE6491F76948C7C1F6 /* ActivityLogStore.swift in Sources */,
+				68F2EED67A1677F528879B69 /* ActivityLogTabView.swift in Sources */,
+				BB210A8945249596BB6F051F /* ActivitySnapshotCommand.swift in Sources */,
 				D22DD4E346A00578FC2AB34A /* AgentActivity.swift in Sources */,
 				1C0AEA61EA5DEA5E2847EAD1 /* AgentCapabilities.swift in Sources */,
 				B7AEDCC3748C5C2C8E4699E4 /* AgentCapabilityParser.swift in Sources */,

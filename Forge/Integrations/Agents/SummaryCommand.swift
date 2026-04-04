@@ -20,13 +20,13 @@ enum SummaryCommand {
     /// Returns a sanitized summary, or nil on failure.
     static func run(context: String, timeout: TimeInterval = 15) async -> String? {
         let command = ForgeStore.shared.loadStateFields().summarizerCommand
-        let parts = parseCommand(command.isEmpty ? Self.defaultCommand : command)
+        let parts = parseCommandParts(command.isEmpty ? Self.defaultCommand : command)
         guard let binary = parts.first, !binary.isEmpty else {
             SummaryLog.log("[SummaryCommand] empty command configured")
             return nil
         }
 
-        guard isBinaryAvailable(binary) else {
+        guard binaryAvailable(binary) else {
             SummaryLog.log("[SummaryCommand] '\(binary)' not available on PATH")
             return nil
         }
@@ -84,10 +84,10 @@ enum SummaryCommand {
         return result
     }
 
-    // MARK: - Private
+    // MARK: - Shared Helpers
 
     /// Split a command string into arguments, respecting single/double quotes.
-    private static func parseCommand(_ command: String) -> [String] {
+    static func parseCommandParts(_ command: String) -> [String] {
         var args: [String] = []
         var current = ""
         var inSingleQuote = false
@@ -111,7 +111,7 @@ enum SummaryCommand {
         return args
     }
 
-    private static func isBinaryAvailable(_ binary: String) -> Bool {
+    static func binaryAvailable(_ binary: String) -> Bool {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/which")
         process.arguments = [binary]

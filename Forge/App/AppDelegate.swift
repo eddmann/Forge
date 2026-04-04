@@ -104,6 +104,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     private func saveSessionSnapshot() {
         MainActor.assumeIsolated {
             TerminalSessionManager.shared.persistState(includeScrollback: true)
+            ActivityLogStore.shared.saveImmediately()
         }
     }
 

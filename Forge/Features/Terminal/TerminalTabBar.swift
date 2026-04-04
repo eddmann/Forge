@@ -6,8 +6,11 @@ class TerminalTabBar: NSView {
     var onRenameTab: ((UUID, String) -> Void)?
     var onNewShellTab: (() -> Void)?
     var onNewAgentTab: ((AgentConfig) -> Void)?
+    var onActivityLogTapped: (() -> Void)?
 
     private let stackView = NSStackView()
+    private let activityButton = NSButton()
+    private let activityHighlight = NSView()
     private let newTabButton = NSButton()
     private let borderView = NSView()
 
@@ -28,6 +31,22 @@ class TerminalTabBar: NSView {
     private func setupViews() {
         wantsLayer = true
         layer?.backgroundColor = theme.chromeBackground.cgColor
+
+        // Activity log button (left side)
+        activityButton.translatesAutoresizingMaskIntoConstraints = false
+        activityButton.bezelStyle = .inline
+        activityButton.isBordered = false
+        activityButton.title = ""
+        activityButton.image = NSImage(systemSymbolName: "bolt.horizontal.circle", accessibilityDescription: "Activity Log")?
+            .withSymbolConfiguration(.init(pointSize: 11, weight: .medium))
+        activityButton.imagePosition = .imageOnly
+        activityButton.target = self
+        activityButton.action = #selector(activityButtonClicked)
+
+        activityHighlight.translatesAutoresizingMaskIntoConstraints = false
+        activityHighlight.wantsLayer = true
+        addSubview(activityHighlight)
+        addSubview(activityButton)
 
         // Stack view for tabs
         stackView.orientation = .horizontal
@@ -56,8 +75,18 @@ class TerminalTabBar: NSView {
         refreshTheme()
 
         NSLayoutConstraint.activate([
+            activityHighlight.leadingAnchor.constraint(equalTo: leadingAnchor),
+            activityHighlight.topAnchor.constraint(equalTo: topAnchor),
+            activityHighlight.bottomAnchor.constraint(equalTo: borderView.topAnchor),
+            activityHighlight.widthAnchor.constraint(equalToConstant: 36),
+
+            activityButton.leadingAnchor.constraint(equalTo: leadingAnchor),
+            activityButton.topAnchor.constraint(equalTo: topAnchor),
+            activityButton.bottomAnchor.constraint(equalTo: bottomAnchor),
+            activityButton.widthAnchor.constraint(equalToConstant: 36),
+
             stackView.topAnchor.constraint(equalTo: topAnchor),
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            stackView.leadingAnchor.constraint(equalTo: activityButton.trailingAnchor),
             stackView.trailingAnchor.constraint(equalTo: newTabButton.leadingAnchor),
             stackView.bottomAnchor.constraint(equalTo: bottomAnchor),
 
@@ -77,7 +106,18 @@ class TerminalTabBar: NSView {
         let t = theme
         layer?.backgroundColor = t.chromeBackground.cgColor
         borderView.layer?.backgroundColor = t.chromeBorder.cgColor
+        activityButton.contentTintColor = t.chromeSecondaryText
         newTabButton.contentTintColor = t.chromeSecondaryText
+    }
+
+    func updateActivityHighlight(_ active: Bool) {
+        let t = theme
+        activityButton.contentTintColor = active ? t.chromePrimaryText : t.chromeSecondaryText
+        activityHighlight.layer?.backgroundColor = active ? t.chromeActiveBackground.cgColor : nil
+    }
+
+    @objc private func activityButtonClicked() {
+        onActivityLogTapped?()
     }
 
     @objc private func newTabClicked() {
