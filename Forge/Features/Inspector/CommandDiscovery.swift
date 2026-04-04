@@ -141,7 +141,7 @@ private func scanMakefile(at path: String) -> [ProjectCommand] {
             let target = String(matched[matched.startIndex ..< colonIdx])
             let deps = matched[matched.index(after: colonIdx)...].trimmingCharacters(in: .whitespaces)
 
-            if !target.hasPrefix(".") {
+            if !target.hasPrefix("."), !target.hasPrefix("_") {
                 var detail: [ProjectCommand.DetailItem] = []
                 if !deps.isEmpty {
                     detail.append(.init(label: "Depends on", value: deps))
