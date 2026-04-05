@@ -83,6 +83,12 @@ class ProcessManager: ObservableObject {
     private let maxCrashesBeforeGiveUp = 5
     private let crashWindowSeconds: TimeInterval = 60
 
+    /// Stored compose context for periodic state sync.
+    private var composeFilePath: String?
+    private var composeWorkingDirectory: String?
+    private var dockerSyncTimer: Timer?
+    private static let dockerSyncInterval: TimeInterval = 60
+
     /// Load processes from forge.json for the given workspace path.
     func loadConfig(from workspacePath: String, allocatedPorts: [String: Int], portDetails: [String: String] = [:]) {
         var loaded: [ManagedProcess] = []
@@ -123,6 +129,9 @@ class ProcessManager: ObservableObject {
         if let compose = config.compose {
             let composeFile = (workspacePath as NSString).appendingPathComponent(compose.file)
             if FileManager.default.fileExists(atPath: composeFile) {
+                composeFilePath = composeFile
+                composeWorkingDirectory = workspacePath
+
                 let services = discoverComposeServices(at: composeFile, filter: compose.services)
                 for service in services {
                     var proc = ManagedProcess(
@@ -138,10 +147,20 @@ class ProcessManager: ObservableObject {
                     proc.port = nil // Docker ports resolved at runtime
                     loaded.append(proc)
                 }
+            } else {
+                composeFilePath = nil
+                composeWorkingDirectory = nil
             }
+        } else {
+            composeFilePath = nil
+            composeWorkingDirectory = nil
         }
 
         processes = loaded
+
+        // Sync process state immediately and start periodic polling
+        syncState()
+        startSyncTimer()
     }
 
     /// Start a specific process by ID.
@@ -209,12 +228,10 @@ class ProcessManager: ObservableObject {
 
     /// Stop a specific process by ID.
     func stop(_ processID: UUID) {
-        guard let process = runningProcesses[processID] else { return }
+        guard let index = processes.firstIndex(where: { $0.id == processID }) else { return }
 
-        // For docker compose, use docker compose stop
-        if let index = processes.firstIndex(where: { $0.id == processID }),
-           processes[index].source == .docker
-        {
+        // For docker compose, use docker compose stop (works for both locally- and externally-started containers)
+        if processes[index].source == .docker {
             let stopProcess = Process()
             stopProcess.executableURL = URL(fileURLWithPath: "/bin/sh")
             let serviceName = processes[index].name
@@ -227,13 +244,12 @@ class ProcessManager: ObservableObject {
             stopProcess.waitUntilExit()
         }
 
-        process.terminate()
-        runningProcesses.removeValue(forKey: processID)
-        restartCounts.removeValue(forKey: processID)
-
-        if let index = processes.firstIndex(where: { $0.id == processID }) {
-            processes[index].status = .stopped
+        if let process = runningProcesses[processID] {
+            process.terminate()
+            runningProcesses.removeValue(forKey: processID)
         }
+        restartCounts.removeValue(forKey: processID)
+        processes[index].status = .stopped
     }
 
     /// Restart a specific process.
@@ -262,8 +278,11 @@ class ProcessManager: ObservableObject {
     /// Clear all processes (e.g. when switching workspaces).
     func clear() {
         stopAll()
+        stopSyncTimer()
         processes.removeAll()
         restartCounts.removeAll()
+        composeFilePath = nil
+        composeWorkingDirectory = nil
     }
 
     // MARK: - Auto-Restart
@@ -296,6 +315,108 @@ class ProcessManager: ObservableObject {
         let delay = min(pow(2.0, Double(crashCount - 1)), 30.0)
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             self?.start(processID)
+        }
+    }
+
+    // MARK: - Process State Sync
+
+    private func startSyncTimer() {
+        stopSyncTimer()
+        dockerSyncTimer = Timer.scheduledTimer(
+            withTimeInterval: Self.dockerSyncInterval,
+            repeats: true
+        ) { [weak self] _ in
+            self?.syncState()
+        }
+    }
+
+    private func stopSyncTimer() {
+        dockerSyncTimer?.invalidate()
+        dockerSyncTimer = nil
+    }
+
+    /// Refresh the status of all processes to match actual system state.
+    func syncState() {
+        syncStandaloneProcesses()
+        syncDockerState()
+    }
+
+    /// Check managed standalone processes and update status if they've exited externally.
+    private func syncStandaloneProcesses() {
+        for i in processes.indices where processes[i].source == .process {
+            let id = processes[i].id
+            if let process = runningProcesses[id] {
+                if !process.isRunning {
+                    runningProcesses.removeValue(forKey: id)
+                    outputPipes.removeValue(forKey: id)
+                    processes[i].status = process.terminationStatus == 0 ? .stopped : .crashed
+                }
+            }
+        }
+    }
+
+    /// Query `docker compose ps` and update docker service statuses to match actual container state.
+    private func syncDockerState() {
+        guard let composeFile = composeFilePath,
+              let workDir = composeWorkingDirectory else { return }
+
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/bin/sh")
+            process.arguments = ["-c", "docker compose -f \"\(composeFile)\" ps --format json 2>/dev/null"]
+            process.currentDirectoryURL = URL(fileURLWithPath: workDir)
+
+            var environment = ProcessInfo.processInfo.environment
+            environment["PATH"] = ShellEnvironment.resolvedPath
+            process.environment = environment
+
+            let pipe = Pipe()
+            process.standardOutput = pipe
+            process.standardError = Pipe()
+
+            do {
+                try process.run()
+            } catch {
+                return
+            }
+            process.waitUntilExit()
+
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            guard !data.isEmpty,
+                  let output = String(data: data, encoding: .utf8) else { return }
+
+            // Parse running service names from JSON output.
+            // docker compose ps --format json outputs one JSON object per line.
+            var runningServices: Set<String> = []
+            for line in output.components(separatedBy: .newlines) {
+                let trimmed = line.trimmingCharacters(in: .whitespaces)
+                guard trimmed.hasPrefix("{") else { continue }
+                guard let lineData = trimmed.data(using: .utf8),
+                      let obj = try? JSONSerialization.jsonObject(with: lineData) as? [String: Any],
+                      let service = obj["Service"] as? String,
+                      let state = obj["State"] as? String else { continue }
+                if state == "running" {
+                    runningServices.insert(service)
+                }
+            }
+
+            DispatchQueue.main.async {
+                guard let self else { return }
+                for i in self.processes.indices where self.processes[i].source == .docker {
+                    let name = self.processes[i].name
+                    let managedByUs = self.runningProcesses[self.processes[i].id] != nil
+
+                    if runningServices.contains(name) {
+                        if self.processes[i].status != .running {
+                            self.processes[i].status = .running
+                        }
+                    } else if !managedByUs {
+                        if self.processes[i].status == .running {
+                            self.processes[i].status = .stopped
+                        }
+                    }
+                }
+            }
         }
     }
 

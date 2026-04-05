@@ -49,6 +49,14 @@ struct ProcessesDrawer: View {
                     Spacer()
 
                     if expanded, !processManager.processes.isEmpty {
+                        Button(action: { processManager.syncState() }) {
+                            Image(systemName: "arrow.trianglehead.2.clockwise")
+                                .font(.system(size: 9))
+                                .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+                        }
+                        .buttonStyle(.borderless)
+                        .help("Refresh process state")
+
                         let hasRunning = processManager.processes.contains { $0.status == .running }
                         Button(action: {
                             if hasRunning {
