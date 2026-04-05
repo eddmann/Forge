@@ -18,6 +18,7 @@ struct CommandPaletteView: View {
             )
         }
         .frame(width: 520, height: 380)
+        .edgesIgnoringSafeArea(.top)
     }
 }
 
