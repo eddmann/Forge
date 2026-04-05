@@ -196,7 +196,6 @@ struct ProjectListView: View {
     private func selectWorkspace(_ workspace: Workspace) {
         store.activeProjectID = workspace.projectID
         store.activeWorkspaceID = workspace.id
-        store.recordActivity(forWorkspace: workspace.id)
     }
 
     private func createWorkspace(for project: Project, branch: String) {
