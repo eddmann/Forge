@@ -16,7 +16,7 @@ class GhosttyApp {
 
     /// Path where Forge writes its theme overrides for Ghostty.
     private static let themeConfigPath: String = {
-        let dir = NSHomeDirectory() + "/.forge/state"
+        let dir = NSHomeDirectory() + "/\(ForgeStore.forgeDirName)/state"
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         return dir + "/ghostty.conf"
     }()

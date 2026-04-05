@@ -227,7 +227,7 @@ private struct GeneralSettingsContent: View {
     }
 
     private var dataDir: String {
-        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".forge").path
+        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(ForgeStore.forgeDirName).path
     }
 
     private func abbreviate(_ path: String) -> String {

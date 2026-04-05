@@ -13,7 +13,7 @@ class AgentEventLogger {
     private var fileHandle: FileHandle?
 
     private init() {
-        logDir = NSHomeDirectory() + "/.forge/logs"
+        logDir = NSHomeDirectory() + "/\(ForgeStore.forgeDirName)/logs"
     }
 
     func log(source: String, session: UUID?, agent: String?, event: String, data: [String: Any]?) {

@@ -44,7 +44,7 @@ enum ShellEnvironment {
 
     /// Directory where Forge writes its ZDOTDIR wrapper and integration scripts.
     static let shellIntegrationDir: String = {
-        let dir = NSHomeDirectory() + "/.forge/state/shell"
+        let dir = NSHomeDirectory() + "/\(ForgeStore.forgeDirName)/state/shell"
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         return dir
     }()
@@ -225,7 +225,7 @@ enum ShellEnvironment {
 
         // Forge socket for agent communication
         env["FORGE_SOCKET"] = ForgeStore.shared.stateDir
-            .appendingPathComponent("forge.sock").path
+            .appendingPathComponent(ForgeStore.socketName).path
 
         // OpenCode: register forge-bridge plugin via config content
         let pluginPath = NSHomeDirectory() + "/.config/opencode/plugin/forge-bridge.ts"
@@ -235,7 +235,7 @@ enum ShellEnvironment {
             env["FORGE_SESSION"] = sessionID.uuidString
 
             // Per-session shell history — stored in env, applied by shell integration after user's rc files
-            let historyDir = (NSHomeDirectory() as NSString).appendingPathComponent(".forge/state/history")
+            let historyDir = (NSHomeDirectory() as NSString).appendingPathComponent("\(ForgeStore.forgeDirName)/state/history")
             try? FileManager.default.createDirectory(atPath: historyDir, withIntermediateDirectories: true)
             env["FORGE_HISTFILE"] = (historyDir as NSString).appendingPathComponent("\(sessionID.uuidString)")
         }

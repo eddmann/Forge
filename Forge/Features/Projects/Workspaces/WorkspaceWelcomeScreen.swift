@@ -210,7 +210,7 @@ enum WorkspaceWelcomeScreen {
     // MARK: - File I/O
 
     private static func writeFile(_ content: String, workspaceID: UUID) -> String {
-        let dir = NSHomeDirectory() + "/.forge/state/welcome"
+        let dir = NSHomeDirectory() + "/\(ForgeStore.forgeDirName)/state/welcome"
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         let path = (dir as NSString).appendingPathComponent("\(workspaceID.uuidString).sh")
         try? content.write(toFile: path, atomically: true, encoding: .utf8)

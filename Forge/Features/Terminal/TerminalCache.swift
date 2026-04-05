@@ -135,7 +135,7 @@ class TerminalCache {
     // MARK: - Per-Session History
 
     private static func lastHistoryCommand(sessionID: UUID) -> String? {
-        let path = NSHomeDirectory() + "/.forge/state/history/\(sessionID.uuidString)"
+        let path = NSHomeDirectory() + "/\(ForgeStore.forgeDirName)/state/history/\(sessionID.uuidString)"
         guard let data = FileManager.default.contents(atPath: path),
               let content = String(data: data, encoding: .utf8) else { return nil }
 
@@ -158,7 +158,7 @@ class TerminalCache {
     // MARK: - Scrollback Persistence
 
     private static func writeScrollbackTempFile(sessionID: UUID, text: String) -> String? {
-        let dir = NSHomeDirectory() + "/.forge/state/scrollback"
+        let dir = NSHomeDirectory() + "/\(ForgeStore.forgeDirName)/state/scrollback"
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         let path = (dir as NSString).appendingPathComponent("\(sessionID.uuidString).txt")
         do {

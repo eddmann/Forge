@@ -150,7 +150,7 @@ struct SendToAgentView: View {
         }
 
         let reviewsDir = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".forge/reviews")
+            .appendingPathComponent("\(ForgeStore.forgeDirName)/reviews")
 
         do {
             try FileManager.default.createDirectory(at: reviewsDir, withIntermediateDirectories: true)

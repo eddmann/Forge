@@ -4,7 +4,7 @@ import Foundation
 /// Writes to ~/.forge/state/summary.log
 enum SummaryLog {
     private static let logPath: String = {
-        let dir = (NSHomeDirectory() as NSString).appendingPathComponent(".forge/state")
+        let dir = (NSHomeDirectory() as NSString).appendingPathComponent("\(ForgeStore.forgeDirName)/state")
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         return (dir as NSString).appendingPathComponent("summary.log")
     }()

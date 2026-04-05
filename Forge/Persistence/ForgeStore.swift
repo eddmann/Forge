@@ -233,6 +233,14 @@ indirect enum SplitLayoutSnapshot: Codable {
 // MARK: - ForgeStore
 
 final class ForgeStore {
+    #if DEBUG
+        static let forgeDirName = ".forge-dev"
+        static let socketName = "forge-dev.sock"
+    #else
+        static let forgeDirName = ".forge"
+        static let socketName = "forge.sock"
+    #endif
+
     static let shared = ForgeStore()
 
     let forgeDir: URL
@@ -242,7 +250,7 @@ final class ForgeStore {
 
     private init() {
         forgeDir = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".forge")
+            .appendingPathComponent(Self.forgeDirName)
         stateDir = forgeDir.appendingPathComponent("state")
         try? FileManager.default.createDirectory(at: forgeDir, withIntermediateDirectories: true)
         try? FileManager.default.createDirectory(at: stateDir, withIntermediateDirectories: true)

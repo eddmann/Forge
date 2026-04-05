@@ -9,7 +9,7 @@ final class ForgeSocketServer {
 
     private init() {
         socketPath = ForgeStore.shared.stateDir
-            .appendingPathComponent("forge.sock").path
+            .appendingPathComponent(ForgeStore.socketName).path
     }
 
     // MARK: - Lifecycle

@@ -211,7 +211,7 @@ final class ReviewStore: ObservableObject {
             $0.map { String(format: "%02x", $0) }.suffix(16).joined()
         } ?? "default"
         return FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".forge/reviews")
+            .appendingPathComponent("\(ForgeStore.forgeDirName)/reviews")
             .appendingPathComponent(hash)
     }
 
