@@ -197,8 +197,14 @@ enum ShellEnvironment {
         )
     }
 
-    /// Build environment variables for terminal sessions
-    static func buildEnvironment(sessionID: UUID? = nil) -> [String: String] {
+    /// Build environment variables for terminal sessions.
+    /// When `workspace` and `projectName` are provided, allocated ports and
+    /// `COMPOSE_PROJECT_NAME` are injected automatically.
+    static func buildEnvironment(
+        sessionID: UUID? = nil,
+        workspace: Workspace? = nil,
+        projectName: String? = nil
+    ) -> [String: String] {
         // Standard terminal environment variables
         var env: [String: String] = [
             "TERM": "xterm-ghostty",
@@ -263,6 +269,16 @@ enum ShellEnvironment {
             unset _forge_bash; \
             fi
             """
+        }
+
+        // Workspace port allocations and Docker Compose project name
+        if let workspace {
+            for (envVar, port) in workspace.allocatedPorts {
+                env[envVar] = String(port)
+            }
+            if let projectName {
+                env["COMPOSE_PROJECT_NAME"] = "\(projectName)-\(workspace.name)"
+            }
         }
 
         return env

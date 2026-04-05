@@ -9,7 +9,9 @@ enum InspectorTab: String, CaseIterable {
 
 struct InspectorView: View {
     @ObservedObject private var store = ProjectStore.shared
+    @ObservedObject private var processManager = ProcessManager.shared
     @State private var commandsExpanded = false
+    @State private var processesExpanded = false
     @State private var commands: [ProjectCommand] = []
     @State private var activeTab: InspectorTab = .working
 
@@ -37,6 +39,12 @@ struct InspectorView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .clipped()
 
+            // Processes drawer pinned above commands
+            ProcessesDrawer(
+                expanded: $processesExpanded,
+                processManager: processManager
+            )
+
             // Commands drawer pinned to bottom
             CommandsDrawer(
                 expanded: $commandsExpanded,
@@ -47,6 +55,7 @@ struct InspectorView: View {
         .background(.clear)
         .onAppear {
             discoverCommands()
+            loadProcesses()
             Task { @MainActor in
                 StatusViewModel.shared.startAutoRefresh()
                 WorkspaceDiffViewModel.shared.startAutoRefresh()
@@ -64,6 +73,7 @@ struct InspectorView: View {
         }
         .onChange(of: store.activeWorkspaceID) { _, _ in
             discoverCommands()
+            loadProcesses()
             Task { @MainActor in
                 StatusViewModel.shared.refresh()
                 WorkspaceDiffViewModel.shared.refresh()
@@ -78,6 +88,14 @@ struct InspectorView: View {
         }
         let path = store.effectivePath ?? project.path
         commands = discoverProjectCommands(at: path)
+    }
+
+    private func loadProcesses() {
+        guard let workspace = store.activeWorkspace else {
+            processManager.clear()
+            return
+        }
+        processManager.loadConfig(from: workspace.path, allocatedPorts: workspace.allocatedPorts, portDetails: workspace.portDetails)
     }
 
     private func runCommand(_ command: ProjectCommand) {

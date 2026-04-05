@@ -30,6 +30,7 @@ struct ProjectCommand: Identifiable {
     }
 
     enum Source: String {
+        case forgeJson = "forge"
         case packageJson = "pkg"
         case makefile = "make"
         case dockerCompose = "docker"
@@ -47,6 +48,7 @@ struct ProjectCommand: Identifiable {
 
         var label: String {
             switch self {
+            case .forgeJson: "Forge"
             case .packageJson: "package.json"
             case .makefile: "Makefile"
             case .dockerCompose: "docker-compose.yml"
@@ -71,6 +73,8 @@ struct ProjectCommand: Identifiable {
 func discoverProjectCommands(at path: String) -> [ProjectCommand] {
     var all: [ProjectCommand] = []
 
+    // forge.json commands scanned first — they take precedence over auto-discovered ones
+    all.append(contentsOf: scanForgeJson(at: path))
     all.append(contentsOf: scanPackageJson(at: path))
     all.append(contentsOf: scanMakefile(at: path))
     all.append(contentsOf: scanDockerCompose(at: path))
@@ -87,6 +91,27 @@ func discoverProjectCommands(at path: String) -> [ProjectCommand] {
     all.append(contentsOf: scanXcodeproj(at: path))
 
     return dedupeCommands(all)
+}
+
+// MARK: - forge.json
+
+private func scanForgeJson(at path: String) -> [ProjectCommand] {
+    guard let config = ForgeConfig.load(from: path),
+          let commands = config.commands else { return [] }
+
+    return commands.map { name, commandConfig in
+        var detail: [ProjectCommand.DetailItem] = []
+        if let description = commandConfig.detail {
+            detail.append(ProjectCommand.DetailItem(label: "Description", value: description))
+        }
+        return ProjectCommand(
+            name: name,
+            command: commandConfig.command,
+            source: .forgeJson,
+            workingDirectory: path,
+            detail: detail
+        )
+    }.sorted { $0.name < $1.name }
 }
 
 // MARK: - package.json
@@ -828,7 +853,7 @@ private func parseTomlKeyValue(_ line: String) -> (String, String)? {
 private func dedupeCommands(_ commands: [ProjectCommand]) -> [ProjectCommand] {
     var seen = Set<String>()
     return commands.filter { command in
-        let key = "\(command.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))|\(command.command.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))"
+        let key = command.name.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         if seen.contains(key) { return false }
         seen.insert(key)
         return true

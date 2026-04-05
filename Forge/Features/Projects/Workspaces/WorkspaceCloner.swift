@@ -40,13 +40,39 @@ enum WorkspaceCloner {
         // Fix remote origin to point to original's upstream, not local path
         fixRemoteOrigin(source: projectPath, dest: destPath)
 
+        // Read forge.json: allocate ports and run setup
+        var allocatedPorts: [String: Int] = [:]
+        var portDetails: [String: String] = [:]
+        let config = ForgeConfig.load(from: destPath)
+        if let requestedPorts = config?.ports, !requestedPorts.isEmpty {
+            let result = PortAllocator.allocatePorts(
+                requested: requestedPorts,
+                existingClaims: [:]
+            )
+            allocatedPorts = result.allocated
+            // Collect detail strings from port configs
+            for (envVar, portConfig) in requestedPorts {
+                if let detail = portConfig.detail {
+                    portDetails[envVar] = detail
+                }
+            }
+        }
+
+        // Run setup commands with allocated ports in the environment
+        if let setup = config?.workspace?.setup {
+            let portEnv = allocatedPorts.mapValues(String.init)
+            runLifecycleCommands(setup.commands, in: destPath, env: portEnv, stopOnFailure: true)
+        }
+
         return Workspace(
             projectID: projectID,
             name: name,
             path: destPath,
             branch: branchName,
             parentBranch: parentBranch,
-            fullClone: result.fullClone
+            fullClone: result.fullClone,
+            allocatedPorts: allocatedPorts,
+            portDetails: portDetails
         )
     }
 
@@ -88,6 +114,24 @@ enum WorkspaceCloner {
     // MARK: - Delete Workspace
 
     static func deleteWorkspace(_ workspace: Workspace) {
+        // Run teardown commands from forge.json before removing files
+        if let config = ForgeConfig.load(from: workspace.path) {
+            if let teardown = config.workspace?.teardown {
+                runLifecycleCommands(teardown.commands, in: workspace.path, env: workspace.allocatedPorts.mapValues(String.init))
+            } else if config.compose != nil {
+                // Auto compose down if no explicit teardown
+                let composeFile = config.compose!.file
+                let fullPath = (workspace.path as NSString).appendingPathComponent(composeFile)
+                if FileManager.default.fileExists(atPath: fullPath) {
+                    runLifecycleCommands(
+                        ["docker compose -f \(composeFile) down"],
+                        in: workspace.path,
+                        env: workspace.allocatedPorts.mapValues(String.init)
+                    )
+                }
+            }
+        }
+
         AgentSetup.shared.untrustCodexProject(path: workspace.path)
         if FileManager.default.fileExists(atPath: workspace.path) {
             try? FileManager.default.removeItem(atPath: workspace.path)
@@ -307,5 +351,48 @@ enum WorkspaceCloner {
 
     private static func runGitOrThrow(in directory: String, args: [String]) throws {
         _ = try Git.shared.runOrThrow(in: directory, args: args)
+    }
+
+    // MARK: - Lifecycle Command Helpers
+
+    /// Run workspace lifecycle commands (setup/teardown) synchronously.
+    /// Each command runs via /bin/sh. Stops on first failure for setup,
+    /// continues through failures for teardown.
+    @discardableResult
+    static func runLifecycleCommands(
+        _ commands: [String],
+        in directory: String,
+        env: [String: String] = [:],
+        stopOnFailure: Bool = false
+    ) -> Bool {
+        var allSucceeded = true
+        for command in commands {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: "/bin/sh")
+            process.arguments = ["-c", command]
+            process.currentDirectoryURL = URL(fileURLWithPath: directory)
+
+            var environment = ProcessInfo.processInfo.environment
+            environment["PATH"] = ShellEnvironment.resolvedPath
+            for (key, value) in env {
+                environment[key] = value
+            }
+            process.environment = environment
+            process.standardOutput = Pipe()
+            process.standardError = Pipe()
+
+            do {
+                try process.run()
+                process.waitUntilExit()
+                if process.terminationStatus != 0 {
+                    allSucceeded = false
+                    if stopOnFailure { return false }
+                }
+            } catch {
+                allSucceeded = false
+                if stopOnFailure { return false }
+            }
+        }
+        return allSucceeded
     }
 }

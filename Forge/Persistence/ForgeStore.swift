@@ -57,6 +57,9 @@ private struct WorkspaceEntry: Codable {
     var status: Workspace.Status
     var fullClone: Bool
     var createdAt: Date
+    var lastActiveAt: Date?
+    var allocatedPorts: [String: Int]?
+    var portDetails: [String: String]?
 
     init(workspace: Workspace) {
         id = workspace.id
@@ -67,6 +70,9 @@ private struct WorkspaceEntry: Codable {
         status = workspace.status
         fullClone = workspace.fullClone
         createdAt = workspace.createdAt
+        lastActiveAt = workspace.lastActiveAt
+        allocatedPorts = workspace.allocatedPorts.isEmpty ? nil : workspace.allocatedPorts
+        portDetails = workspace.portDetails.isEmpty ? nil : workspace.portDetails
     }
 
     func toWorkspace(projectID: UUID) -> Workspace {
@@ -79,7 +85,10 @@ private struct WorkspaceEntry: Codable {
             parentBranch: parentBranch,
             status: status,
             fullClone: fullClone,
-            createdAt: createdAt
+            createdAt: createdAt,
+            lastActiveAt: lastActiveAt,
+            allocatedPorts: allocatedPorts ?? [:],
+            portDetails: portDetails ?? [:]
         )
     }
 }

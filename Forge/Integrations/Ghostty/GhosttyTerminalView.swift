@@ -54,11 +54,21 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
 
     // MARK: - Shell Startup
 
-    func startShell(in directory: String, sessionID: UUID? = nil, additionalEnv: [String: String] = [:]) {
+    func startShell(
+        in directory: String,
+        sessionID: UUID? = nil,
+        additionalEnv: [String: String] = [:],
+        workspace: Workspace? = nil,
+        projectName: String? = nil
+    ) {
         guard !hasStartedProcess else { return }
         hasStartedProcess = true
 
-        var env = ShellEnvironment.buildEnvironment(sessionID: sessionID)
+        var env = ShellEnvironment.buildEnvironment(
+            sessionID: sessionID,
+            workspace: workspace,
+            projectName: projectName
+        )
         env["TERM"] = "xterm-ghostty"
         env["COLORTERM"] = "truecolor"
         env["TERM_PROGRAM"] = "ghostty"

@@ -64,7 +64,27 @@ class TerminalCache {
             }
         }
 
-        view.startShell(in: session.workingDirectory, sessionID: session.id, additionalEnv: additionalEnv)
+        // Resolve workspace and project for port/compose env injection
+        let (resolvedWorkspace, resolvedProjectName): (Workspace?, String?) = MainActor.assumeIsolated {
+            if let tab = TerminalSessionManager.shared.tabs.first(where: {
+                $0.sessionIDs.contains(session.id) || $0.paneManager?.allSessionIDs.contains(session.id) == true
+            }),
+                let wsID = tab.workspaceID,
+                let ws = ProjectStore.shared.workspaces.first(where: { $0.id == wsID })
+            {
+                let projName = ProjectStore.shared.projects.first { $0.id == ws.projectID }?.name
+                return (ws, projName)
+            }
+            return (nil, nil)
+        }
+
+        view.startShell(
+            in: session.workingDirectory,
+            sessionID: session.id,
+            additionalEnv: additionalEnv,
+            workspace: resolvedWorkspace,
+            projectName: resolvedProjectName
+        )
 
         cache[session.id] = view
 
