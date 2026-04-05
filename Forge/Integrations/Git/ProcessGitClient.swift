@@ -26,11 +26,27 @@ final class ProcessGitClient: GitClient {
             }
             DispatchQueue.global().asyncAfter(deadline: .now() + timeout, execute: timeoutItem)
 
+            // Read pipes concurrently before waitUntilExit to prevent deadlock
+            // when output exceeds the pipe buffer (~64KB)
+            var outData = Data()
+            var errData = Data()
+            let group = DispatchGroup()
+
+            group.enter()
+            DispatchQueue.global().async {
+                outData = outPipe.fileHandleForReading.readDataToEndOfFile()
+                group.leave()
+            }
+            group.enter()
+            DispatchQueue.global().async {
+                errData = errPipe.fileHandleForReading.readDataToEndOfFile()
+                group.leave()
+            }
+
+            group.wait()
             process.waitUntilExit()
             timeoutItem.cancel()
 
-            let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
-            let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
             let stdout = String(data: outData, encoding: .utf8) ?? ""
             let stderr = String(data: errData, encoding: .utf8) ?? ""
 
