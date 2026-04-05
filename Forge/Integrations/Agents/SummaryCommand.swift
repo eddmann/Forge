@@ -155,11 +155,6 @@ enum SummaryCommand {
 
         guard !text.isEmpty else { return nil }
 
-        // Truncate to 100 chars
-        if text.count > 100 {
-            text = String(text.prefix(97)) + "..."
-        }
-
         return text
     }
 }

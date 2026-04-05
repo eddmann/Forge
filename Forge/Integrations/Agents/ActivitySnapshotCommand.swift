@@ -86,11 +86,6 @@ enum ActivitySnapshotCommand {
 
         guard !text.isEmpty else { return nil }
 
-        // Truncate to 200 chars (longer than sidebar summaries)
-        if text.count > 200 {
-            text = String(text.prefix(197)) + "..."
-        }
-
         return text
     }
 }

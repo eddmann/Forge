@@ -90,7 +90,6 @@ private struct ActivityEventRow: View {
     let event: ActivityEvent
     let isFirst: Bool
     let isLast: Bool
-
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
             // Timeline column
@@ -105,9 +104,9 @@ private struct ActivityEventRow: View {
                 ZStack {
                     Circle()
                         .fill(event.kind.color.opacity(0.15))
-                        .frame(width: 24, height: 24)
+                        .frame(width: 28, height: 28)
                     Image(systemName: event.kind.icon)
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(event.kind.color)
                 }
 
@@ -117,36 +116,35 @@ private struct ActivityEventRow: View {
                     .frame(width: 1.5)
                     .frame(maxHeight: .infinity)
             }
-            .frame(width: 40)
+            .frame(width: 44)
 
             // Content
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Text(event.title)
-                        .font(.system(size: 13, weight: .medium))
+                        .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.primary)
 
                     Spacer()
 
                     Text(relativeTime(event.timestamp))
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary.opacity(0.5))
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary.opacity(0.6))
                 }
 
                 if event.isPending {
                     Text("Summarising...")
-                        .font(.system(size: 12))
+                        .font(.system(size: 13))
                         .foregroundColor(.secondary.opacity(0.5))
                         .italic()
                 } else if let detail = event.detail, !detail.isEmpty {
                     Text(detail)
-                        .font(.system(size: 12))
+                        .font(.system(size: 13))
                         .foregroundColor(.secondary.opacity(0.8))
-                        .lineLimit(3)
                         .lineSpacing(2)
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 10)
             .padding(.trailing, 20)
         }
         .padding(.leading, 16)
