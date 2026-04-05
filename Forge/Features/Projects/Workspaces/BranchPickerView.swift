@@ -5,8 +5,6 @@ struct BranchPickerView: View {
     @State private var searchText: String = ""
     @State private var showNewBranch = false
     @State private var newBranchName: String = ""
-    @State private var errorMessage: String?
-    @State private var successMessage: String?
     @State private var isOperating = false
     var onDismiss: () -> Void
 
@@ -36,32 +34,6 @@ struct BranchPickerView: View {
             Divider()
                 .background(Color.white.opacity(0.1))
 
-            if let error = errorMessage {
-                HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 10))
-                    Text(error)
-                        .font(.system(size: 11))
-                        .lineLimit(2)
-                }
-                .foregroundColor(.red)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-            }
-
-            if let success = successMessage {
-                HStack(spacing: 4) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 10))
-                    Text(success)
-                        .font(.system(size: 11))
-                        .lineLimit(2)
-                }
-                .foregroundColor(.green)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-            }
-
             if showNewBranch {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("NEW BRANCH")
@@ -79,7 +51,7 @@ struct BranchPickerView: View {
                             .controlSize(.small)
                             .disabled(newBranchName.trimmingCharacters(in: .whitespaces).isEmpty || isOperating)
 
-                        Button(action: { showNewBranch = false; errorMessage = nil }) {
+                        Button(action: { showNewBranch = false }) {
                             Image(systemName: "xmark")
                                 .font(.system(size: 9, weight: .medium))
                         }
@@ -145,8 +117,6 @@ struct BranchPickerView: View {
                 ActionRow(icon: "plus", label: "New Branch") {
                     showNewBranch = true
                     newBranchName = ""
-                    errorMessage = nil
-                    successMessage = nil
                 }
                 ActionRow(icon: "plus.square.on.square", label: "New Workspace") {
                     createWorkspace()
@@ -161,7 +131,6 @@ struct BranchPickerView: View {
     private func selectBranch(_ branch: String) {
         guard let path = store.effectivePath, !isOperating else { return }
         isOperating = true
-        errorMessage = nil
 
         DispatchQueue.global(qos: .userInitiated).async {
             let result = Git.shared.run(in: path, args: ["checkout", branch])
@@ -172,7 +141,7 @@ struct BranchPickerView: View {
                     store.requestGitRefresh()
                     onDismiss()
                 } else {
-                    errorMessage = result.trimmedOutput
+                    ToastManager.shared.show(result.trimmedOutput, severity: .error)
                 }
             }
         }
@@ -184,8 +153,6 @@ struct BranchPickerView: View {
         guard let path = store.effectivePath else { return }
 
         isOperating = true
-        errorMessage = nil
-        successMessage = nil
 
         DispatchQueue.global(qos: .userInitiated).async {
             let result = Git.shared.run(in: path, args: ["checkout", "-b", name])
@@ -195,12 +162,12 @@ struct BranchPickerView: View {
                     showNewBranch = false
                     store.currentBranch = name
                     store.requestGitRefresh()
-                    successMessage = "Created branch '\(name)'"
+                    ToastManager.shared.show("Created branch '\(name)'")
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                         onDismiss()
                     }
                 } else {
-                    errorMessage = result.trimmedOutput
+                    ToastManager.shared.show(result.trimmedOutput, severity: .error)
                 }
             }
         }
@@ -210,8 +177,6 @@ struct BranchPickerView: View {
         guard let project = store.activeProject, !isOperating else { return }
         let parentBranch = store.currentBranch.isEmpty ? project.defaultBranch : store.currentBranch
         isOperating = true
-        errorMessage = nil
-        successMessage = nil
 
         DispatchQueue.global(qos: .userInitiated).async {
             do {
@@ -227,7 +192,7 @@ struct BranchPickerView: View {
                     store.activeWorkspaceID = workspace.id
                     ProjectStore.shared.recordActivity(for: project.id)
                     ProjectStore.shared.recordActivity(forWorkspace: workspace.id)
-                    successMessage = "Created workspace '\(workspace.name)'"
+                    ToastManager.shared.show("Created workspace '\(workspace.name)'")
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                         onDismiss()
                     }
@@ -235,7 +200,7 @@ struct BranchPickerView: View {
             } catch {
                 DispatchQueue.main.async {
                     isOperating = false
-                    errorMessage = error.localizedDescription
+                    ToastManager.shared.show(error.localizedDescription, severity: .error)
                 }
             }
         }

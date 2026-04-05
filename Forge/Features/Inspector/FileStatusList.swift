@@ -8,40 +8,29 @@ struct FileStatusList: View {
     @State private var showDiscardConfirmation = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            VStack(spacing: 0) {
-                if viewModel.statuses.isEmpty, !viewModel.isLoading {
-                    emptyState
-                } else {
-                    // File sections
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            section(for: .conflicts)
-                            section(for: .staged)
-                            section(for: .unstaged)
-                            section(for: .untracked)
-                        }
-                        .padding(.top, 4)
+        VStack(spacing: 0) {
+            if viewModel.statuses.isEmpty, !viewModel.isLoading {
+                emptyState
+            } else {
+                // File sections
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        section(for: .conflicts)
+                        section(for: .staged)
+                        section(for: .unstaged)
+                        section(for: .untracked)
                     }
-
-                    Rectangle()
-                        .fill(Color.white.opacity(0.06))
-                        .frame(height: 0.5)
-
-                    // Commit composer
-                    commitComposer
+                    .padding(.top, 4)
                 }
-            }
 
-            // Toast notification overlay
-            if let msg = viewModel.feedbackMessage {
-                GitToast(message: msg, isError: viewModel.feedbackIsError)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                    .padding(.bottom, 8)
-                    .padding(.horizontal, 8)
+                Rectangle()
+                    .fill(Color.white.opacity(0.06))
+                    .frame(height: 0.5)
+
+                // Commit composer
+                commitComposer
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: viewModel.feedbackMessage)
         .confirmationDialog(
             "Discard Changes?",
             isPresented: $showDiscardConfirmation,
@@ -212,37 +201,5 @@ struct FileStatusList: View {
     private func fileCommentCount(for file: FileStatus) -> Int {
         guard let root = ProjectStore.shared.effectiveRootPath else { return 0 }
         return reviewStore.comments(in: root, filePath: file.path).count
-    }
-}
-
-// MARK: - Toast Notification
-
-private struct GitToast: View {
-    let message: String
-    let isError: Bool
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: isError ? "exclamationmark.circle.fill" : "checkmark.circle.fill")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(isError ? .red : .green)
-
-            Text(message)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.primary)
-                .lineLimit(2)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(isError ? Color.red.opacity(0.2) : Color.green.opacity(0.2), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.2), radius: 6, y: 2)
     }
 }

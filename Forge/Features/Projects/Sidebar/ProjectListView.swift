@@ -9,7 +9,6 @@ struct ProjectListView: View {
     @ObservedObject private var store = ProjectStore.shared
     @ObservedObject private var sessionManager = TerminalSessionManager.shared
     @State private var searchText = ""
-    @State private var errorMessage: String?
     private var creatingWorkspaceForProject: Set<UUID> {
         store.creatingWorkspaceForProject
     }
@@ -63,26 +62,6 @@ struct ProjectListView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if let errorMessage {
-                HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 10))
-                    Text(errorMessage)
-                        .font(.system(size: 11))
-                        .lineLimit(3)
-                    Spacer()
-                    Button(action: { self.errorMessage = nil }) {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 9, weight: .medium))
-                    }
-                    .buttonStyle(.plain)
-                }
-                .foregroundColor(.red)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 6)
-                .background(Color.red.opacity(0.08))
-            }
-
             if store.projects.isEmpty {
                 VStack(spacing: 12) {
                     Spacer()
@@ -217,7 +196,7 @@ struct ProjectListView: View {
             } catch {
                 DispatchQueue.main.async {
                     store.creatingWorkspaceForProject.remove(project.id)
-                    errorMessage = error.localizedDescription
+                    ToastManager.shared.show(error.localizedDescription, severity: .error)
                 }
             }
         }
@@ -235,7 +214,6 @@ struct ProjectListView: View {
     }
 
     private func mergeWorkspace(_ workspace: Workspace, projectPath: String) {
-        errorMessage = nil
         mergingWorkspaceIDs.insert(workspace.id)
         DispatchQueue.global(qos: .userInitiated).async {
             do {
@@ -246,13 +224,11 @@ struct ProjectListView: View {
                     store.recordActivity(for: workspace.projectID)
                     store.recordActivity(forWorkspace: workspace.id)
                     store.requestGitRefresh()
-                    // Clear any previous error
-                    errorMessage = nil
                 }
             } catch {
                 DispatchQueue.main.async {
                     mergingWorkspaceIDs.remove(workspace.id)
-                    errorMessage = error.localizedDescription
+                    ToastManager.shared.show(error.localizedDescription, severity: .error, duration: 5.0)
                 }
             }
         }

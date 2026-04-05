@@ -264,7 +264,7 @@ class AgentEventStore: ObservableObject {
         notifications = updated
 
         if isAppFocused, isActiveTab {
-            NSSound.beep()
+            ToastManager.shared.show("\(notification.title): \(notification.body)")
         } else {
             deliverSystemNotification(notification)
         }

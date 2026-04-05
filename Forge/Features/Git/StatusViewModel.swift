@@ -20,8 +20,6 @@ final class StatusViewModel: ObservableObject {
     @Published var ahead = 0
     @Published var behind = 0
     @Published var hasUpstream = false
-    @Published var feedbackMessage: String?
-    @Published var feedbackIsError = false
 
     // MARK: - Private
 
@@ -151,11 +149,11 @@ final class StatusViewModel: ObservableObject {
         runMutating(in: repoPath, args: ["add", "--", file.path]) { [weak self] result in
             guard let self else { return }
             if result.success {
-                setFeedback("Staged \(file.fileName)", isError: false)
+                ToastManager.shared.show("Staged \(file.fileName)")
                 recordActivity()
                 refresh()
             } else {
-                setFeedback(cleanError(result.stderr), isError: true)
+                ToastManager.shared.show(cleanError(result.stderr), severity: .error)
             }
         }
     }
@@ -165,11 +163,11 @@ final class StatusViewModel: ObservableObject {
         runMutating(in: repoPath, args: ["restore", "--staged", "--", file.path]) { [weak self] result in
             guard let self else { return }
             if result.success {
-                setFeedback("Unstaged \(file.fileName)", isError: false)
+                ToastManager.shared.show("Unstaged \(file.fileName)")
                 recordActivity()
                 refresh()
             } else {
-                setFeedback(cleanError(result.stderr), isError: true)
+                ToastManager.shared.show(cleanError(result.stderr), severity: .error)
             }
         }
     }
@@ -179,11 +177,11 @@ final class StatusViewModel: ObservableObject {
         runMutating(in: repoPath, args: ["add", "-A"]) { [weak self] result in
             guard let self else { return }
             if result.success {
-                setFeedback("Staged all changes", isError: false)
+                ToastManager.shared.show("Staged all changes")
                 recordActivity()
                 refresh()
             } else {
-                setFeedback(cleanError(result.stderr), isError: true)
+                ToastManager.shared.show(cleanError(result.stderr), severity: .error)
             }
         }
     }
@@ -193,11 +191,11 @@ final class StatusViewModel: ObservableObject {
         runMutating(in: repoPath, args: ["reset", "HEAD"]) { [weak self] result in
             guard let self else { return }
             if result.success {
-                setFeedback("Unstaged all changes", isError: false)
+                ToastManager.shared.show("Unstaged all changes")
                 recordActivity()
                 refresh()
             } else {
-                setFeedback(cleanError(result.stderr), isError: true)
+                ToastManager.shared.show(cleanError(result.stderr), severity: .error)
             }
         }
     }
@@ -220,10 +218,10 @@ final class StatusViewModel: ObservableObject {
         runMutating(in: repoPath, args: args) { [weak self] result in
             guard let self else { return }
             if result.success {
-                setFeedback("Discarded \(file.fileName)", isError: false)
+                ToastManager.shared.show("Discarded \(file.fileName)")
                 refresh()
             } else {
-                setFeedback(cleanError(result.stderr), isError: true)
+                ToastManager.shared.show(cleanError(result.stderr), severity: .error)
             }
         }
     }
@@ -244,7 +242,6 @@ final class StatusViewModel: ObservableObject {
         guard !message.isEmpty, let repoPath, !isBusy else { return }
 
         isCommitting = true
-        feedbackMessage = nil
 
         var args = ["commit", "-m", message]
         if isAmend { args = ["commit", "--amend", "-m", message] }
@@ -256,11 +253,11 @@ final class StatusViewModel: ObservableObject {
             if result.success {
                 commitMessage = ""
                 isAmend = false
-                setFeedback(wasAmend ? "Amended commit." : "Committed changes.", isError: false)
+                ToastManager.shared.show(wasAmend ? "Amended commit." : "Committed changes.")
                 recordActivity()
                 refresh()
             } else {
-                setFeedback(cleanError(result.stderr), isError: true)
+                ToastManager.shared.show(cleanError(result.stderr), severity: .error)
             }
         }
     }
@@ -280,11 +277,11 @@ final class StatusViewModel: ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 self?.isBusy = false
                 if result.success {
-                    self?.setFeedback("Staged hunk", isError: false)
+                    ToastManager.shared.show("Staged hunk")
                     self?.recordActivity()
                     self?.refresh()
                 } else {
-                    self?.setFeedback(self?.cleanError(result.stderr) ?? "Failed to stage hunk", isError: true)
+                    ToastManager.shared.show(self?.cleanError(result.stderr) ?? "Failed to stage hunk", severity: .error)
                 }
                 completion?()
             }
@@ -304,11 +301,11 @@ final class StatusViewModel: ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 self?.isBusy = false
                 if result.success {
-                    self?.setFeedback("Unstaged hunk", isError: false)
+                    ToastManager.shared.show("Unstaged hunk")
                     self?.recordActivity()
                     self?.refresh()
                 } else {
-                    self?.setFeedback(self?.cleanError(result.stderr) ?? "Failed to unstage hunk", isError: true)
+                    ToastManager.shared.show(self?.cleanError(result.stderr) ?? "Failed to unstage hunk", severity: .error)
                 }
                 completion?()
             }
@@ -329,19 +326,19 @@ final class StatusViewModel: ObservableObject {
         )
 
         guard !markup.isEmpty else {
-            setFeedback("Add at least one review comment before exporting.", isError: true)
+            ToastManager.shared.show("Add at least one review comment before exporting.", severity: .warning)
             return
         }
 
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(markup, forType: .string)
-        setFeedback("Copied review for agent.", isError: false)
+        ToastManager.shared.show("Copied review for agent.")
     }
 
     func clearReviewComments() {
         guard let selectedRoot = ProjectStore.shared.effectiveRootPath else { return }
         ReviewStore.shared.clearComments(in: selectedRoot)
-        setFeedback("Cleared review comments.", isError: false)
+        ToastManager.shared.show("Cleared review comments.")
     }
 
     // MARK: - Helpers
@@ -355,20 +352,6 @@ final class StatusViewModel: ObservableObject {
                 completion(result)
             }
         }
-    }
-
-    private var feedbackDismissTask: DispatchWorkItem?
-
-    private func setFeedback(_ message: String, isError: Bool) {
-        feedbackDismissTask?.cancel()
-        feedbackMessage = message
-        feedbackIsError = isError
-
-        let task = DispatchWorkItem { [weak self] in
-            self?.feedbackMessage = nil
-        }
-        feedbackDismissTask = task
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: task)
     }
 
     #if DEBUG

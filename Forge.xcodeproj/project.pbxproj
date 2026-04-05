@@ -71,6 +71,7 @@
 		766D9CF7612E3BE9CEC14A9E /* WorkspaceDiffViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */; };
 		77AE960A4776D5A0A52AD199 /* CommandPaletteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D2513A6B4EB6E2718B01CE /* CommandPaletteItem.swift */; };
 		792DB5B7CE3CD212E63347F3 /* JetBrainsMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */; };
+		824C90E0DE7F062B5BE0702B /* ToastPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA171C5EE0F3CF9830676149 /* ToastPanel.swift */; };
 		8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */; };
 		83C38DE811797FDEC108A310 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB6C83CAC1F911908568BD7 /* StatusBarController.swift */; };
 		87DE037B3A7130EABAEEA4FC /* GitUnifiedDiffParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */; };
@@ -83,6 +84,7 @@
 		9EC89A28301B55CD351004C8 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E18D8DBAC71B87110136F /* SplitViewController.swift */; };
 		9EDD41D6CE5D3A6834DC9C8C /* BonsplitPaneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17205892BB4CD21C1A347A75 /* BonsplitPaneManager.swift */; };
 		A2858A5B2AAD0956FC54CA0B /* forge-cli in Resources */ = {isa = PBXBuildFile; fileRef = 0DC2B1C4E2E0CE097908C96B /* forge-cli */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A5BD3BA67E0B7131054B2AD4 /* ToastManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277F7B623A62618F58935CEB /* ToastManager.swift */; };
 		A5E0E33106E041E304409673 /* AgentSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014017376795403DB6AD56A /* AgentSetup.swift */; };
 		A6AC1E458EE45F2D0FDC703C /* SplitAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 243460106C0C757CFFBF6D4E /* SplitAnimator.swift */; };
 		AB404BEE7FC486153DD784A2 /* WorkspaceWelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A33F98B22ADD7CD5183A9E /* WorkspaceWelcomeScreen.swift */; };
@@ -116,6 +118,7 @@
 		DE18EFF881E8F22355D76103 /* TabItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C6BF661A3B57C7A0FE4DC /* TabItem.swift */; };
 		DEAC350B0F837DF5137CCCDF /* ForgeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A90616935E4BDC25E834E9B /* ForgeStore.swift */; };
 		DF49C321DAD4350EFE68125A /* GitDiffModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50575BD258BDA402F95EE53 /* GitDiffModels.swift */; };
+		DF85061B496FA68855985CE6 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BD07A979DFB5309C7168A3 /* ToastView.swift */; };
 		E0B0011E31FC00183E2E9953 /* ShellEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 512FB160F659513F1441B40F /* ShellEnvironment.swift */; };
 		E4733A69B65CD74E31153FA1 /* WordDiff.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B6352ABACD0556576E6674 /* WordDiff.swift */; };
 		E52D47766A9E2B7BE40BAECD /* pokemon-sprites in Resources */ = {isa = PBXBuildFile; fileRef = 72F5381FD45049EF3C7CE858 /* pokemon-sprites */; };
@@ -171,6 +174,7 @@
 		20D2513A6B4EB6E2718B01CE /* CommandPaletteItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPaletteItem.swift; sourceTree = "<group>"; };
 		20F68C9DCE5D98462D21881D /* BonsplitDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitDelegate.swift; sourceTree = "<group>"; };
 		243460106C0C757CFFBF6D4E /* SplitAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitAnimator.swift; sourceTree = "<group>"; };
+		277F7B623A62618F58935CEB /* ToastManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastManager.swift; sourceTree = "<group>"; };
 		27A6CD1CBB80B47266E1EF60 /* DemoStateFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoStateFactory.swift; sourceTree = "<group>"; };
 		2B48636B23896A11A9644925 /* GitClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitClient.swift; sourceTree = "<group>"; };
 		324C6BF661A3B57C7A0FE4DC /* TabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItem.swift; sourceTree = "<group>"; };
@@ -184,6 +188,7 @@
 		447E8085460F22791A2E2002 /* GitDiffService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitDiffService.swift; sourceTree = "<group>"; };
 		47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSessionManager.swift; sourceTree = "<group>"; };
 		4D2846837C3C3B77437CA2B0 /* ProcessManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManager.swift; sourceTree = "<group>"; };
+		50BD07A979DFB5309C7168A3 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		512FB160F659513F1441B40F /* ShellEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellEnvironment.swift; sourceTree = "<group>"; };
 		53E8575792CD729D327E6C2A /* TerminalAppearanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalAppearanceView.swift; sourceTree = "<group>"; };
 		5692E40E8CC3135ACC22733D /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
@@ -237,6 +242,7 @@
 		A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentInfoPopoverView.swift; sourceTree = "<group>"; };
 		A913D1CB5E730CFBA223F25D /* DebugEventLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugEventLog.swift; sourceTree = "<group>"; };
 		A918DA6D12D11F5510C604BB /* ProjectStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectStore.swift; sourceTree = "<group>"; };
+		AA171C5EE0F3CF9830676149 /* ToastPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPanel.swift; sourceTree = "<group>"; };
 		AB2C640E2A64288AE183298D /* BonsplitConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitConfiguration.swift; sourceTree = "<group>"; };
 		B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitUnifiedDiffParser.swift; sourceTree = "<group>"; };
 		B6962054AB32C0DF336214C6 /* LayoutSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSnapshot.swift; sourceTree = "<group>"; };
@@ -766,6 +772,9 @@
 				0DE29E80CC2891CE39E9AA50 /* MainSplitViewController.swift */,
 				8CFD8D52036236C912F9A75B /* MainWindowController.swift */,
 				FCB6C83CAC1F911908568BD7 /* StatusBarController.swift */,
+				277F7B623A62618F58935CEB /* ToastManager.swift */,
+				AA171C5EE0F3CF9830676149 /* ToastPanel.swift */,
+				50BD07A979DFB5309C7168A3 /* ToastView.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -1023,6 +1032,9 @@
 				636833B4508AD5E5520B0E57 /* TerminalSessionManager.swift in Sources */,
 				E9935234B95FAF969A02353A /* TerminalTab.swift in Sources */,
 				440926E6DA96FD3DAE4BCDD4 /* TerminalTabBar.swift in Sources */,
+				A5BD3BA67E0B7131054B2AD4 /* ToastManager.swift in Sources */,
+				824C90E0DE7F062B5BE0702B /* ToastPanel.swift in Sources */,
+				DF85061B496FA68855985CE6 /* ToastView.swift in Sources */,
 				4C793C7041A31A190944A901 /* UnifiedDiffView.swift in Sources */,
 				660EC2752004FADA5827C386 /* WelcomeView.swift in Sources */,
 				E4733A69B65CD74E31153FA1 /* WordDiff.swift in Sources */,
