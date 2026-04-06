@@ -177,7 +177,7 @@ struct BranchPickerView: View {
         guard let project = store.activeProject, !isOperating else { return }
         let parentBranch = store.currentBranch.isEmpty ? project.defaultBranch : store.currentBranch
         isOperating = true
-        ToastManager.shared.show("Creating workspace…", severity: .success, duration: 30.0)
+        ToastManager.shared.showModal("Creating workspace…")
 
         DispatchQueue.global(qos: .userInitiated).async {
             do {
@@ -188,7 +188,7 @@ struct BranchPickerView: View {
                     parentBranch: parentBranch,
                     progress: { step in
                         DispatchQueue.main.async {
-                            ToastManager.shared.show(step, severity: .success, duration: 30.0)
+                            ToastManager.shared.showModal(step)
                         }
                     }
                 )
@@ -200,6 +200,7 @@ struct BranchPickerView: View {
                     store.activeWorkspaceID = ws.id
                     ProjectStore.shared.recordActivity(for: project.id)
                     ProjectStore.shared.recordActivity(forWorkspace: ws.id)
+                    ToastManager.shared.dismissModal()
                     if let failure = setupFailed {
                         let detail = failure.errorOutput ?? failure.failedCommand ?? "Unknown error"
                         ToastManager.shared.show(
@@ -218,6 +219,7 @@ struct BranchPickerView: View {
             } catch {
                 DispatchQueue.main.async {
                     isOperating = false
+                    ToastManager.shared.dismissModal()
                     ToastManager.shared.show(error.localizedDescription, severity: .error)
                 }
             }

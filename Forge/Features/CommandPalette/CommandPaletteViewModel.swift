@@ -223,7 +223,7 @@ final class CommandPaletteViewModel: ObservableObject {
             guard let project = store.activeProject else { return }
             let branch = project.defaultBranch
             store.creatingWorkspaceForProject.insert(project.id)
-            ToastManager.shared.show("Creating workspace…", severity: .success, duration: 30.0)
+            ToastManager.shared.showModal("Creating workspace…")
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
                     let result = try WorkspaceCloner.createWorkspace(
@@ -231,7 +231,7 @@ final class CommandPaletteViewModel: ObservableObject {
                         projectPath: project.path, parentBranch: branch,
                         progress: { step in
                             DispatchQueue.main.async {
-                                ToastManager.shared.show(step, severity: .success, duration: 30.0)
+                                ToastManager.shared.showModal(step)
                             }
                         }
                     )
@@ -241,6 +241,7 @@ final class CommandPaletteViewModel: ObservableObject {
                         store.creatingWorkspaceForProject.remove(project.id)
                         store.addWorkspace(ws)
                         store.activeWorkspaceID = ws.id
+                        ToastManager.shared.dismissModal()
                         if let failure = setupFailed {
                             let detail = failure.errorOutput ?? failure.failedCommand ?? "Unknown error"
                             ToastManager.shared.show(
@@ -256,6 +257,7 @@ final class CommandPaletteViewModel: ObservableObject {
                 } catch {
                     DispatchQueue.main.async {
                         store.creatingWorkspaceForProject.remove(project.id)
+                        ToastManager.shared.dismissModal()
                         ToastManager.shared.show(error.localizedDescription, severity: .error)
                     }
                 }

@@ -13,6 +13,7 @@
 		10ABE7EA8B508FD50BC72C8D /* ProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2846837C3C3B77437CA2B0 /* ProcessManager.swift */; };
 		14CB2C84FC65B925A953F23E /* AgentEventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71607C511F2A39E630507479 /* AgentEventStore.swift */; };
 		186B0FFC225E49680C7A1400 /* ExternalEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17988CA2EA98D7A6396E2B91 /* ExternalEditor.swift */; };
+		1960BBD0AD440293C5A0106A /* ModalToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC2CB286B26CE7FA1755E614 /* ModalToastView.swift */; };
 		1A651B037477F4DBA2ED094E /* DemoMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BE7F290D41BF2C34D83F4A /* DemoMode.swift */; };
 		1ADCE9E20D14A95F005B6033 /* AgentEventLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E002CD819513C0820D42DF3 /* AgentEventLogger.swift */; };
 		1B65752028DE519CB345DAB8 /* ForgeSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */; };
@@ -68,6 +69,7 @@
 		6E66D7FFCF8DFBB0390ECD49 /* FileStatusList.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC582D54CE2623E5734E1EEE /* FileStatusList.swift */; };
 		70C18486C2C2B8BCCF6EF853 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E2BA9B896F72867C2704FC /* CommandPalette.swift */; };
 		7135B8F57163B17958BAAA26 /* ChangesTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FF87CF5EC77FF694158BAC /* ChangesTabView.swift */; };
+		73E1BF7F4B71A2601319ED03 /* ModalToastPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8836627A63A5FC5785B35DB2 /* ModalToastPanel.swift */; };
 		766D9CF7612E3BE9CEC14A9E /* WorkspaceDiffViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */; };
 		77AE960A4776D5A0A52AD199 /* CommandPaletteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D2513A6B4EB6E2718B01CE /* CommandPaletteItem.swift */; };
 		792DB5B7CE3CD212E63347F3 /* JetBrainsMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */; };
@@ -221,6 +223,7 @@
 		7E28C3575AE17D6490A76432 /* Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workspace.swift; sourceTree = "<group>"; };
 		839E65E109DAFF8720308214 /* TerminalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalCache.swift; sourceTree = "<group>"; };
 		868FBDD017F6B9CA822F6A7D /* ChangesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesViewModel.swift; sourceTree = "<group>"; };
+		8836627A63A5FC5785B35DB2 /* ModalToastPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalToastPanel.swift; sourceTree = "<group>"; };
 		8A1D2E8F62597C740B62B4D0 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
 		8A90616935E4BDC25E834E9B /* ForgeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeStore.swift; sourceTree = "<group>"; };
 		8BBFCA5701CEE5E34D6C159E /* SplitNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitNode.swift; sourceTree = "<group>"; };
@@ -270,6 +273,7 @@
 		D67FC7642C53676D66D0BD42 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		D8B6352ABACD0556576E6674 /* WordDiff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiff.swift; sourceTree = "<group>"; };
 		DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitContainerView.swift; sourceTree = "<group>"; };
+		DC2CB286B26CE7FA1755E614 /* ModalToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalToastView.swift; sourceTree = "<group>"; };
 		DCF2655CE07FECC563390787 /* FileStatusRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusRow.swift; sourceTree = "<group>"; };
 		DD57395E80A40A56655E491F /* InspectorStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorStateStore.swift; sourceTree = "<group>"; };
 		DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceDiffViewModel.swift; sourceTree = "<group>"; };
@@ -774,6 +778,8 @@
 				749EB54C1D9FD07119776AA4 /* AppDelegate.swift */,
 				0DE29E80CC2891CE39E9AA50 /* MainSplitViewController.swift */,
 				8CFD8D52036236C912F9A75B /* MainWindowController.swift */,
+				8836627A63A5FC5785B35DB2 /* ModalToastPanel.swift */,
+				DC2CB286B26CE7FA1755E614 /* ModalToastView.swift */,
 				FCB6C83CAC1F911908568BD7 /* StatusBarController.swift */,
 				277F7B623A62618F58935CEB /* ToastManager.swift */,
 				AA171C5EE0F3CF9830676149 /* ToastPanel.swift */,
@@ -983,6 +989,8 @@
 				F5B0165ECE06BC459D782E71 /* LayoutSnapshot.swift in Sources */,
 				4E5B37050E49C380D5DDC77A /* MainSplitViewController.swift in Sources */,
 				B2A94F3E550AC00F336C7D1D /* MainWindowController.swift in Sources */,
+				73E1BF7F4B71A2601319ED03 /* ModalToastPanel.swift in Sources */,
+				1960BBD0AD440293C5A0106A /* ModalToastView.swift in Sources */,
 				44E8410998E0416714800A1B /* NavigationDirection.swift in Sources */,
 				F351A2997F2AFC7ADB235655 /* PaneContainerView.swift in Sources */,
 				676341BCA86E78A23161ED1B /* PaneID.swift in Sources */,

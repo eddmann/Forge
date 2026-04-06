@@ -27,6 +27,7 @@ final class ToastManager: ObservableObject {
     // MARK: - Published State
 
     @Published private(set) var currentToast: Toast?
+    @Published private(set) var modalToast: Toast?
 
     // MARK: - Private
 
@@ -34,7 +35,7 @@ final class ToastManager: ObservableObject {
 
     private init() {}
 
-    // MARK: - API
+    // MARK: - Regular Toast API
 
     func show(_ message: String, severity: Severity = .success, duration: TimeInterval? = nil, action: Action? = nil) {
         dismissTask?.cancel()
@@ -57,5 +58,18 @@ final class ToastManager: ObservableObject {
         dismissTask = nil
         currentToast = nil
         ToastPanel.shared.hide()
+    }
+
+    // MARK: - Modal Toast API
+
+    func showModal(_ message: String, severity: Severity = .success) {
+        let toast = Toast(message: message, severity: severity, action: nil, duration: 0)
+        modalToast = toast
+        ModalToastPanel.shared.present()
+    }
+
+    func dismissModal() {
+        modalToast = nil
+        ModalToastPanel.shared.hide()
     }
 }
