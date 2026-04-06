@@ -21,6 +21,7 @@ final class ChangesViewModel: ObservableObject {
 
     @Published var scrollToFilePath: String?
     @Published var collapsedFiles: Set<String> = []
+    @Published var contextExpanded = false
 
     // Per-file draft/selection state (keyed by file path)
     @Published var draftComment: DraftCommentState?
@@ -60,20 +61,22 @@ final class ChangesViewModel: ObservableObject {
         isLoading = fileDiffs.isEmpty
         error = nil
 
-        if let branchDiffRequest {
-            loadBranchDiffs(request: branchDiffRequest)
+        if var req = branchDiffRequest {
+            req.contextLines = contextExpanded ? 99999 : 3
+            loadBranchDiffs(request: req)
             return
         }
 
         let statusVM = StatusViewModel.shared
         let statuses = statusVM.statuses
+        let ctx = contextExpanded ? 99999 : 3
 
         // Load unstaged diffs (covers most changes)
-        diffService.diffAsync(in: repoPath, request: .unstaged()) { [weak self] unstagedResult in
+        diffService.diffAsync(in: repoPath, request: .unstaged(contextLines: ctx)) { [weak self] unstagedResult in
             guard let self else { return }
 
             // Also load staged diffs
-            diffService.diffAsync(in: repoPath, request: .staged()) { [weak self] stagedResult in
+            diffService.diffAsync(in: repoPath, request: .staged(contextLines: ctx)) { [weak self] stagedResult in
                 DispatchQueue.main.async {
                     guard let self else { return }
                     self.isLoading = false
@@ -129,6 +132,11 @@ final class ChangesViewModel: ObservableObject {
 
     func reload() {
         loadAllDiffs()
+    }
+
+    func toggleContextExpansion() {
+        contextExpanded.toggle()
+        reload()
     }
 
     // MARK: - Scroll To File

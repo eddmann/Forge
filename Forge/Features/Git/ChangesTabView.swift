@@ -128,6 +128,20 @@ struct ChangesTabView: View {
 
             Spacer()
 
+            // Expand / Collapse context
+            Button(action: { viewModel.toggleContextExpansion() }) {
+                HStack(spacing: 3) {
+                    Image(systemName: viewModel.contextExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                        .font(.system(size: 10))
+                    Text(viewModel.contextExpanded ? "Collapse" : "Expand")
+                        .font(.system(size: 11, weight: .medium))
+                }
+            }
+            .buttonStyle(.borderless)
+            .help(viewModel.contextExpanded ? "Show only changed hunks" : "Show full file context")
+
+            Divider().frame(height: 16)
+
             // View mode toggle
             Picker("", selection: $viewModel.viewMode) {
                 ForEach(DiffViewMode.allCases, id: \.self) { mode in

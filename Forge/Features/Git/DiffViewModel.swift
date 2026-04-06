@@ -54,6 +54,7 @@ final class DiffViewModel: ObservableObject {
     @Published var draftComment: DraftCommentState?
     @Published var selectedLineIDs: Set<String> = []
     @Published var selectionAnchorID: String?
+    @Published var contextExpanded = false
 
     private let diffService = GitDiffService.shared
 
@@ -76,9 +77,10 @@ final class DiffViewModel: ObservableObject {
             return
         }
 
+        let ctx = contextExpanded ? 99999 : 3
         let request: GitDiffRequest = staged
-            ? .staged(paths: [filePath])
-            : .unstaged(paths: [filePath])
+            ? .staged(paths: [filePath], contextLines: ctx)
+            : .unstaged(paths: [filePath], contextLines: ctx)
 
         diffService.diffAsync(in: repoPath, request: request) { [weak self] result in
             DispatchQueue.main.async {
@@ -98,6 +100,11 @@ final class DiffViewModel: ObservableObject {
 
     func reload() {
         loadDiff()
+    }
+
+    func toggleContextExpansion() {
+        contextExpanded.toggle()
+        reload()
     }
 
     // MARK: - Hunk Navigation
