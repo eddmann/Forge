@@ -223,20 +223,28 @@ final class CommandPaletteViewModel: ObservableObject {
             guard let project = store.activeProject else { return }
             let branch = project.defaultBranch
             store.creatingWorkspaceForProject.insert(project.id)
+            ToastManager.shared.show("Creating workspace…", severity: .success, duration: 30.0)
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
                     let ws = try WorkspaceCloner.createWorkspace(
                         projectID: project.id, projectName: project.name,
-                        projectPath: project.path, parentBranch: branch
+                        projectPath: project.path, parentBranch: branch,
+                        progress: { step in
+                            DispatchQueue.main.async {
+                                ToastManager.shared.show(step, severity: .success, duration: 30.0)
+                            }
+                        }
                     )
                     DispatchQueue.main.async {
                         store.creatingWorkspaceForProject.remove(project.id)
                         store.addWorkspace(ws)
                         store.activeWorkspaceID = ws.id
+                        ToastManager.shared.show("Created workspace '\(ws.name)'")
                     }
                 } catch {
                     DispatchQueue.main.async {
                         store.creatingWorkspaceForProject.remove(project.id)
+                        ToastManager.shared.show(error.localizedDescription, severity: .error)
                     }
                 }
             }

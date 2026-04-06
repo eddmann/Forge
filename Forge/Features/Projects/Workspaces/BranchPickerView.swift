@@ -177,6 +177,7 @@ struct BranchPickerView: View {
         guard let project = store.activeProject, !isOperating else { return }
         let parentBranch = store.currentBranch.isEmpty ? project.defaultBranch : store.currentBranch
         isOperating = true
+        ToastManager.shared.show("Creating workspace…", severity: .success, duration: 30.0)
 
         DispatchQueue.global(qos: .userInitiated).async {
             do {
@@ -184,7 +185,12 @@ struct BranchPickerView: View {
                     projectID: project.id,
                     projectName: project.name,
                     projectPath: project.path,
-                    parentBranch: parentBranch
+                    parentBranch: parentBranch,
+                    progress: { step in
+                        DispatchQueue.main.async {
+                            ToastManager.shared.show(step, severity: .success, duration: 30.0)
+                        }
+                    }
                 )
                 DispatchQueue.main.async {
                     isOperating = false

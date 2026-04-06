@@ -179,19 +179,26 @@ struct ProjectListView: View {
 
     private func createWorkspace(for project: Project, branch: String) {
         store.creatingWorkspaceForProject.insert(project.id)
+        ToastManager.shared.show("Creating workspace…", severity: .success, duration: 30.0)
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 let workspace = try WorkspaceCloner.createWorkspace(
                     projectID: project.id,
                     projectName: project.name,
                     projectPath: project.path,
-                    parentBranch: branch
+                    parentBranch: branch,
+                    progress: { step in
+                        DispatchQueue.main.async {
+                            ToastManager.shared.show(step, severity: .success, duration: 30.0)
+                        }
+                    }
                 )
                 DispatchQueue.main.async {
                     store.creatingWorkspaceForProject.remove(project.id)
                     store.addWorkspace(workspace)
                     store.activeProjectID = project.id
                     store.activeWorkspaceID = workspace.id
+                    ToastManager.shared.show("Created workspace '\(workspace.name)'")
                 }
             } catch {
                 DispatchQueue.main.async {
@@ -203,18 +210,22 @@ struct ProjectListView: View {
     }
 
     private func deleteWorkspace(_ workspace: Workspace) {
+        let name = workspace.name
         deletingWorkspaceIDs.insert(workspace.id)
+        ToastManager.shared.show("Deleting workspace '\(name)'…", severity: .success, duration: 30.0)
         DispatchQueue.global(qos: .userInitiated).async {
             WorkspaceCloner.deleteWorkspace(workspace)
             DispatchQueue.main.async {
                 deletingWorkspaceIDs.remove(workspace.id)
                 store.deleteWorkspace(id: workspace.id)
+                ToastManager.shared.show("Deleted workspace '\(name)'")
             }
         }
     }
 
     private func mergeWorkspace(_ workspace: Workspace, projectPath: String) {
         mergingWorkspaceIDs.insert(workspace.id)
+        ToastManager.shared.show("Merging '\(workspace.name)'…", severity: .success, duration: 30.0)
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 let message = try WorkspaceCloner.mergeWorkspaceIntoProject(workspace, projectPath: projectPath)
@@ -224,6 +235,7 @@ struct ProjectListView: View {
                     store.recordActivity(for: workspace.projectID)
                     store.recordActivity(forWorkspace: workspace.id)
                     store.requestGitRefresh()
+                    ToastManager.shared.show(message)
                 }
             } catch {
                 DispatchQueue.main.async {

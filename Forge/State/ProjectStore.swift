@@ -175,6 +175,7 @@ class ProjectStore: ObservableObject {
             if let existing = projects.first(where: { $0.path == url.path }) {
                 activeProjectID = existing.id
                 activeWorkspaceID = nil
+                Task { @MainActor in ToastManager.shared.show("Switched to '\(existing.name)'") }
             }
             return
         }
@@ -184,6 +185,7 @@ class ProjectStore: ObservableObject {
         activeProjectID = project.id
         activeWorkspaceID = nil
         saveAll()
+        Task { @MainActor in ToastManager.shared.show("Added project '\(project.name)'") }
     }
 
     func removeProject(id: UUID) {

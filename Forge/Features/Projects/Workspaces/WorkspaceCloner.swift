@@ -12,7 +12,8 @@ enum WorkspaceCloner {
         projectID: UUID,
         projectName: String,
         projectPath: String,
-        parentBranch: String
+        parentBranch: String,
+        progress: ((String) -> Void)? = nil
     ) throws -> Workspace {
         let existingNames = ProjectStore.shared.workspaces.map(\.name)
         let name = WorkspaceNaming.generateUnique(existing: existingNames)
@@ -20,16 +21,19 @@ enum WorkspaceCloner {
         let destDirName = "\(projectName)-\(name)"
         let destPath = ForgeStore.shared.clonesDir.appendingPathComponent(destDirName).path
 
+        progress?("Cloning repository…")
         let result = try cloneProject(source: projectPath, dest: destPath)
 
         // Pre-seed Codex trust for this workspace (Codex doesn't walk parent dirs)
         AgentSetup.shared.trustCodexProject(path: destPath)
 
         // Make the selected branch the base for the workspace branch.
+        progress?("Checking out \(parentBranch)…")
         try checkoutWorkspaceBaseBranch(in: destPath, parentBranch: parentBranch)
 
         // Create and checkout workspace branch
         let branchName = "forge/\(name)"
+        progress?("Creating branch \(branchName)…")
         let (branchExists, _) = runGitSync(in: destPath, args: ["rev-parse", "--verify", "refs/heads/\(branchName)"])
         if !branchExists {
             try runGitOrThrow(in: destPath, args: ["checkout", "-b", branchName])
@@ -38,6 +42,7 @@ enum WorkspaceCloner {
         }
 
         // Fix remote origin to point to original's upstream, not local path
+        progress?("Configuring remote…")
         fixRemoteOrigin(source: projectPath, dest: destPath)
 
         // Read forge.json: allocate ports and run setup
