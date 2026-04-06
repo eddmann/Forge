@@ -106,6 +106,7 @@ struct SessionStateFile: Codable {
     var summaries: [String: String] = [:]
     var scopes: [String: ScopeState] = [:]
     var scrollback: [String: String] = [:]
+    var inspectorStates: [String: InspectorStateEntry] = [:]
 
     init() {}
 
@@ -121,6 +122,7 @@ struct SessionStateFile: Codable {
         summaries = try c.decodeIfPresent([String: String].self, forKey: .summaries) ?? [:]
         scopes = try c.decodeIfPresent([String: ScopeState].self, forKey: .scopes) ?? [:]
         scrollback = try c.decodeIfPresent([String: String].self, forKey: .scrollback) ?? [:]
+        inspectorStates = try c.decodeIfPresent([String: InspectorStateEntry].self, forKey: .inspectorStates) ?? [:]
     }
 }
 

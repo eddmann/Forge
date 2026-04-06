@@ -72,6 +72,18 @@ struct RingBuffer<Element> {
 
 // MARK: - Process Manager
 
+/// Snapshot of a managed process's display state for caching across workspace switches.
+struct ProcessSnapshot {
+    let name: String
+    let command: String
+    let workingDirectory: String
+    let source: ManagedProcess.ProcessSource
+    let status: ManagedProcess.ProcessStatus
+    let outputLines: [String]
+    let port: Int?
+    let portDetail: String?
+}
+
 /// Manages lifecycle of processes defined in forge.json for a workspace.
 class ProcessManager: ObservableObject {
     static let shared = ProcessManager()
@@ -89,8 +101,57 @@ class ProcessManager: ObservableObject {
     private var dockerSyncTimer: Timer?
     private static let dockerSyncInterval: TimeInterval = 60
 
+    /// Per-workspace cache of process snapshots (output buffers + status) keyed by workspace scope key.
+    private var processCache: [String: [ProcessSnapshot]] = [:]
+    /// Currently active scope key.
+    private var activeScopeKey: String?
+
+    /// Save a snapshot of the current processes for later restoration.
+    func saveCurrentState() {
+        guard let key = activeScopeKey, !processes.isEmpty else { return }
+        processCache[key] = processes.map { proc in
+            ProcessSnapshot(
+                name: proc.name,
+                command: proc.command,
+                workingDirectory: proc.workingDirectory,
+                source: proc.source,
+                status: runningProcesses[proc.id] != nil ? .running : proc.status,
+                outputLines: proc.outputBuffer.lines,
+                port: proc.port,
+                portDetail: proc.portDetail
+            )
+        }
+    }
+
+    /// Restore cached process snapshots for the given scope key, returning true if cache was used.
+    @discardableResult
+    func restoreCachedState(forKey key: String) -> Bool {
+        guard let snapshots = processCache[key], !snapshots.isEmpty else { return false }
+        processes = snapshots.map { snap in
+            var proc = ManagedProcess(
+                name: snap.name,
+                command: snap.command,
+                workingDirectory: snap.workingDirectory,
+                source: snap.source,
+                autoStart: false,
+                autoRestart: false,
+                env: [:]
+            )
+            proc.status = snap.status
+            proc.outputBuffer.append(contentsOf: snap.outputLines)
+            proc.port = snap.port
+            proc.portDetail = snap.portDetail
+            return proc
+        }
+        return true
+    }
+
     /// Load processes from forge.json for the given workspace path.
-    func loadConfig(from workspacePath: String, allocatedPorts: [String: Int], portDetails: [String: String] = [:]) {
+    func loadConfig(from workspacePath: String, allocatedPorts: [String: Int], portDetails: [String: String] = [:], scopeKey: String? = nil) {
+        // Save outgoing workspace's process state
+        saveCurrentState()
+        activeScopeKey = scopeKey
+
         var loaded: [ManagedProcess] = []
 
         guard let config = ForgeConfig.load(from: workspacePath) else {
@@ -277,12 +338,14 @@ class ProcessManager: ObservableObject {
 
     /// Clear all processes (e.g. when switching workspaces).
     func clear() {
+        saveCurrentState()
         stopAll()
         stopSyncTimer()
         processes.removeAll()
         restartCounts.removeAll()
         composeFilePath = nil
         composeWorkingDirectory = nil
+        activeScopeKey = nil
     }
 
     // MARK: - Auto-Restart

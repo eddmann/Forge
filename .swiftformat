@@ -5,4 +5,4 @@
 --commas inline
 --semicolons inline
 --self remove
---exclude Dependencies,build,dist,Forge/Vendor,Forge/Features/Projects/Workspaces/WorkspaceWelcomeScreen.swift
+--exclude Dependencies,build,dist,Forge/Vendor,Forge/Features/Projects/Workspaces/WorkspaceWelcomeScreen.swift,reference

@@ -10,16 +10,39 @@ enum InspectorTab: String, CaseIterable {
 struct InspectorView: View {
     @ObservedObject private var store = ProjectStore.shared
     @ObservedObject private var processManager = ProcessManager.shared
-    @State private var commandsExpanded = false
-    @State private var processesExpanded = false
+    @ObservedObject private var inspectorState = InspectorStateStore.shared
     @State private var commands: [ProjectCommand] = []
-    @State private var activeTab: InspectorTab = .working
+
+    private var activeTab: InspectorTab {
+        InspectorTab(rawValue: inspectorState.current.activeTab) ?? .working
+    }
+
+    private var activeTabBinding: Binding<InspectorTab> {
+        Binding(
+            get: { activeTab },
+            set: { newTab in inspectorState.update { $0.activeTab = newTab.rawValue } }
+        )
+    }
+
+    private var commandsExpandedBinding: Binding<Bool> {
+        Binding(
+            get: { inspectorState.current.commandsExpanded },
+            set: { newValue in inspectorState.update { $0.commandsExpanded = newValue } }
+        )
+    }
+
+    private var processesExpandedBinding: Binding<Bool> {
+        Binding(
+            get: { inspectorState.current.processesExpanded },
+            set: { newValue in inspectorState.update { $0.processesExpanded = newValue } }
+        )
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             // Tab bar — only show when a workspace is active
             if store.activeWorkspace != nil {
-                InspectorTabBar(activeTab: $activeTab)
+                InspectorTabBar(activeTab: activeTabBinding)
                     .zIndex(1)
             }
 
@@ -41,19 +64,21 @@ struct InspectorView: View {
 
             // Processes drawer pinned above commands
             ProcessesDrawer(
-                expanded: $processesExpanded,
+                expanded: processesExpandedBinding,
                 processManager: processManager
             )
 
             // Commands drawer pinned to bottom
             CommandsDrawer(
-                expanded: $commandsExpanded,
+                expanded: commandsExpandedBinding,
                 commands: commands,
                 onRun: runCommand
             )
         }
         .background(.clear)
         .onAppear {
+            inspectorState.restore()
+            StatusViewModel.shared.restoreFromInspectorState()
             discoverCommands()
             loadProcesses()
             Task { @MainActor in
@@ -62,6 +87,8 @@ struct InspectorView: View {
             }
         }
         .onDisappear {
+            StatusViewModel.shared.saveToInspectorState()
+            inspectorState.persist()
             StatusViewModel.shared.stopAutoRefresh()
             WorkspaceDiffViewModel.shared.stopAutoRefresh()
         }
@@ -77,6 +104,7 @@ struct InspectorView: View {
             Task { @MainActor in
                 StatusViewModel.shared.refresh()
                 WorkspaceDiffViewModel.shared.refresh()
+                inspectorState.persist()
             }
         }
     }
@@ -95,7 +123,13 @@ struct InspectorView: View {
             processManager.clear()
             return
         }
-        processManager.loadConfig(from: workspace.path, allocatedPorts: workspace.allocatedPorts, portDetails: workspace.portDetails)
+        let key = "\(store.activeProjectID?.uuidString ?? "")|\(workspace.id.uuidString)"
+        processManager.loadConfig(
+            from: workspace.path,
+            allocatedPorts: workspace.allocatedPorts,
+            portDetails: workspace.portDetails,
+            scopeKey: key
+        )
     }
 
     private func runCommand(_ command: ProjectCommand) {

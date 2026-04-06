@@ -115,6 +115,7 @@
 		D9645675D4C6E211F608B386 /* SendToAgentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */; };
 		DAB078E282A2AEC5CE9E5284 /* ChangesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868FBDD017F6B9CA822F6A7D /* ChangesViewModel.swift */; };
 		DD6DF706C2BB39C33D15BE82 /* ProjectListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C84715E19D3D7A198B19B8 /* ProjectListView.swift */; };
+		DDAF563F120C7056CFF05B45 /* InspectorStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57395E80A40A56655E491F /* InspectorStateStore.swift */; };
 		DE18EFF881E8F22355D76103 /* TabItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C6BF661A3B57C7A0FE4DC /* TabItem.swift */; };
 		DEAC350B0F837DF5137CCCDF /* ForgeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A90616935E4BDC25E834E9B /* ForgeStore.swift */; };
 		DF49C321DAD4350EFE68125A /* GitDiffModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50575BD258BDA402F95EE53 /* GitDiffModels.swift */; };
@@ -270,6 +271,7 @@
 		D8B6352ABACD0556576E6674 /* WordDiff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiff.swift; sourceTree = "<group>"; };
 		DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitContainerView.swift; sourceTree = "<group>"; };
 		DCF2655CE07FECC563390787 /* FileStatusRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusRow.swift; sourceTree = "<group>"; };
+		DD57395E80A40A56655E491F /* InspectorStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorStateStore.swift; sourceTree = "<group>"; };
 		DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceDiffViewModel.swift; sourceTree = "<group>"; };
 		E062060F229D0DEFE19EFDA3 /* ActivityLogStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityLogStore.swift; sourceTree = "<group>"; };
 		E1BCD87FD2A8EFF1229D24CB /* CommandPaletteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPaletteViewModel.swift; sourceTree = "<group>"; };
@@ -480,6 +482,7 @@
 				71607C511F2A39E630507479 /* AgentEventStore.swift */,
 				FDE1F53D3088D83C929C6089 /* AgentStore.swift */,
 				0B205456E82CD816617F8385 /* CommitCountStore.swift */,
+				DD57395E80A40A56655E491F /* InspectorStateStore.swift */,
 				A918DA6D12D11F5510C604BB /* ProjectStore.swift */,
 				E8C30B829376599F48CCB5C7 /* ReviewStore.swift */,
 				BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */,
@@ -974,6 +977,7 @@
 				DF49C321DAD4350EFE68125A /* GitDiffModels.swift in Sources */,
 				32AA8DE2E57C810B1FC02B29 /* GitDiffService.swift in Sources */,
 				87DE037B3A7130EABAEEA4FC /* GitUnifiedDiffParser.swift in Sources */,
+				DDAF563F120C7056CFF05B45 /* InspectorStateStore.swift in Sources */,
 				3FF161D6FC74BF72BACE1CF4 /* InspectorView.swift in Sources */,
 				8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */,
 				F5B0165ECE06BC459D782E71 /* LayoutSnapshot.swift in Sources */,

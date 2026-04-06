@@ -26,11 +26,18 @@ final class StatusViewModel: ObservableObject {
     private var refreshTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
 
+    /// Tracks the previous workspace scope for saving state on switch.
+    private var previousProjectID: UUID?
+    private var previousWorkspaceID: UUID?
+
     private var repoPath: String? {
         ProjectStore.shared.effectiveRootPath ?? ProjectStore.shared.activeProject?.path
     }
 
     private init() {
+        previousProjectID = ProjectStore.shared.activeProjectID
+        previousWorkspaceID = ProjectStore.shared.activeWorkspaceID
+
         // Refresh when project/workspace changes (deferred to avoid publishing during view updates)
         ProjectStore.shared.$activeProjectID
             .dropFirst()
@@ -41,10 +48,73 @@ final class StatusViewModel: ObservableObject {
 
         ProjectStore.shared.$activeWorkspaceID
             .dropFirst()
-            .sink { [weak self] _ in
-                Task { @MainActor in self?.refresh() }
+            .sink { [weak self] newID in
+                Task { @MainActor in
+                    guard let self else { return }
+                    // Save state under the previous workspace scope
+                    self.saveToInspectorState(
+                        projectID: self.previousProjectID,
+                        workspaceID: self.previousWorkspaceID
+                    )
+                    // Update tracking
+                    self.previousProjectID = ProjectStore.shared.activeProjectID
+                    self.previousWorkspaceID = newID
+                    // Restore from the new workspace scope
+                    self.restoreFromInspectorState()
+                    self.refresh()
+                }
             }
             .store(in: &cancellables)
+    }
+
+    // MARK: - Per-Workspace State
+
+    /// Save current commit-related state into the inspector state cache.
+    /// When projectID/workspaceID are provided, saves under that scope (used for outgoing workspace).
+    /// Otherwise saves under the current active scope.
+    func saveToInspectorState(projectID: UUID? = nil, workspaceID: UUID? = nil) {
+        let store = InspectorStateStore.shared
+        let useExplicit = projectID != nil || workspaceID != nil
+        if useExplicit {
+            var state = store[projectID, workspaceID]
+            state.commitMessage = commitMessage
+            state.isAmend = isAmend
+            state.statuses = statuses
+            state.grouped = grouped
+            state.currentBranch = currentBranch
+            state.ahead = ahead
+            state.behind = behind
+            state.hasUpstream = hasUpstream
+            state.lastCommitMessage = lastCommitMessage
+            store[projectID, workspaceID] = state
+        } else {
+            store.update { state in
+                state.commitMessage = self.commitMessage
+                state.isAmend = self.isAmend
+                state.statuses = self.statuses
+                state.grouped = self.grouped
+                state.currentBranch = self.currentBranch
+                state.ahead = self.ahead
+                state.behind = self.behind
+                state.hasUpstream = self.hasUpstream
+                state.lastCommitMessage = self.lastCommitMessage
+            }
+        }
+    }
+
+    /// Restore commit-related state from the inspector state cache for the current workspace.
+    func restoreFromInspectorState() {
+        let store = InspectorStateStore.shared
+        let state = store.current
+        commitMessage = state.commitMessage
+        isAmend = state.isAmend
+        statuses = state.statuses
+        grouped = state.grouped
+        currentBranch = state.currentBranch
+        ahead = state.ahead
+        behind = state.behind
+        hasUpstream = state.hasUpstream
+        lastCommitMessage = state.lastCommitMessage
     }
 
     // MARK: - Auto Refresh
