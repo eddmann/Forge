@@ -106,6 +106,24 @@ class ProcessManager: ObservableObject {
     /// Currently active scope key.
     private var activeScopeKey: String?
 
+    /// Workspace context for building shell-equivalent environment.
+    private var workspaceName: String?
+    private var projectName: String?
+    private var allocatedPorts: [String: Int] = [:]
+
+    /// Build the base environment for running processes in this workspace.
+    /// Matches what a workspace shell terminal would see.
+    private func workspaceEnvironment() -> [String: String] {
+        var env = ShellEnvironment.buildEnvironment()
+        if let workspaceName, let projectName {
+            env["COMPOSE_PROJECT_NAME"] = "\(projectName)-\(workspaceName)"
+        }
+        for (key, port) in allocatedPorts {
+            env[key] = String(port)
+        }
+        return env
+    }
+
     /// Save a snapshot of the current processes for later restoration.
     func saveCurrentState() {
         guard let key = activeScopeKey, !processes.isEmpty else { return }
@@ -147,11 +165,13 @@ class ProcessManager: ObservableObject {
     }
 
     /// Load processes from forge.json for the given workspace path.
-    func loadConfig(from workspacePath: String, allocatedPorts: [String: Int], portDetails: [String: String] = [:], scopeKey: String? = nil) {
+    func loadConfig(from workspacePath: String, allocatedPorts: [String: Int], portDetails: [String: String] = [:], scopeKey: String? = nil, workspaceName: String? = nil, projectName: String? = nil) {
         // Save outgoing workspace's process state
         saveCurrentState()
         activeScopeKey = scopeKey
-
+        self.allocatedPorts = allocatedPorts
+        self.workspaceName = workspaceName
+        self.projectName = projectName
         var loaded: [ManagedProcess] = []
 
         guard let config = ForgeConfig.load(from: workspacePath) else {
@@ -236,8 +256,8 @@ class ProcessManager: ObservableObject {
         process.arguments = ["-c", managed.command]
         process.currentDirectoryURL = URL(fileURLWithPath: managed.workingDirectory)
 
-        var environment = ProcessInfo.processInfo.environment
-        environment["PATH"] = ShellEnvironment.resolvedPath
+        var environment = workspaceEnvironment()
+        // Per-process env from forge.json wins over defaults
         for (key, value) in managed.env {
             environment[key] = value
         }
@@ -298,7 +318,7 @@ class ProcessManager: ObservableObject {
             let serviceName = processes[index].name
             stopProcess.arguments = ["-c", "docker compose stop \(serviceName)"]
             stopProcess.currentDirectoryURL = URL(fileURLWithPath: processes[index].workingDirectory)
-            stopProcess.environment = ["PATH": ShellEnvironment.resolvedPath]
+            stopProcess.environment = workspaceEnvironment()
             stopProcess.standardOutput = Pipe()
             stopProcess.standardError = Pipe()
             try? stopProcess.run()
@@ -423,15 +443,14 @@ class ProcessManager: ObservableObject {
         guard let composeFile = composeFilePath,
               let workDir = composeWorkingDirectory else { return }
 
+        let env = workspaceEnvironment()
         DispatchQueue.global(qos: .utility).async { [weak self] in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/sh")
             process.arguments = ["-c", "docker compose -f \"\(composeFile)\" ps --format json 2>/dev/null"]
             process.currentDirectoryURL = URL(fileURLWithPath: workDir)
 
-            var environment = ProcessInfo.processInfo.environment
-            environment["PATH"] = ShellEnvironment.resolvedPath
-            process.environment = environment
+            process.environment = env
 
             let pipe = Pipe()
             process.standardOutput = pipe

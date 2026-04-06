@@ -124,11 +124,14 @@ struct InspectorView: View {
             return
         }
         let key = "\(store.activeProjectID?.uuidString ?? "")|\(workspace.id.uuidString)"
+        let projectName = store.activeProject?.name
         processManager.loadConfig(
             from: workspace.path,
             allocatedPorts: workspace.allocatedPorts,
             portDetails: workspace.portDetails,
-            scopeKey: key
+            scopeKey: key,
+            workspaceName: workspace.name,
+            projectName: projectName
         )
     }
 

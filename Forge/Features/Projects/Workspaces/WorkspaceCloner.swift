@@ -73,7 +73,11 @@ enum WorkspaceCloner {
         if let setup = config?.workspace?.setup {
             progress?("Running setup scripts…")
             let portEnv = allocatedPorts.mapValues(String.init)
-            setupResult = runLifecycleCommands(setup.commands, in: destPath, env: portEnv, stopOnFailure: true)
+            setupResult = runLifecycleCommands(
+                setup.commands, in: destPath, env: portEnv,
+                workspaceName: name, projectName: projectName,
+                stopOnFailure: true
+            )
         }
 
         let workspace = Workspace(
@@ -133,10 +137,15 @@ enum WorkspaceCloner {
     static func deleteWorkspace(_ workspace: Workspace, progress: ((String) -> Void)? = nil) -> LifecycleResult? {
         // Run teardown commands from forge.json before removing files
         var teardownResult: LifecycleResult?
+        let portEnv = workspace.allocatedPorts.mapValues(String.init)
+        let projectName = ProjectStore.shared.projects.first { $0.id == workspace.projectID }?.name
         if let config = ForgeConfig.load(from: workspace.path) {
             if let teardown = config.workspace?.teardown {
                 progress?("Running teardown scripts…")
-                teardownResult = runLifecycleCommands(teardown.commands, in: workspace.path, env: workspace.allocatedPorts.mapValues(String.init))
+                teardownResult = runLifecycleCommands(
+                    teardown.commands, in: workspace.path, env: portEnv,
+                    workspaceName: workspace.name, projectName: projectName
+                )
             } else if config.compose != nil {
                 // Auto compose down if no explicit teardown
                 progress?("Stopping docker compose…")
@@ -145,8 +154,8 @@ enum WorkspaceCloner {
                 if FileManager.default.fileExists(atPath: fullPath) {
                     teardownResult = runLifecycleCommands(
                         ["docker compose -f \(composeFile) down"],
-                        in: workspace.path,
-                        env: workspace.allocatedPorts.mapValues(String.init)
+                        in: workspace.path, env: portEnv,
+                        workspaceName: workspace.name, projectName: projectName
                     )
                 }
             }
@@ -385,13 +394,15 @@ enum WorkspaceCloner {
     }
 
     /// Run workspace lifecycle commands (setup/teardown) synchronously.
-    /// Each command runs via /bin/sh. Stops on first failure for setup,
-    /// continues through failures for teardown.
+    /// Each command runs via /bin/sh with the same environment a workspace
+    /// shell would have (allocated ports, COMPOSE_PROJECT_NAME, FORGE_SOCKET, etc.).
     @discardableResult
     static func runLifecycleCommands(
         _ commands: [String],
         in directory: String,
         env: [String: String] = [:],
+        workspaceName: String? = nil,
+        projectName: String? = nil,
         stopOnFailure: Bool = false
     ) -> LifecycleResult {
         for command in commands {
@@ -400,8 +411,14 @@ enum WorkspaceCloner {
             process.arguments = ["-c", command]
             process.currentDirectoryURL = URL(fileURLWithPath: directory)
 
-            var environment = ProcessInfo.processInfo.environment
-            environment["PATH"] = ShellEnvironment.resolvedPath
+            // Start from the same base environment that workspace shells use
+            // (includes FORGE_SOCKET, HOME, LANG, SHELL, resolved PATH, etc.)
+            var environment = ShellEnvironment.buildEnvironment()
+            // Compose project name requires both workspace and project name
+            if let workspaceName, let projectName {
+                environment["COMPOSE_PROJECT_NAME"] = "\(projectName)-\(workspaceName)"
+            }
+            // Caller-provided env (typically allocated ports) wins over defaults
             for (key, value) in env {
                 environment[key] = value
             }
