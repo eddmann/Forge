@@ -73,20 +73,13 @@ class AgentEventStore: ObservableObject {
                 TerminalSessionManager.shared.updateAgentSessionID(sessionID, agentSessionID: agentSID)
             }
 
-            // Activity log: agent session started
-            if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
-                let agentName = AgentStore.shared.agents.first(where: { $0.command == agent })?.name ?? agent
-                let model = data["model"] as? String
-                ActivityLogStore.shared.append(workspaceID: wsID, event: ActivityEvent(
-                    kind: .agentSessionStart,
-                    title: "\(agentName) started",
-                    metadata: model.map { ["model": $0] } ?? [:]
-                ))
-            }
+            // Activity tracking: reset for new session
+            AgentWorkTracker.shared.clearForTab(tabID)
 
         case "prompt":
             stateByTab[tabID]?.lastPrompt = data["prompt"] as? String
             activityByTab[tabID] = .thinking
+            AgentWorkTracker.shared.markDirty(tabID: tabID, agent: agent)
 
         case "tool_start":
             let toolName = data["tool_name"] as? String ?? "Unknown"
@@ -96,11 +89,13 @@ class AgentEventStore: ObservableObject {
                 startedAt: Date()
             )
             activityByTab[tabID] = .toolExecuting
+            AgentWorkTracker.shared.markDirty(tabID: tabID, agent: agent)
 
         case "tool_end":
             stateByTab[tabID]?.currentTool = nil
             // Back to thinking — the agent is processing the tool result
             activityByTab[tabID] = .thinking
+            AgentWorkTracker.shared.markDirty(tabID: tabID, agent: agent)
 
         case "stop":
             stateByTab[tabID]?.lastResponse = data["last_assistant_message"] as? String
@@ -119,16 +114,8 @@ class AgentEventStore: ObservableObject {
             if previousActivity == .thinking || previousActivity == .toolExecuting {
                 if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
                     SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID, tabID: tabID)
-
-                    // Activity log: agent session ended + snapshot
-                    ActivityLogStore.shared.append(workspaceID: wsID, event: ActivityEvent(
-                        kind: .agentSessionEnd,
-                        title: "\(agentName) finished"
-                    ))
-                    ActivityLogStore.shared.requestSnapshot(
-                        workspaceID: wsID, tabID: tabID, agent: agent, tense: .past
-                    )
                 }
+                AgentWorkTracker.shared.markDirty(tabID: tabID, agent: agent)
             }
 
         case "notification":
@@ -148,13 +135,7 @@ class AgentEventStore: ObservableObject {
             // Turn finished but agent may continue — set idle
             stateByTab[tabID]?.currentTool = nil
             activityByTab[tabID] = .idle
-
-            // Activity log: periodic snapshot (cooldown-gated in the store)
-            if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
-                ActivityLogStore.shared.requestSnapshot(
-                    workspaceID: wsID, tabID: tabID, agent: agent, tense: .present
-                )
-            }
+            AgentWorkTracker.shared.markDirty(tabID: tabID, agent: agent)
 
         case "message_start":
             activityByTab[tabID] = .thinking
@@ -175,7 +156,9 @@ class AgentEventStore: ObservableObject {
             // OpenCode direct status events
             if let status = data["status"] as? String {
                 switch status {
-                case "busy": activityByTab[tabID] = .thinking
+                case "busy":
+                    activityByTab[tabID] = .thinking
+                    AgentWorkTracker.shared.markDirty(tabID: tabID, agent: agent)
                 case "retry": activityByTab[tabID] = .retrying
                 case "idle":
                     let previousActivity = activityByTab[tabID]
@@ -189,6 +172,7 @@ class AgentEventStore: ObservableObject {
                         if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
                             SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID, tabID: tabID)
                         }
+                        AgentWorkTracker.shared.markDirty(tabID: tabID, agent: agent)
                     }
                 default: break
                 }
@@ -226,6 +210,11 @@ class AgentEventStore: ObservableObject {
         guard previousActivity != activity else { return }
         activityByTab[tabID] = activity
 
+        // Mark dirty when agent is working (covers terminal-only agents like Gemini/Amp)
+        if activity == .thinking || activity == .toolExecuting {
+            AgentWorkTracker.shared.markDirty(tabID: tabID, agent: agent)
+        }
+
         // Detect working → idle transition from terminal signals alone.
         // This catches agents whose Stop hook may not fire (e.g. Codex)
         // or when the terminal title reverts before the hook arrives.
@@ -239,9 +228,8 @@ class AgentEventStore: ObservableObject {
             }
             if let wsID = TerminalSessionManager.shared.workspaceID(for: tabID) {
                 SummaryScheduler.shared.workspaceActivityDetected(workspaceID: wsID, tabID: tabID)
-                // Activity log emission handled in handleAgentEvent("stop") — not duplicated here
-                // to avoid double entries for agents that fire both socket and terminal events.
             }
+            AgentWorkTracker.shared.markDirty(tabID: tabID, agent: agent)
         }
     }
 
@@ -296,6 +284,7 @@ class AgentEventStore: ObservableObject {
     }
 
     func clearForTab(_ tabID: UUID) {
+        AgentWorkTracker.shared.clearForTab(tabID)
         let ids = notifications.filter { $0.tabID == tabID }.map(\.id.uuidString)
         notifications.removeAll { $0.tabID == tabID }
         activityByTab.removeValue(forKey: tabID)

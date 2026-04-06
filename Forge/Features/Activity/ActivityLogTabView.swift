@@ -177,9 +177,7 @@ extension ActivityEventKind {
         switch self {
         case .workspaceCreated: "plus.circle.fill"
         case .workspaceMerged: "arrow.triangle.merge"
-        case .agentSessionStart: "play.circle.fill"
-        case .agentSnapshot: "text.bubble.fill"
-        case .agentSessionEnd: "checkmark.circle.fill"
+        case .agentUpdate: "text.bubble.fill"
         case .reviewSent: "paperplane.circle.fill"
         }
     }
@@ -188,9 +186,7 @@ extension ActivityEventKind {
         switch self {
         case .workspaceCreated: .green
         case .workspaceMerged: .purple
-        case .agentSessionStart: .blue
-        case .agentSnapshot: .secondary
-        case .agentSessionEnd: .gray
+        case .agentUpdate: .blue
         case .reviewSent: .orange
         }
     }

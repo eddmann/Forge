@@ -85,6 +85,7 @@
 		9CF85EDE6491F76948C7C1F6 /* ActivityLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E062060F229D0DEFE19EFDA3 /* ActivityLogStore.swift */; };
 		9EC89A28301B55CD351004C8 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E18D8DBAC71B87110136F /* SplitViewController.swift */; };
 		9EDD41D6CE5D3A6834DC9C8C /* BonsplitPaneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17205892BB4CD21C1A347A75 /* BonsplitPaneManager.swift */; };
+		A00B446E499123071A80471B /* AgentWorkTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A2695113421FE27C7F5C0F /* AgentWorkTracker.swift */; };
 		A2858A5B2AAD0956FC54CA0B /* forge-cli in Resources */ = {isa = PBXBuildFile; fileRef = 0DC2B1C4E2E0CE097908C96B /* forge-cli */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A5BD3BA67E0B7131054B2AD4 /* ToastManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277F7B623A62618F58935CEB /* ToastManager.swift */; };
 		A5E0E33106E041E304409673 /* AgentSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014017376795403DB6AD56A /* AgentSetup.swift */; };
@@ -243,6 +244,7 @@
 		A0FE24D12EFC16A9E835DFD3 /* BonsplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitView.swift; sourceTree = "<group>"; };
 		A1CA93EABEB76A8CDDB0D8A4 /* WorkspaceCommit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceCommit.swift; sourceTree = "<group>"; };
 		A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeSocketServer.swift; sourceTree = "<group>"; };
+		A3A2695113421FE27C7F5C0F /* AgentWorkTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentWorkTracker.swift; sourceTree = "<group>"; };
 		A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentInfoPopoverView.swift; sourceTree = "<group>"; };
 		A913D1CB5E730CFBA223F25D /* DebugEventLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugEventLog.swift; sourceTree = "<group>"; };
 		A918DA6D12D11F5510C604BB /* ProjectStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectStore.swift; sourceTree = "<group>"; };
@@ -485,6 +487,7 @@
 				E062060F229D0DEFE19EFDA3 /* ActivityLogStore.swift */,
 				71607C511F2A39E630507479 /* AgentEventStore.swift */,
 				FDE1F53D3088D83C929C6089 /* AgentStore.swift */,
+				A3A2695113421FE27C7F5C0F /* AgentWorkTracker.swift */,
 				0B205456E82CD816617F8385 /* CommitCountStore.swift */,
 				DD57395E80A40A56655E491F /* InspectorStateStore.swift */,
 				A918DA6D12D11F5510C604BB /* ProjectStore.swift */,
@@ -945,6 +948,7 @@
 				0C401CA4784BC5616BB7AA5D /* AgentReviewPayloadBuilder.swift in Sources */,
 				A5E0E33106E041E304409673 /* AgentSetup.swift in Sources */,
 				1C121FFC047C8B2497C556D9 /* AgentStore.swift in Sources */,
+				A00B446E499123071A80471B /* AgentWorkTracker.swift in Sources */,
 				4E353DD84E747CCAAC3E9A85 /* AppDelegate.swift in Sources */,
 				227D8A9991C1E52BE92D2B4B /* BonsplitConfiguration.swift in Sources */,
 				61EAB7F9E8DBF4632D654669 /* BonsplitController.swift in Sources */,

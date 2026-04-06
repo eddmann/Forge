@@ -5,10 +5,24 @@ import Foundation
 enum ActivityEventKind: String, Codable {
     case workspaceCreated
     case workspaceMerged
-    case agentSessionStart
-    case agentSnapshot
-    case agentSessionEnd
+    case agentUpdate
     case reviewSent
+
+    init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        switch raw {
+        case "agentSessionStart", "agentSnapshot", "agentSessionEnd":
+            self = .agentUpdate
+        default:
+            guard let kind = ActivityEventKind(rawValue: raw) else {
+                throw try DecodingError.dataCorruptedError(
+                    in: decoder.singleValueContainer(),
+                    debugDescription: "Unknown ActivityEventKind: \(raw)"
+                )
+            }
+            self = kind
+        }
+    }
 }
 
 // MARK: - ActivityEvent

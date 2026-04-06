@@ -3,12 +3,9 @@ import Foundation
 /// Spawns the configured summarizer CLI to produce a narrative snapshot
 /// of a single terminal tab's recent activity.
 enum ActivitySnapshotCommand {
-    enum Tense {
-        case present // ongoing work (turn_end)
-        case past // completed work (stop)
-    }
+    static let unchangedSentinel = "UNCHANGED"
 
-    private static let presentPrompt = """
+    private static let basePrompt = """
     You are a workspace narrator for a developer tool.
     Read the recent terminal activity and describe what the agent is currently working on in 1-2 sentences.
     - Be specific: mention file names, features, or errors when relevant.
@@ -16,17 +13,21 @@ enum ActivitySnapshotCommand {
     - Respond with ONLY the narrative. No extra text.
     """
 
-    private static let pastPrompt = """
-    You are a workspace narrator for a developer tool.
-    Read the recent terminal activity and describe what the agent accomplished in 1-2 sentences.
-    - Be specific: mention file names, features, or errors when relevant.
-    - Write in past tense ("Added OAuth2 support", "Fixed compilation error in auth module").
-    - Respond with ONLY the narrative. No extra text.
+    private static let diffSuffix = """
+
+    The previous update said: "%@"
+    Only produce a new summary if the work has meaningfully progressed or changed direction.
+    If nothing meaningful has changed, respond with exactly: UNCHANGED
     """
 
     /// Run the summarizer with single-tab context, returning a narrative snapshot.
-    static func run(context: String, tense: Tense, timeout: TimeInterval = 15) async -> String? {
-        let prompt = tense == .present ? presentPrompt : pastPrompt
+    /// Returns `nil` on failure. Returns `"UNCHANGED"` if the AI determines nothing new happened.
+    static func run(context: String, previousSummary: String? = nil, timeout: TimeInterval = 15) async -> String? {
+        var prompt = basePrompt
+        if let previousSummary, !previousSummary.isEmpty {
+            prompt += String(format: diffSuffix, previousSummary)
+        }
+
         let command = ForgeStore.shared.loadStateFields().summarizerCommand
         let parts = SummaryCommand.parseCommandParts(command.isEmpty ? SummaryCommand.defaultCommand : command)
         guard let binary = parts.first, !binary.isEmpty else { return nil }
