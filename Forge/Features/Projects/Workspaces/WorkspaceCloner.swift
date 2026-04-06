@@ -6,6 +6,11 @@ enum WorkspaceCloner {
         var fullClone: Bool
     }
 
+    struct CreateResult {
+        let workspace: Workspace
+        let setupFailed: LifecycleResult?
+    }
+
     // MARK: - Create Workspace
 
     static func createWorkspace(
@@ -14,7 +19,7 @@ enum WorkspaceCloner {
         projectPath: String,
         parentBranch: String,
         progress: ((String) -> Void)? = nil
-    ) throws -> Workspace {
+    ) throws -> CreateResult {
         let existingNames = ProjectStore.shared.workspaces.map(\.name)
         let name = WorkspaceNaming.generateUnique(existing: existingNames)
 
@@ -64,12 +69,14 @@ enum WorkspaceCloner {
         }
 
         // Run setup commands with allocated ports in the environment
+        var setupResult: LifecycleResult?
         if let setup = config?.workspace?.setup {
+            progress?("Running setup scripts…")
             let portEnv = allocatedPorts.mapValues(String.init)
-            runLifecycleCommands(setup.commands, in: destPath, env: portEnv, stopOnFailure: true)
+            setupResult = runLifecycleCommands(setup.commands, in: destPath, env: portEnv, stopOnFailure: true)
         }
 
-        return Workspace(
+        let workspace = Workspace(
             projectID: projectID,
             name: name,
             path: destPath,
@@ -78,6 +85,10 @@ enum WorkspaceCloner {
             fullClone: result.fullClone,
             allocatedPorts: allocatedPorts,
             portDetails: portDetails
+        )
+        return CreateResult(
+            workspace: workspace,
+            setupFailed: setupResult?.success == false ? setupResult : nil
         )
     }
 
@@ -118,17 +129,21 @@ enum WorkspaceCloner {
 
     // MARK: - Delete Workspace
 
-    static func deleteWorkspace(_ workspace: Workspace) {
+    @discardableResult
+    static func deleteWorkspace(_ workspace: Workspace, progress: ((String) -> Void)? = nil) -> LifecycleResult? {
         // Run teardown commands from forge.json before removing files
+        var teardownResult: LifecycleResult?
         if let config = ForgeConfig.load(from: workspace.path) {
             if let teardown = config.workspace?.teardown {
-                runLifecycleCommands(teardown.commands, in: workspace.path, env: workspace.allocatedPorts.mapValues(String.init))
+                progress?("Running teardown scripts…")
+                teardownResult = runLifecycleCommands(teardown.commands, in: workspace.path, env: workspace.allocatedPorts.mapValues(String.init))
             } else if config.compose != nil {
                 // Auto compose down if no explicit teardown
+                progress?("Stopping docker compose…")
                 let composeFile = config.compose!.file
                 let fullPath = (workspace.path as NSString).appendingPathComponent(composeFile)
                 if FileManager.default.fileExists(atPath: fullPath) {
-                    runLifecycleCommands(
+                    teardownResult = runLifecycleCommands(
                         ["docker compose -f \(composeFile) down"],
                         in: workspace.path,
                         env: workspace.allocatedPorts.mapValues(String.init)
@@ -141,6 +156,7 @@ enum WorkspaceCloner {
         if FileManager.default.fileExists(atPath: workspace.path) {
             try? FileManager.default.removeItem(atPath: workspace.path)
         }
+        return teardownResult?.success == false ? teardownResult : nil
     }
 
     // MARK: - Merge Workspace into Project
@@ -360,6 +376,12 @@ enum WorkspaceCloner {
 
     // MARK: - Lifecycle Command Helpers
 
+    struct LifecycleResult {
+        let success: Bool
+        let failedCommand: String?
+        let errorOutput: String?
+    }
+
     /// Run workspace lifecycle commands (setup/teardown) synchronously.
     /// Each command runs via /bin/sh. Stops on first failure for setup,
     /// continues through failures for teardown.
@@ -369,8 +391,7 @@ enum WorkspaceCloner {
         in directory: String,
         env: [String: String] = [:],
         stopOnFailure: Bool = false
-    ) -> Bool {
-        var allSucceeded = true
+    ) -> LifecycleResult {
         for command in commands {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/sh")
@@ -384,20 +405,25 @@ enum WorkspaceCloner {
             }
             process.environment = environment
             process.standardOutput = Pipe()
-            process.standardError = Pipe()
+            let errPipe = Pipe()
+            process.standardError = errPipe
 
             do {
                 try process.run()
                 process.waitUntilExit()
                 if process.terminationStatus != 0 {
-                    allSucceeded = false
-                    if stopOnFailure { return false }
+                    let stderr = String(data: errPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                    if stopOnFailure {
+                        return LifecycleResult(success: false, failedCommand: command, errorOutput: stderr)
+                    }
                 }
             } catch {
-                allSucceeded = false
-                if stopOnFailure { return false }
+                if stopOnFailure {
+                    return LifecycleResult(success: false, failedCommand: command, errorOutput: error.localizedDescription)
+                }
             }
         }
-        return allSucceeded
+        return LifecycleResult(success: true, failedCommand: nil, errorOutput: nil)
     }
 }

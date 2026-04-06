@@ -182,7 +182,7 @@ struct ProjectListView: View {
         ToastManager.shared.show("Creating workspace…", severity: .success, duration: 30.0)
         DispatchQueue.global(qos: .userInitiated).async {
             do {
-                let workspace = try WorkspaceCloner.createWorkspace(
+                let result = try WorkspaceCloner.createWorkspace(
                     projectID: project.id,
                     projectName: project.name,
                     projectPath: project.path,
@@ -193,12 +193,24 @@ struct ProjectListView: View {
                         }
                     }
                 )
+                let ws = result.workspace
+                let setupFailed = result.setupFailed
                 DispatchQueue.main.async {
                     store.creatingWorkspaceForProject.remove(project.id)
-                    store.addWorkspace(workspace)
+                    store.addWorkspace(ws)
                     store.activeProjectID = project.id
-                    store.activeWorkspaceID = workspace.id
-                    ToastManager.shared.show("Created workspace '\(workspace.name)'")
+                    store.activeWorkspaceID = ws.id
+                    if let failure = setupFailed {
+                        let detail = failure.errorOutput ?? failure.failedCommand ?? "Unknown error"
+                        ToastManager.shared.show(
+                            "Setup failed: \(detail)", severity: .error, duration: 8.0,
+                            action: .init(label: "Open Terminal") {
+                                TerminalSessionManager.shared.createSession(workingDirectory: ws.path)
+                            }
+                        )
+                    } else {
+                        ToastManager.shared.show("Created workspace '\(ws.name)'")
+                    }
                 }
             } catch {
                 DispatchQueue.main.async {
@@ -212,13 +224,28 @@ struct ProjectListView: View {
     private func deleteWorkspace(_ workspace: Workspace) {
         let name = workspace.name
         deletingWorkspaceIDs.insert(workspace.id)
-        ToastManager.shared.show("Deleting workspace '\(name)'…", severity: .success, duration: 30.0)
+        let hasRunning = ProcessManager.shared.processes.contains { $0.status == .running }
+        if hasRunning {
+            ToastManager.shared.show("Stopping processes…", severity: .success, duration: 30.0)
+        } else {
+            ToastManager.shared.show("Deleting workspace '\(name)'…", severity: .success, duration: 30.0)
+        }
+        ProcessManager.shared.clear()
         DispatchQueue.global(qos: .userInitiated).async {
-            WorkspaceCloner.deleteWorkspace(workspace)
+            let teardownFailure = WorkspaceCloner.deleteWorkspace(workspace, progress: { step in
+                DispatchQueue.main.async {
+                    ToastManager.shared.show(step, severity: .success, duration: 30.0)
+                }
+            })
             DispatchQueue.main.async {
                 deletingWorkspaceIDs.remove(workspace.id)
                 store.deleteWorkspace(id: workspace.id)
-                ToastManager.shared.show("Deleted workspace '\(name)'")
+                if let failure = teardownFailure {
+                    let detail = failure.errorOutput ?? failure.failedCommand ?? "Unknown error"
+                    ToastManager.shared.show("Teardown failed: \(detail)", severity: .warning, duration: 5.0)
+                } else {
+                    ToastManager.shared.show("Deleted workspace '\(name)'")
+                }
             }
         }
     }

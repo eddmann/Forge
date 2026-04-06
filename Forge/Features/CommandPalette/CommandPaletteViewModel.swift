@@ -226,7 +226,7 @@ final class CommandPaletteViewModel: ObservableObject {
             ToastManager.shared.show("Creating workspace…", severity: .success, duration: 30.0)
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
-                    let ws = try WorkspaceCloner.createWorkspace(
+                    let result = try WorkspaceCloner.createWorkspace(
                         projectID: project.id, projectName: project.name,
                         projectPath: project.path, parentBranch: branch,
                         progress: { step in
@@ -235,11 +235,23 @@ final class CommandPaletteViewModel: ObservableObject {
                             }
                         }
                     )
+                    let ws = result.workspace
+                    let setupFailed = result.setupFailed
                     DispatchQueue.main.async {
                         store.creatingWorkspaceForProject.remove(project.id)
                         store.addWorkspace(ws)
                         store.activeWorkspaceID = ws.id
-                        ToastManager.shared.show("Created workspace '\(ws.name)'")
+                        if let failure = setupFailed {
+                            let detail = failure.errorOutput ?? failure.failedCommand ?? "Unknown error"
+                            ToastManager.shared.show(
+                                "Setup failed: \(detail)", severity: .error, duration: 8.0,
+                                action: .init(label: "Open Terminal") {
+                                    TerminalSessionManager.shared.createSession(workingDirectory: ws.path)
+                                }
+                            )
+                        } else {
+                            ToastManager.shared.show("Created workspace '\(ws.name)'")
+                        }
                     }
                 } catch {
                     DispatchQueue.main.async {

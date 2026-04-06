@@ -181,7 +181,7 @@ struct BranchPickerView: View {
 
         DispatchQueue.global(qos: .userInitiated).async {
             do {
-                let workspace = try WorkspaceCloner.createWorkspace(
+                let result = try WorkspaceCloner.createWorkspace(
                     projectID: project.id,
                     projectName: project.name,
                     projectPath: project.path,
@@ -192,13 +192,25 @@ struct BranchPickerView: View {
                         }
                     }
                 )
+                let ws = result.workspace
+                let setupFailed = result.setupFailed
                 DispatchQueue.main.async {
                     isOperating = false
-                    store.addWorkspace(workspace)
-                    store.activeWorkspaceID = workspace.id
+                    store.addWorkspace(ws)
+                    store.activeWorkspaceID = ws.id
                     ProjectStore.shared.recordActivity(for: project.id)
-                    ProjectStore.shared.recordActivity(forWorkspace: workspace.id)
-                    ToastManager.shared.show("Created workspace '\(workspace.name)'")
+                    ProjectStore.shared.recordActivity(forWorkspace: ws.id)
+                    if let failure = setupFailed {
+                        let detail = failure.errorOutput ?? failure.failedCommand ?? "Unknown error"
+                        ToastManager.shared.show(
+                            "Setup failed: \(detail)", severity: .error, duration: 8.0,
+                            action: .init(label: "Open Terminal") {
+                                TerminalSessionManager.shared.createSession(workingDirectory: ws.path)
+                            }
+                        )
+                    } else {
+                        ToastManager.shared.show("Created workspace '\(ws.name)'")
+                    }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                         onDismiss()
                     }
