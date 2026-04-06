@@ -46,9 +46,9 @@ enum WorkspaceCloner {
             try runGitOrThrow(in: destPath, args: ["checkout", branchName])
         }
 
-        // Fix remote origin to point to original's upstream, not local path
+        // Set origin to the project directory so the workspace can fetch updates
         progress?("Configuring remote…")
-        fixRemoteOrigin(source: projectPath, dest: destPath)
+        setOriginToProject(projectPath: projectPath, workspacePath: destPath)
 
         // Read forge.json: allocate ports and run setup
         var allocatedPorts: [String: Int] = [:]
@@ -339,18 +339,20 @@ enum WorkspaceCloner {
             )
         }
 
-        fixRemoteOrigin(source: source, dest: dest)
+        // git clone --local already sets origin to source path — no fixup needed
     }
 
-    private static func fixRemoteOrigin(source: String, dest: String) {
-        let (success, output) = runGitSync(in: source, args: ["remote", "get-url", "origin"])
-        let originalURL = output.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        if success, !originalURL.isEmpty {
-            _ = runGitSync(in: dest, args: ["remote", "set-url", "origin", originalURL])
+    /// Set the workspace's origin remote to the project directory so it can fetch updates.
+    private static func setOriginToProject(projectPath: String, workspacePath: String) {
+        let normalizedPath = (projectPath as NSString).standardizingPath
+        let (hasOrigin, _) = runGitSync(in: workspacePath, args: ["remote", "get-url", "origin"])
+        if hasOrigin {
+            _ = runGitSync(in: workspacePath, args: ["remote", "set-url", "origin", normalizedPath])
         } else {
-            _ = runGitSync(in: dest, args: ["remote", "remove", "origin"])
+            _ = runGitSync(in: workspacePath, args: ["remote", "add", "origin", normalizedPath])
         }
+        // Fetch so origin/main is up to date for workspace diff
+        _ = runGitSync(in: workspacePath, args: ["fetch", "origin", "--no-tags"])
     }
 
     // MARK: - Git Helpers

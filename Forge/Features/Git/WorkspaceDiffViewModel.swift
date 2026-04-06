@@ -71,7 +71,7 @@ final class WorkspaceDiffViewModel: ObservableObject {
             return
         }
 
-        let parentBranch = workspace.parentBranch
+        let parentRef = "origin/\(workspace.parentBranch)"
 
         // Check if HEAD has changed — skip redundant work
         let headResult = Git.shared.run(in: repoPath, args: ["rev-parse", "HEAD"])
@@ -83,20 +83,23 @@ final class WorkspaceDiffViewModel: ObservableObject {
         isLoading = fileDiffs.isEmpty
         error = nil
 
-        // Find merge-base
-        Git.shared.runAsync(in: repoPath, args: ["merge-base", parentBranch, "HEAD"]) { [weak self] mergeBaseResult in
-            Task { @MainActor in
-                guard let self else { return }
+        // Fetch from project so origin/<parentBranch> is current
+        Git.shared.runAsync(in: repoPath, args: ["fetch", "origin", "--no-tags"]) { [weak self] _ in
+            // Find merge-base against origin/<parentBranch>
+            Git.shared.runAsync(in: repoPath, args: ["merge-base", parentRef, "HEAD"]) { mergeBaseResult in
+                Task { @MainActor in
+                    guard let self else { return }
 
-                guard mergeBaseResult.success else {
-                    self.isLoading = false
-                    self.error = "Could not find common ancestor with '\(parentBranch)'"
-                    return
+                    guard mergeBaseResult.success else {
+                        self.isLoading = false
+                        self.error = "Could not find common ancestor with '\(parentRef)'"
+                        return
+                    }
+
+                    let mergeBase = mergeBaseResult.trimmedOutput
+                    self.loadDiffs(repoPath: repoPath, mergeBase: mergeBase)
+                    self.loadCommits(repoPath: repoPath, parentRef: parentRef, currentHead: currentHead)
                 }
-
-                let mergeBase = mergeBaseResult.trimmedOutput
-                self.loadDiffs(repoPath: repoPath, mergeBase: mergeBase)
-                self.loadCommits(repoPath: repoPath, parentBranch: parentBranch, currentHead: currentHead)
             }
         }
     }
@@ -122,10 +125,10 @@ final class WorkspaceDiffViewModel: ObservableObject {
 
     // MARK: - Load Commits
 
-    private func loadCommits(repoPath: String, parentBranch: String, currentHead: String) {
+    private func loadCommits(repoPath: String, parentRef: String, currentHead: String) {
         Git.shared.runAsync(
             in: repoPath,
-            args: ["log", "\(parentBranch)..HEAD", "--format=%H%n%s%n%an%n%aI", "--reverse"]
+            args: ["log", "\(parentRef)..HEAD", "--format=%H%n%s%n%an%n%aI", "--reverse"]
         ) { [weak self] result in
             Task { @MainActor in
                 guard let self else { return }
@@ -157,7 +160,7 @@ final class WorkspaceDiffViewModel: ObservableObject {
         guard let repoPath, let workspace else { return }
 
         // Find merge-base for the center panel diff
-        let mergeBaseResult = Git.shared.run(in: repoPath, args: ["merge-base", workspace.parentBranch, "HEAD"])
+        let mergeBaseResult = Git.shared.run(in: repoPath, args: ["merge-base", "origin/\(workspace.parentBranch)", "HEAD"])
         guard mergeBaseResult.success else { return }
 
         let mergeBase = mergeBaseResult.trimmedOutput
