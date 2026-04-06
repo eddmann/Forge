@@ -52,8 +52,6 @@ final class DiffViewModel: ObservableObject {
     @Published var searchQuery = ""
     @Published var currentHunkIndex = 0
     @Published var draftComment: DraftCommentState?
-    @Published var selectedLineIDs: Set<String> = []
-    @Published var selectionAnchorID: String?
     @Published var contextExpanded = false
 
     private let diffService = GitDiffService.shared
@@ -139,7 +137,7 @@ final class DiffViewModel: ObservableObject {
 
     // MARK: - Comments
 
-    /// Begin a comment on selected lines, or a single line. Anchor determines where the inline editor appears.
+    /// Begin a comment on a single line. Anchor determines where the inline editor appears.
     func beginComment(startLine: Int, endLine: Int, side: AgentReviewCommentSide, codeSnippet: String, anchorLineID: String?) {
         draftComment = DraftCommentState(
             filePath: filePath,
@@ -149,8 +147,6 @@ final class DiffViewModel: ObservableObject {
             codeSnippet: codeSnippet,
             anchorLineID: anchorLineID
         )
-        selectedLineIDs.removeAll()
-        selectionAnchorID = nil
     }
 
     func editComment(_ comment: AgentReviewComment) {
@@ -203,50 +199,6 @@ final class DiffViewModel: ObservableObject {
         }
 
         draftComment = nil
-    }
-
-    // MARK: - Line Selection
-
-    func toggleLineSelection(lineID: String) {
-        if selectionAnchorID == nil {
-            selectionAnchorID = lineID
-            selectedLineIDs = [lineID]
-        } else {
-            // Extend selection from anchor to this line
-            guard let allLines = diff?.hunks.flatMap(\.lines) else { return }
-            let lineIDs = allLines.map(\.id)
-            guard let anchorIdx = lineIDs.firstIndex(of: selectionAnchorID!),
-                  let targetIdx = lineIDs.firstIndex(of: lineID) else { return }
-            let range = min(anchorIdx, targetIdx) ... max(anchorIdx, targetIdx)
-            selectedLineIDs = Set(lineIDs[range])
-        }
-    }
-
-    func clearSelection() {
-        selectedLineIDs.removeAll()
-        selectionAnchorID = nil
-    }
-
-    /// Begin comment on currently selected lines.
-    func commentOnSelection() {
-        guard !selectedLineIDs.isEmpty,
-              let allLines = diff?.hunks.flatMap(\.lines) else { return }
-
-        let selected = allLines.filter { selectedLineIDs.contains($0.id) }
-        guard let first = selected.first, let last = selected.last else { return }
-
-        let startNum = (first.kind == .removed ? first.oldLineNumber : first.newLineNumber) ?? 0
-        let endNum = (last.kind == .removed ? last.oldLineNumber : last.newLineNumber) ?? 0
-        let side: AgentReviewCommentSide = first.kind == .removed ? .old : .new
-        let snippet = selected.map(\.text).joined(separator: "\n")
-
-        beginComment(
-            startLine: startNum,
-            endLine: endNum,
-            side: side,
-            codeSnippet: snippet,
-            anchorLineID: last.id
-        )
     }
 
     func cancelDraft() {

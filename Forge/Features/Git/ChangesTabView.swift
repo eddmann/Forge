@@ -92,11 +92,6 @@ struct ChangesTabView: View {
                     }
                 }
             }
-
-            // Selection bar
-            if !viewModel.selectedLineIDs.isEmpty {
-                selectionBar
-            }
         }
         .background(Color(nsColor: NSColor.windowBackgroundColor))
     }
@@ -229,23 +224,6 @@ struct ChangesTabView: View {
         }
     }
 
-    // MARK: - Selection Bar
-
-    private var selectionBar: some View {
-        HStack(spacing: 12) {
-            Text("\(viewModel.selectedLineIDs.count) lines selected")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.secondary)
-            Spacer()
-            Button("Clear") { viewModel.clearSelection() }
-                .buttonStyle(.borderless)
-                .foregroundColor(.secondary)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color(nsColor: NSColor.controlBackgroundColor))
-    }
-
     // MARK: - Helpers
 
     private func changeIcon(_ kind: GitFileChangeKind) -> String {
@@ -337,7 +315,6 @@ struct ChangesUnifiedFileView: View {
                                 line: line,
                                 pairContent: linePairs[line.id],
                                 filePath: filePath,
-                                isSelected: viewModel.selectedLineIDs.contains(line.id),
                                 viewModel: viewModel
                             )
 
@@ -367,7 +344,6 @@ private struct ChangesLineRow: View {
     let line: GitDiffLine
     let pairContent: String?
     let filePath: String
-    let isSelected: Bool
     @ObservedObject var viewModel: ChangesViewModel
     @ObservedObject private var appearance = TerminalAppearanceStore.shared
 
@@ -422,20 +398,9 @@ private struct ChangesLineRow: View {
             Spacer(minLength: 0)
         }
         .padding(.vertical, 1)
-        .background(isSelected ? Color.blue.opacity(0.15) : lineBackground)
-        .contentShape(Rectangle())
+        .background(lineBackground)
         .onHover { isHovered = $0 }
-        .onTapGesture {
-            let allLines = viewModel.fileDiffs
-                .first(where: { ($0.newPath ?? $0.oldPath) == filePath })?
-                .hunks.flatMap(\.lines) ?? []
-            if NSEvent.modifierFlags.contains(.shift) {
-                viewModel.toggleLineSelection(lineID: line.id, allLines: allLines)
-            } else {
-                viewModel.clearSelection()
-                viewModel.toggleLineSelection(lineID: line.id, allLines: allLines)
-            }
-        }
+        .textSelection(.enabled)
     }
 
     private var lineBackground: Color {
@@ -805,8 +770,8 @@ private struct ChangesSplitLineRow: View {
             .padding(.vertical, 1)
             .background(bgColor(for: line.kind))
             .frame(width: width).clipped()
-            .contentShape(Rectangle())
             .onHover { isHovered.wrappedValue = $0 }
+            .textSelection(.enabled)
         } else {
             Color(nsColor: NSColor.separatorColor).frame(width: width, height: 20)
         }

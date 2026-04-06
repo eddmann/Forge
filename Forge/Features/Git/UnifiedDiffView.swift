@@ -20,7 +20,6 @@ struct UnifiedDiffView: View {
                                 UnifiedLineRow(
                                     line: line,
                                     pairContent: linePairs[line.id],
-                                    isSelected: viewModel.selectedLineIDs.contains(line.id),
                                     viewModel: viewModel
                                 )
 
@@ -114,7 +113,6 @@ struct UnifiedDiffView: View {
 private struct UnifiedLineRow: View {
     let line: GitDiffLine
     let pairContent: String?
-    let isSelected: Bool
     @ObservedObject var viewModel: DiffViewModel
     @ObservedObject private var appearance = TerminalAppearanceStore.shared
 
@@ -177,26 +175,9 @@ private struct UnifiedLineRow: View {
             Spacer(minLength: 0)
         }
         .padding(.vertical, 1)
-        .background(rowBackground)
-        .contentShape(Rectangle())
+        .background(lineBackground)
         .onHover { isHovered = $0 }
-        .onTapGesture {
-            if NSEvent.modifierFlags.contains(.shift) {
-                viewModel.toggleLineSelection(lineID: line.id)
-            } else if !viewModel.selectedLineIDs.isEmpty {
-                // Had a selection, now commenting on it
-                viewModel.commentOnSelection()
-            } else {
-                viewModel.toggleLineSelection(lineID: line.id)
-            }
-        }
-    }
-
-    private var rowBackground: Color {
-        if isSelected {
-            return Color.blue.opacity(0.15)
-        }
-        return lineBackground
+        .textSelection(.enabled)
     }
 
     private var lineBackground: Color {
@@ -216,19 +197,13 @@ private struct UnifiedLineRow: View {
     }
 
     private func beginCommentOnLine() {
-        if viewModel.selectedLineIDs.isEmpty {
-            // Single line comment
-            let num = (line.kind == .removed ? line.oldLineNumber : line.newLineNumber) ?? 0
-            let side: AgentReviewCommentSide = line.kind == .removed ? .old : .new
-            viewModel.beginComment(
-                startLine: num, endLine: num,
-                side: side, codeSnippet: line.text,
-                anchorLineID: line.id
-            )
-        } else {
-            // Comment on selection
-            viewModel.commentOnSelection()
-        }
+        let num = (line.kind == .removed ? line.oldLineNumber : line.newLineNumber) ?? 0
+        let side: AgentReviewCommentSide = line.kind == .removed ? .old : .new
+        viewModel.beginComment(
+            startLine: num, endLine: num,
+            side: side, codeSnippet: line.text,
+            anchorLineID: line.id
+        )
     }
 }
 

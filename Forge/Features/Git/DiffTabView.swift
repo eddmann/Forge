@@ -52,11 +52,6 @@ struct DiffTabView: View {
             } else {
                 emptyDiffView
             }
-
-            // Selection action bar
-            if !viewModel.selectedLineIDs.isEmpty {
-                selectionBar
-            }
         }
         .background(Color(nsColor: NSColor.windowBackgroundColor))
         .onAppear { viewModel.loadDiff() }
@@ -204,28 +199,5 @@ struct DiffTabView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    // MARK: - Selection Bar
-
-    private var selectionBar: some View {
-        HStack(spacing: 12) {
-            Text("\(viewModel.selectedLineIDs.count) lines selected")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.secondary)
-
-            Spacer()
-
-            Button("Comment") { viewModel.commentOnSelection() }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-
-            Button("Clear") { viewModel.clearSelection() }
-                .buttonStyle(.borderless)
-                .foregroundColor(.secondary)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color(nsColor: NSColor.controlBackgroundColor))
     }
 }

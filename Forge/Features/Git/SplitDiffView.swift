@@ -206,23 +206,11 @@ private struct SplitLineRow: View {
                     .padding(.horizontal, 4)
             }
             .padding(.vertical, 1)
-            .background(
-                viewModel.selectedLineIDs.contains(line.id)
-                    ? Color.blue.opacity(0.15)
-                    : backgroundColor(for: line.kind)
-            )
+            .background(backgroundColor(for: line.kind))
             .frame(width: width)
             .clipped()
-            .contentShape(Rectangle())
             .onHover { isHovered.wrappedValue = $0 }
-            .onTapGesture {
-                if NSEvent.modifierFlags.contains(.shift) {
-                    viewModel.toggleLineSelection(lineID: line.id)
-                } else {
-                    viewModel.clearSelection()
-                    viewModel.toggleLineSelection(lineID: line.id)
-                }
-            }
+            .textSelection(.enabled)
         } else {
             Color(nsColor: NSColor.separatorColor)
                 .frame(width: width, height: 20)

@@ -23,10 +23,7 @@ final class ChangesViewModel: ObservableObject {
     @Published var collapsedFiles: Set<String> = []
     @Published var contextExpanded = false
 
-    // Per-file draft/selection state (keyed by file path)
     @Published var draftComment: DraftCommentState?
-    @Published var selectedLineIDs: Set<String> = []
-    @Published var selectionAnchorID: String?
 
     private let diffService = GitDiffService.shared
     private var scrollCancellable: AnyCancellable?
@@ -161,8 +158,6 @@ final class ChangesViewModel: ObservableObject {
             codeSnippet: codeSnippet,
             anchorLineID: anchorLineID
         )
-        selectedLineIDs.removeAll()
-        selectionAnchorID = nil
     }
 
     func editComment(_ comment: AgentReviewComment) {
@@ -225,44 +220,6 @@ final class ChangesViewModel: ObservableObject {
             rootPath: repoPath,
             filePath: comment.filePath,
             commentID: comment.id
-        )
-    }
-
-    // MARK: - Line Selection
-
-    func toggleLineSelection(lineID: String, allLines: [GitDiffLine]) {
-        if selectionAnchorID == nil {
-            selectionAnchorID = lineID
-            selectedLineIDs = [lineID]
-        } else {
-            let lineIDs = allLines.map(\.id)
-            guard let anchorIdx = lineIDs.firstIndex(of: selectionAnchorID!),
-                  let targetIdx = lineIDs.firstIndex(of: lineID) else { return }
-            let range = min(anchorIdx, targetIdx) ... max(anchorIdx, targetIdx)
-            selectedLineIDs = Set(lineIDs[range])
-        }
-    }
-
-    func clearSelection() {
-        selectedLineIDs.removeAll()
-        selectionAnchorID = nil
-    }
-
-    func commentOnSelection(filePath: String, allLines: [GitDiffLine]) {
-        guard !selectedLineIDs.isEmpty else { return }
-        let selected = allLines.filter { selectedLineIDs.contains($0.id) }
-        guard let first = selected.first, let last = selected.last else { return }
-
-        let startNum = (first.kind == .removed ? first.oldLineNumber : first.newLineNumber) ?? 0
-        let endNum = (last.kind == .removed ? last.oldLineNumber : last.newLineNumber) ?? 0
-        let side: AgentReviewCommentSide = first.kind == .removed ? .old : .new
-        let snippet = selected.map(\.text).joined(separator: "\n")
-
-        beginComment(
-            filePath: filePath,
-            startLine: startNum, endLine: endNum,
-            side: side, codeSnippet: snippet,
-            anchorLineID: last.id
         )
     }
 
