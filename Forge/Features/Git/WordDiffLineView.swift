@@ -3,7 +3,7 @@ import SwiftUI
 struct WordDiffLineView: View {
     let segments: [WordDiffSegment]
     let lineBackground: Color
-    @ObservedObject private var appearance = TerminalAppearanceStore.shared
+    let fontSize: CGFloat
 
     var body: some View {
         HStack(spacing: 0) {
@@ -12,7 +12,7 @@ struct WordDiffLineView: View {
                     .background(highlightColor(for: segment.kind))
             }
         }
-        .font(.system(size: CGFloat(appearance.config.diffFontSize), design: .monospaced))
+        .font(.system(size: fontSize, design: .monospaced))
     }
 
     private func highlightColor(for kind: WordDiffSegment.SegmentKind) -> Color {

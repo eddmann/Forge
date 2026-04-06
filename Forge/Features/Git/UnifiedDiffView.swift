@@ -7,20 +7,25 @@ struct UnifiedDiffView: View {
     @ObservedObject private var appearance = TerminalAppearanceStore.shared
 
     var body: some View {
+        let fontSize = CGFloat(appearance.config.diffFontSize)
+        let hasDraft = viewModel.draftComment != nil
+        let draftAnchorID = viewModel.draftComment?.anchorLineID
+
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(spacing: 0) {
                     ForEach(Array(diff.hunks.enumerated()), id: \.offset) { hunkIdx, hunk in
-                        hunkHeaderView(hunk: hunk, index: hunkIdx)
+                        hunkHeaderView(hunk: hunk, index: hunkIdx, fontSize: fontSize)
 
                         let linePairs = hunk.findLinePairs()
                         ForEach(hunk.lines) { line in
                             if line.kind != .noNewlineMarker {
-                                // The diff line row
                                 UnifiedLineRow(
                                     line: line,
                                     pairContent: linePairs[line.id],
-                                    viewModel: viewModel
+                                    fontSize: fontSize,
+                                    showCommentButton: !hasDraft,
+                                    onComment: { beginComment(on: line) }
                                 )
 
                                 // Inline comments for this line
@@ -37,7 +42,7 @@ struct UnifiedDiffView: View {
                                 }
 
                                 // Inline draft editor anchored after this line
-                                if viewModel.draftComment?.anchorLineID == line.id {
+                                if draftAnchorID == line.id {
                                     InlineDraftEditor(viewModel: viewModel)
                                 }
                             }
@@ -53,10 +58,10 @@ struct UnifiedDiffView: View {
 
     // MARK: - Hunk Header
 
-    private func hunkHeaderView(hunk: GitDiffHunk, index: Int) -> some View {
+    private func hunkHeaderView(hunk: GitDiffHunk, index: Int, fontSize: CGFloat) -> some View {
         HStack(spacing: 8) {
             Text(hunk.header.isEmpty ? "@@" : hunk.header)
-                .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                .font(.system(size: fontSize - 2, design: .monospaced))
                 .foregroundColor(.blue.opacity(0.8))
                 .lineLimit(1)
 
@@ -106,15 +111,26 @@ struct UnifiedDiffView: View {
     private func lineSide(for line: GitDiffLine) -> AgentReviewCommentSide {
         line.kind == .removed ? .old : .new
     }
+
+    private func beginComment(on line: GitDiffLine) {
+        let num = (line.kind == .removed ? line.oldLineNumber : line.newLineNumber) ?? 0
+        let side: AgentReviewCommentSide = line.kind == .removed ? .old : .new
+        viewModel.beginComment(
+            startLine: num, endLine: num,
+            side: side, codeSnippet: line.text,
+            anchorLineID: line.id
+        )
+    }
 }
 
-// MARK: - Unified Line Row (with hover + selection)
+// MARK: - Unified Line Row (no @ObservedObject — pure data + closures)
 
 private struct UnifiedLineRow: View {
     let line: GitDiffLine
     let pairContent: String?
-    @ObservedObject var viewModel: DiffViewModel
-    @ObservedObject private var appearance = TerminalAppearanceStore.shared
+    let fontSize: CGFloat
+    let showCommentButton: Bool
+    let onComment: () -> Void
 
     @State private var isHovered = false
 
@@ -122,8 +138,8 @@ private struct UnifiedLineRow: View {
         HStack(spacing: 0) {
             // Comment button (appears on hover in the gutter)
             ZStack {
-                if isHovered, viewModel.draftComment == nil {
-                    Button(action: { beginCommentOnLine() }) {
+                if isHovered, showCommentButton {
+                    Button(action: onComment) {
                         Image(systemName: "plus")
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(.white)
@@ -138,19 +154,19 @@ private struct UnifiedLineRow: View {
 
             // Old line number
             Text(line.oldLineNumber.map { String($0) } ?? "")
-                .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                .font(.system(size: fontSize - 2, design: .monospaced))
                 .foregroundColor(Color(nsColor: .tertiaryLabelColor))
                 .frame(width: 36, alignment: .trailing)
 
             // New line number
             Text(line.newLineNumber.map { String($0) } ?? "")
-                .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                .font(.system(size: fontSize - 2, design: .monospaced))
                 .foregroundColor(Color(nsColor: .tertiaryLabelColor))
                 .frame(width: 36, alignment: .trailing)
 
             // Prefix
             Text(line.prefix)
-                .font(.system(size: CGFloat(appearance.config.diffFontSize), design: .monospaced))
+                .font(.system(size: fontSize, design: .monospaced))
                 .foregroundColor(prefixColor)
                 .frame(width: 16)
 
@@ -161,12 +177,12 @@ private struct UnifiedLineRow: View {
                     pairContent: pairContent,
                     isAddition: line.kind == .added
                 )
-                WordDiffLineView(segments: segments, lineBackground: lineBackground)
+                WordDiffLineView(segments: segments, lineBackground: lineBackground, fontSize: fontSize)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 4)
             } else {
                 Text(line.text)
-                    .font(.system(size: CGFloat(appearance.config.diffFontSize), design: .monospaced))
+                    .font(.system(size: fontSize, design: .monospaced))
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 4)
@@ -194,16 +210,6 @@ private struct UnifiedLineRow: View {
         case .removed: .red
         default: Color(nsColor: .tertiaryLabelColor)
         }
-    }
-
-    private func beginCommentOnLine() {
-        let num = (line.kind == .removed ? line.oldLineNumber : line.newLineNumber) ?? 0
-        let side: AgentReviewCommentSide = line.kind == .removed ? .old : .new
-        viewModel.beginComment(
-            startLine: num, endLine: num,
-            side: side, codeSnippet: line.text,
-            anchorLineID: line.id
-        )
     }
 }
 

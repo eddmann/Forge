@@ -290,14 +290,19 @@ struct ChangesUnifiedFileView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
         } else {
+            let fontSize = CGFloat(appearance.config.diffFontSize)
+            let hasDraft = viewModel.draftComment != nil
+            let draftAnchorID = viewModel.draftComment?.anchorLineID
+            let repoPath = viewModel.repoPath
+            let fp = filePath
+
             LazyVStack(spacing: 0) {
                 let multipleHunks = diff.hunks.count > 1
                 ForEach(Array(diff.hunks.enumerated()), id: \.offset) { _, hunk in
-                    // Only show hunk header when there are multiple hunks
                     if multipleHunks {
                         HStack(spacing: 8) {
                             Text(hunk.header.isEmpty ? "@@" : hunk.header)
-                                .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                                .font(.system(size: fontSize - 2, design: .monospaced))
                                 .foregroundColor(.blue.opacity(0.8))
                                 .lineLimit(1)
                             Spacer()
@@ -314,20 +319,21 @@ struct ChangesUnifiedFileView: View {
                             ChangesLineRow(
                                 line: line,
                                 pairContent: linePairs[line.id],
-                                filePath: filePath,
-                                viewModel: viewModel
+                                fontSize: fontSize,
+                                showCommentButton: !hasDraft,
+                                onComment: { beginComment(on: line) }
                             )
 
                             // Inline comments
                             let lineNum = (line.kind == .removed ? line.oldLineNumber : line.newLineNumber) ?? 0
                             let side: AgentReviewCommentSide = line.kind == .removed ? .old : .new
-                            let comments = reviewStore.comments(in: viewModel.repoPath, filePath: filePath, line: lineNum, side: side)
+                            let comments = reviewStore.comments(in: repoPath, filePath: fp, line: lineNum, side: side)
                             ForEach(comments) { comment in
                                 InlineCommentCard(comment: comment, viewModel: viewModel)
                             }
 
                             // Inline draft
-                            if viewModel.draftComment?.anchorLineID == line.id {
+                            if draftAnchorID == line.id {
                                 InlineDraftEditor(viewModel: viewModel)
                             }
                         }
@@ -336,16 +342,27 @@ struct ChangesUnifiedFileView: View {
             }
         }
     }
+
+    private func beginComment(on line: GitDiffLine) {
+        let num = (line.kind == .removed ? line.oldLineNumber : line.newLineNumber) ?? 0
+        let side: AgentReviewCommentSide = line.kind == .removed ? .old : .new
+        viewModel.beginComment(
+            filePath: filePath,
+            startLine: num, endLine: num,
+            side: side, codeSnippet: line.text,
+            anchorLineID: line.id
+        )
+    }
 }
 
-// MARK: - Line row for Changes view
+// MARK: - Line row for Changes view (no @ObservedObject — pure data + closures)
 
 private struct ChangesLineRow: View {
     let line: GitDiffLine
     let pairContent: String?
-    let filePath: String
-    @ObservedObject var viewModel: ChangesViewModel
-    @ObservedObject private var appearance = TerminalAppearanceStore.shared
+    let fontSize: CGFloat
+    let showCommentButton: Bool
+    let onComment: () -> Void
 
     @State private var isHovered = false
 
@@ -353,8 +370,8 @@ private struct ChangesLineRow: View {
         HStack(spacing: 0) {
             // Comment button gutter
             ZStack {
-                if isHovered, viewModel.draftComment == nil {
-                    Button(action: { beginComment() }) {
+                if isHovered, showCommentButton {
+                    Button(action: onComment) {
                         Image(systemName: "plus")
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(.white)
@@ -368,28 +385,28 @@ private struct ChangesLineRow: View {
             .frame(width: 20)
 
             Text(line.oldLineNumber.map { String($0) } ?? "")
-                .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                .font(.system(size: fontSize - 2, design: .monospaced))
                 .foregroundColor(Color(nsColor: .tertiaryLabelColor))
                 .frame(width: 36, alignment: .trailing)
 
             Text(line.newLineNumber.map { String($0) } ?? "")
-                .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                .font(.system(size: fontSize - 2, design: .monospaced))
                 .foregroundColor(Color(nsColor: .tertiaryLabelColor))
                 .frame(width: 36, alignment: .trailing)
 
             Text(line.prefix)
-                .font(.system(size: CGFloat(appearance.config.diffFontSize), design: .monospaced))
+                .font(.system(size: fontSize, design: .monospaced))
                 .foregroundColor(prefixColor)
                 .frame(width: 16)
 
             if let pairContent, line.kind == .added || line.kind == .removed {
                 let segments = WordDiff.computeForLine(content: line.text, pairContent: pairContent, isAddition: line.kind == .added)
-                WordDiffLineView(segments: segments, lineBackground: lineBackground)
+                WordDiffLineView(segments: segments, lineBackground: lineBackground, fontSize: fontSize)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 4)
             } else {
                 Text(line.text)
-                    .font(.system(size: CGFloat(appearance.config.diffFontSize), design: .monospaced))
+                    .font(.system(size: fontSize, design: .monospaced))
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 4)
@@ -418,20 +435,9 @@ private struct ChangesLineRow: View {
         default: Color(nsColor: .tertiaryLabelColor)
         }
     }
-
-    private func beginComment() {
-        let num = (line.kind == .removed ? line.oldLineNumber : line.newLineNumber) ?? 0
-        let side: AgentReviewCommentSide = line.kind == .removed ? .old : .new
-        viewModel.beginComment(
-            filePath: filePath,
-            startLine: num, endLine: num,
-            side: side, codeSnippet: line.text,
-            anchorLineID: line.id
-        )
-    }
 }
 
-// MARK: - Inline comment card (reused from UnifiedDiffView pattern)
+// MARK: - Inline comment card
 
 private struct InlineCommentCard: View {
     let comment: AgentReviewComment
@@ -614,16 +620,18 @@ struct ChangesSplitFileView: View {
             }
             .padding(.horizontal, 12).padding(.vertical, 8)
         } else {
+            let fontSize = CGFloat(appearance.config.diffFontSize)
+            let hasDraft = viewModel.draftComment != nil
+
             GeometryReader { geo in
                 let colWidth = (geo.size.width - 1) / 2
                 let multipleHunks = diff.hunks.count > 1
                 VStack(spacing: 0) {
                     ForEach(Array(diff.hunks.enumerated()), id: \.offset) { _, hunk in
-                        // Only show hunk header when there are multiple hunks
                         if multipleHunks {
                             HStack(spacing: 0) {
                                 Text(hunk.header.isEmpty ? "@@" : hunk.header)
-                                    .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                                    .font(.system(size: fontSize - 2, design: .monospaced))
                                     .foregroundColor(.blue.opacity(0.8))
                                     .padding(.horizontal, 8).padding(.vertical, 3)
                                 Spacer()
@@ -634,14 +642,14 @@ struct ChangesSplitFileView: View {
 
                         let rows = makeRows(from: hunk)
                         ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
-                            // Split row with hover comment buttons
                             ChangesSplitLineRow(
                                 left: row.0,
                                 right: row.1,
                                 columnWidth: colWidth,
                                 totalWidth: geo.size.width,
-                                filePath: filePath,
-                                viewModel: viewModel
+                                fontSize: fontSize,
+                                showCommentButton: !hasDraft,
+                                onComment: { line, side in beginComment(line: line, side: side) }
                             )
 
                             // Inline comments for this row
@@ -679,6 +687,16 @@ struct ChangesSplitFileView: View {
         return result
     }
 
+    private func beginComment(line: GitDiffLine, side: AgentReviewCommentSide) {
+        let num = (side == .old ? line.oldLineNumber : line.newLineNumber) ?? 0
+        viewModel.beginComment(
+            filePath: filePath,
+            startLine: num, endLine: num,
+            side: side, codeSnippet: line.text,
+            anchorLineID: line.id
+        )
+    }
+
     private func makeRows(from hunk: GitDiffHunk) -> [(GitDiffLine?, GitDiffLine?)] {
         var rows: [(GitDiffLine?, GitDiffLine?)] = []
         var i = 0; let lines = hunk.lines
@@ -709,16 +727,16 @@ struct ChangesSplitFileView: View {
     }
 }
 
-// MARK: - Split line row with hover comment buttons (Changes tab)
+// MARK: - Split line row (no @ObservedObject — pure data + closures)
 
 private struct ChangesSplitLineRow: View {
     let left: GitDiffLine?
     let right: GitDiffLine?
     let columnWidth: CGFloat
     let totalWidth: CGFloat
-    let filePath: String
-    @ObservedObject var viewModel: ChangesViewModel
-    @ObservedObject private var appearance = TerminalAppearanceStore.shared
+    let fontSize: CGFloat
+    let showCommentButton: Bool
+    let onComment: (GitDiffLine, AgentReviewCommentSide) -> Void
 
     @State private var leftHovered = false
     @State private var rightHovered = false
@@ -738,8 +756,8 @@ private struct ChangesSplitLineRow: View {
             HStack(spacing: 0) {
                 // Hover comment button
                 ZStack {
-                    if isHovered.wrappedValue, viewModel.draftComment == nil {
-                        Button(action: { beginComment(line: line, side: side) }) {
+                    if isHovered.wrappedValue, showCommentButton {
+                        Button(action: { onComment(line, side) }) {
                             Image(systemName: "plus")
                                 .font(.system(size: 8, weight: .bold))
                                 .foregroundColor(.white)
@@ -754,14 +772,14 @@ private struct ChangesSplitLineRow: View {
 
                 // Line number
                 Text((side == .old ? line.oldLineNumber : line.newLineNumber).map { String($0) } ?? "")
-                    .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                    .font(.system(size: fontSize - 2, design: .monospaced))
                     .foregroundColor(Color(nsColor: .tertiaryLabelColor))
                     .frame(width: 32, alignment: .trailing)
                     .padding(.trailing, 4)
 
                 // Content
                 Text(line.text)
-                    .font(.system(size: CGFloat(appearance.config.diffFontSize), design: .monospaced))
+                    .font(.system(size: fontSize, design: .monospaced))
                     .foregroundColor(.primary)
                     .lineLimit(1).truncationMode(.tail)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -783,15 +801,5 @@ private struct ChangesSplitLineRow: View {
         case .removed: Color.red.opacity(0.1)
         default: .clear
         }
-    }
-
-    private func beginComment(line: GitDiffLine, side: AgentReviewCommentSide) {
-        let num = (side == .old ? line.oldLineNumber : line.newLineNumber) ?? 0
-        viewModel.beginComment(
-            filePath: filePath,
-            startLine: num, endLine: num,
-            side: side, codeSnippet: line.text,
-            anchorLineID: line.id
-        )
     }
 }

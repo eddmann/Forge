@@ -7,6 +7,9 @@ struct SplitDiffView: View {
     @ObservedObject private var appearance = TerminalAppearanceStore.shared
 
     var body: some View {
+        let fontSize = CGFloat(appearance.config.diffFontSize)
+        let hasDraft = viewModel.draftComment != nil
+
         GeometryReader { geo in
             let columnWidth = (geo.size.width - 1) / 2
 
@@ -17,7 +20,7 @@ struct SplitDiffView: View {
                             // Hunk header
                             HStack(spacing: 0) {
                                 Text(hunk.header.isEmpty ? "@@" : hunk.header)
-                                    .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                                    .font(.system(size: fontSize - 2, design: .monospaced))
                                     .foregroundColor(.blue.opacity(0.8))
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 3)
@@ -30,16 +33,16 @@ struct SplitDiffView: View {
                             // Paired lines
                             let rows = makeRows(from: hunk)
                             ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
-                                // The split row
                                 SplitLineRow(
                                     row: row,
                                     columnWidth: columnWidth,
                                     totalWidth: geo.size.width,
-                                    viewModel: viewModel,
-                                    reviewStore: reviewStore
+                                    fontSize: fontSize,
+                                    showCommentButton: !hasDraft,
+                                    onComment: { line, side in beginComment(line: line, side: side) }
                                 )
 
-                                // Inline comments after this row (anchored to either side's line)
+                                // Inline comments after this row
                                 let anchorIDs = [row.left?.id, row.right?.id].compactMap { $0 }
                                 ForEach(inlineComments(for: row), id: \.id) { comment in
                                     SplitInlineCommentCard(
@@ -119,52 +122,43 @@ struct SplitDiffView: View {
 
     private func inlineComments(for row: SplitRow) -> [AgentReviewComment] {
         var result: [AgentReviewComment] = []
-        // Left side: check old line number for removed or context lines
         if let left = row.left, let num = left.oldLineNumber, left.kind == .removed || left.kind == .context {
             result += reviewStore.comments(in: viewModel.repoPath, filePath: viewModel.filePath, line: num, side: .old)
         }
-        // Right side: check new line number for added or context lines
         if let right = row.right, let num = right.newLineNumber, right.kind == .added || right.kind == .context {
             result += reviewStore.comments(in: viewModel.repoPath, filePath: viewModel.filePath, line: num, side: .new)
         }
         return result
     }
+
+    private func beginComment(line: GitDiffLine, side: AgentReviewCommentSide) {
+        let num = (side == .old ? line.oldLineNumber : line.newLineNumber) ?? 0
+        viewModel.beginComment(
+            startLine: num, endLine: num,
+            side: side, codeSnippet: line.text,
+            anchorLineID: line.id
+        )
+    }
 }
 
-// MARK: - Split Line Row
+// MARK: - Split Line Row (no @ObservedObject — pure data + closures)
 
 private struct SplitLineRow: View {
     let row: SplitDiffView.SplitRow
     let columnWidth: CGFloat
     let totalWidth: CGFloat
-    @ObservedObject var viewModel: DiffViewModel
-    @ObservedObject var reviewStore: ReviewStore
-    @ObservedObject private var appearance = TerminalAppearanceStore.shared
+    let fontSize: CGFloat
+    let showCommentButton: Bool
+    let onComment: (GitDiffLine, AgentReviewCommentSide) -> Void
 
     @State private var leftHovered = false
     @State private var rightHovered = false
 
     var body: some View {
         HStack(spacing: 0) {
-            // Left column
-            splitCell(
-                line: row.left,
-                side: .old,
-                width: columnWidth,
-                isHovered: $leftHovered
-            )
-
-            Rectangle()
-                .fill(Color.white.opacity(0.08))
-                .frame(width: 1)
-
-            // Right column
-            splitCell(
-                line: row.right,
-                side: .new,
-                width: columnWidth,
-                isHovered: $rightHovered
-            )
+            splitCell(line: row.left, side: .old, width: columnWidth, isHovered: $leftHovered)
+            Rectangle().fill(Color.white.opacity(0.08)).frame(width: 1)
+            splitCell(line: row.right, side: .new, width: columnWidth, isHovered: $rightHovered)
         }
         .frame(width: totalWidth)
     }
@@ -175,8 +169,8 @@ private struct SplitLineRow: View {
             HStack(spacing: 0) {
                 // Hover comment button
                 ZStack {
-                    if isHovered.wrappedValue, viewModel.draftComment == nil {
-                        Button(action: { beginComment(line: line, side: side) }) {
+                    if isHovered.wrappedValue, showCommentButton {
+                        Button(action: { onComment(line, side) }) {
                             Image(systemName: "plus")
                                 .font(.system(size: 8, weight: .bold))
                                 .foregroundColor(.white)
@@ -191,14 +185,14 @@ private struct SplitLineRow: View {
 
                 // Line number
                 Text(lineNumber(for: line, side: side))
-                    .font(.system(size: CGFloat(appearance.config.diffFontSize) - 2, design: .monospaced))
+                    .font(.system(size: fontSize - 2, design: .monospaced))
                     .foregroundColor(Color(nsColor: .tertiaryLabelColor))
                     .frame(width: 32, alignment: .trailing)
                     .padding(.trailing, 4)
 
                 // Content
                 Text(line.text)
-                    .font(.system(size: CGFloat(appearance.config.diffFontSize), design: .monospaced))
+                    .font(.system(size: fontSize, design: .monospaced))
                     .foregroundColor(.primary)
                     .lineLimit(1)
                     .truncationMode(.tail)
@@ -228,15 +222,6 @@ private struct SplitLineRow: View {
         case .removed: Color.red.opacity(0.1)
         default: .clear
         }
-    }
-
-    private func beginComment(line: GitDiffLine, side: AgentReviewCommentSide) {
-        let num = (side == .old ? line.oldLineNumber : line.newLineNumber) ?? 0
-        viewModel.beginComment(
-            startLine: num, endLine: num,
-            side: side, codeSnippet: line.text,
-            anchorLineID: line.id
-        )
     }
 }
 
