@@ -5,7 +5,7 @@
 # Forge
 
 > [!WARNING]
-> Lots of running to explore features — expect clanker slop underneath for now.
+> Lots of running to explore features - expect clanker slop underneath for now.
 
 A native macOS terminal for local coding-agent workflows.
 
@@ -33,11 +33,20 @@ Forge is [living personal software](#living-personal-software) built to make loc
 - GPU-accelerated terminal via [Ghostty](https://ghostty.org), with tabs and arbitrarily nested split panes
 - Project and workspace management with lightweight APFS CoW workspace cloning
 - Agent-aware terminal sessions with live status, notifications, and agent launching
-- Built-in Git status, diff, and review workflows
-- Command discovery and palette-driven navigation
+- Built-in Git status, diff, and review workflows with full file context and native text selection
+- Fuzzy command palette with intent-based sections for quick navigation
+- Workspace activity log with AI-powered summaries of agent work
+- Project configuration via [`forge.json`](docs/forge-json.md) for processes, port allocation, lifecycle scripts, and Docker Compose stacks
 - Customizable appearance and editor integration
-- Local JSON persistence under `~/.forge`
 - Bundled CLI for IPC and automation
+
+## Project Configuration
+
+Drop a [`forge.json`](docs/forge-json.md) in your project root to configure per-workspace:
+
+- Processes - dev servers, watchers, Docker Compose stacks
+- Ports - automatic allocation with environment variable injection so workspaces don't collide
+- Lifecycle scripts - setup and teardown commands that run on workspace create/destroy
 
 ## Data Storage
 
@@ -49,10 +58,13 @@ Forge stores local state in `~/.forge/`:
   projects.json
   state/
     sessions.json
+    activity/
     forge.sock
   clones/
   reviews/
 ```
+
+Per-project configuration lives in `forge.json` at the repository root (see [docs/forge-json.md](docs/forge-json.md)).
 
 ## Requirements
 
@@ -81,6 +93,7 @@ make build
 make format
 make lint
 make release
+make dev            # Run a development build (uses ~/.forge-dev for isolation)
 make can-release
 ```
 
