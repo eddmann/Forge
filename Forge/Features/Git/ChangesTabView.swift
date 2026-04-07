@@ -416,6 +416,7 @@ private struct ChangesLineRow: View {
         .padding(.vertical, 1)
         .background(lineBackground)
         .onHover { isHovered = $0 }
+        .onAppear { isHovered = false }
         .textSelection(.enabled)
     }
 
@@ -726,7 +727,7 @@ struct ChangesSplitFileView: View {
     }
 }
 
-// MARK: - Split line row (no @ObservedObject — pure data + closures)
+// MARK: - Split line row
 
 private struct ChangesSplitLineRow: View {
     let left: GitDiffLine?
@@ -737,25 +738,42 @@ private struct ChangesSplitLineRow: View {
     let showCommentButton: Bool
     let onComment: (GitDiffLine, AgentReviewCommentSide) -> Void
 
-    @State private var leftHovered = false
-    @State private var rightHovered = false
-
     var body: some View {
         HStack(spacing: 0) {
-            splitCell(line: left, side: .old, width: columnWidth, isHovered: $leftHovered)
+            ChangesSplitCellView(
+                line: left, side: .old, width: columnWidth,
+                fontSize: fontSize, showCommentButton: showCommentButton,
+                onComment: onComment
+            )
             Rectangle().fill(Color.white.opacity(0.08)).frame(width: 1)
-            splitCell(line: right, side: .new, width: columnWidth, isHovered: $rightHovered)
+            ChangesSplitCellView(
+                line: right, side: .new, width: columnWidth,
+                fontSize: fontSize, showCommentButton: showCommentButton,
+                onComment: onComment
+            )
         }
         .frame(width: totalWidth)
     }
+}
 
-    @ViewBuilder
-    private func splitCell(line: GitDiffLine?, side: AgentReviewCommentSide, width: CGFloat, isHovered: Binding<Bool>) -> some View {
+// MARK: - Split Cell (own struct so @State hover survives LazyVStack recycling)
+
+private struct ChangesSplitCellView: View {
+    let line: GitDiffLine?
+    let side: AgentReviewCommentSide
+    let width: CGFloat
+    let fontSize: CGFloat
+    let showCommentButton: Bool
+    let onComment: (GitDiffLine, AgentReviewCommentSide) -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
         if let line {
             HStack(spacing: 0) {
                 // Hover comment button
                 ZStack {
-                    if isHovered.wrappedValue, showCommentButton {
+                    if isHovered, showCommentButton {
                         Button(action: { onComment(line, side) }) {
                             Image(systemName: "plus")
                                 .font(.system(size: 8, weight: .bold))
@@ -787,7 +805,7 @@ private struct ChangesSplitLineRow: View {
             .padding(.vertical, 1)
             .background(bgColor(for: line.kind))
             .frame(width: width).clipped()
-            .onHover { isHovered.wrappedValue = $0 }
+            .onHover { isHovered = $0 }
             .textSelection(.enabled)
         } else {
             Color(nsColor: NSColor.separatorColor).frame(width: width, height: 20)

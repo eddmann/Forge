@@ -188,6 +188,7 @@ private struct UnifiedLineRow: View {
         .padding(.vertical, 1)
         .background(lineBackground)
         .onHover { isHovered = $0 }
+        .onAppear { isHovered = false }
         .textSelection(.enabled)
     }
 

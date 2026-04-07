@@ -141,7 +141,7 @@ struct SplitDiffView: View {
     }
 }
 
-// MARK: - Split Line Row (no @ObservedObject — pure data + closures)
+// MARK: - Split Line Row
 
 private struct SplitLineRow: View {
     let row: SplitDiffView.SplitRow
@@ -151,25 +151,42 @@ private struct SplitLineRow: View {
     let showCommentButton: Bool
     let onComment: (GitDiffLine, AgentReviewCommentSide) -> Void
 
-    @State private var leftHovered = false
-    @State private var rightHovered = false
-
     var body: some View {
         HStack(spacing: 0) {
-            splitCell(line: row.left, side: .old, width: columnWidth, isHovered: $leftHovered)
+            SplitCellView(
+                line: row.left, side: .old, width: columnWidth,
+                fontSize: fontSize, showCommentButton: showCommentButton,
+                onComment: onComment
+            )
             Rectangle().fill(Color.white.opacity(0.08)).frame(width: 1)
-            splitCell(line: row.right, side: .new, width: columnWidth, isHovered: $rightHovered)
+            SplitCellView(
+                line: row.right, side: .new, width: columnWidth,
+                fontSize: fontSize, showCommentButton: showCommentButton,
+                onComment: onComment
+            )
         }
         .frame(width: totalWidth)
     }
+}
 
-    @ViewBuilder
-    private func splitCell(line: GitDiffLine?, side: AgentReviewCommentSide, width: CGFloat, isHovered: Binding<Bool>) -> some View {
+// MARK: - Split Cell (own struct so @State hover survives LazyVStack recycling)
+
+private struct SplitCellView: View {
+    let line: GitDiffLine?
+    let side: AgentReviewCommentSide
+    let width: CGFloat
+    let fontSize: CGFloat
+    let showCommentButton: Bool
+    let onComment: (GitDiffLine, AgentReviewCommentSide) -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
         if let line {
             HStack(spacing: 0) {
                 // Hover comment button
                 ZStack {
-                    if isHovered.wrappedValue, showCommentButton {
+                    if isHovered, showCommentButton {
                         Button(action: { onComment(line, side) }) {
                             Image(systemName: "plus")
                                 .font(.system(size: 8, weight: .bold))
@@ -184,7 +201,7 @@ private struct SplitLineRow: View {
                 .frame(width: 18)
 
                 // Line number
-                Text(lineNumber(for: line, side: side))
+                Text((side == .old ? line.oldLineNumber : line.newLineNumber).map { String($0) } ?? "")
                     .font(.system(size: fontSize - 2, design: .monospaced))
                     .foregroundColor(Color(nsColor: .tertiaryLabelColor))
                     .frame(width: 32, alignment: .trailing)
@@ -203,17 +220,12 @@ private struct SplitLineRow: View {
             .background(backgroundColor(for: line.kind))
             .frame(width: width)
             .clipped()
-            .onHover { isHovered.wrappedValue = $0 }
+            .onHover { isHovered = $0 }
             .textSelection(.enabled)
         } else {
             Color(nsColor: NSColor.separatorColor)
                 .frame(width: width, height: 20)
         }
-    }
-
-    private func lineNumber(for line: GitDiffLine, side: AgentReviewCommentSide) -> String {
-        let num = side == .old ? line.oldLineNumber : line.newLineNumber
-        return num.map { String($0) } ?? ""
     }
 
     private func backgroundColor(for kind: GitDiffLineKind) -> Color {
