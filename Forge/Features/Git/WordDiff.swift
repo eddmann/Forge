@@ -133,13 +133,13 @@ enum WordDiff {
     }
 }
 
-// MARK: - Hunk Line Pairing
+// MARK: - Hunk Line Pairing & Pre-computed Word Diffs
 
 extension GitDiffHunk {
-    /// Finds pairs of adjacent deletion/addition lines for word-level diffing.
-    /// Returns a dictionary mapping line IDs to their paired line's text content.
-    func findLinePairs() -> [String: String] {
-        var pairs: [String: String] = [:]
+    /// Pre-computes word-level diff segments for all paired lines in this hunk.
+    /// Call once per hunk outside the view body, then pass segments to line rows.
+    func preparedWordDiffs() -> [String: [WordDiffSegment]] {
+        var segments: [String: [WordDiffSegment]] = [:]
         var i = 0
 
         while i < lines.count {
@@ -157,8 +157,12 @@ extension GitDiffHunk {
                 }
                 let pairCount = min(deletions.count, additions.count)
                 for k in 0 ..< pairCount {
-                    pairs[deletions[k].id] = additions[k].text
-                    pairs[additions[k].id] = deletions[k].text
+                    let (oldSegs, newSegs) = WordDiff.compute(
+                        oldLine: deletions[k].text,
+                        newLine: additions[k].text
+                    )
+                    segments[deletions[k].id] = oldSegs
+                    segments[additions[k].id] = newSegs
                 }
                 i = j
             } else {
@@ -166,6 +170,6 @@ extension GitDiffHunk {
             }
         }
 
-        return pairs
+        return segments
     }
 }

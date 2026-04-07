@@ -17,12 +17,12 @@ struct UnifiedDiffView: View {
                     ForEach(Array(diff.hunks.enumerated()), id: \.offset) { hunkIdx, hunk in
                         hunkHeaderView(hunk: hunk, index: hunkIdx, fontSize: fontSize)
 
-                        let linePairs = hunk.findLinePairs()
+                        let wordDiffs = hunk.preparedWordDiffs()
                         ForEach(hunk.lines) { line in
                             if line.kind != .noNewlineMarker {
                                 UnifiedLineRow(
                                     line: line,
-                                    pairContent: linePairs[line.id],
+                                    wordDiffSegments: wordDiffs[line.id],
                                     fontSize: fontSize,
                                     showCommentButton: !hasDraft,
                                     onComment: { beginComment(on: line) }
@@ -127,7 +127,7 @@ struct UnifiedDiffView: View {
 
 private struct UnifiedLineRow: View {
     let line: GitDiffLine
-    let pairContent: String?
+    let wordDiffSegments: [WordDiffSegment]?
     let fontSize: CGFloat
     let showCommentButton: Bool
     let onComment: () -> Void
@@ -170,13 +170,8 @@ private struct UnifiedLineRow: View {
                 .foregroundColor(prefixColor)
                 .frame(width: 16)
 
-            // Content with word-level diff
-            if let pairContent, line.kind == .added || line.kind == .removed {
-                let segments = WordDiff.computeForLine(
-                    content: line.text,
-                    pairContent: pairContent,
-                    isAddition: line.kind == .added
-                )
+            // Content with pre-computed word-level diff
+            if let segments = wordDiffSegments {
                 WordDiffLineView(segments: segments, lineBackground: lineBackground, fontSize: fontSize)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 4)
