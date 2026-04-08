@@ -53,6 +53,7 @@
 		61EAB7F9E8DBF4632D654669 /* BonsplitController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7519165D08DFDF8192EA8F7C /* BonsplitController.swift */; };
 		6301D6142F066E246ADA5117 /* SplitContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */; };
 		636833B4508AD5E5520B0E57 /* TerminalSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */; };
+		65F9F7C24F4FE3635F0B936C /* ForgeConfigPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF0A769B8CB474623AE8F74 /* ForgeConfigPrompts.swift */; };
 		660EC2752004FADA5827C386 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99751F6A0C8860A70146FB8D /* WelcomeView.swift */; };
 		6620650A4F8E1CB27057FE5B /* TerminalSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03D48F43AB138181D6CD761 /* TerminalSession.swift */; };
 		673D256E6787F286D9EEC05B /* TerminalObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E805EE38B5FF260D35CE21 /* TerminalObserver.swift */; };
@@ -245,6 +246,7 @@
 		95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendToAgentView.swift; sourceTree = "<group>"; };
 		9964C3D3A979B915F2434DAF /* ActivitySnapshotCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitySnapshotCommand.swift; sourceTree = "<group>"; };
 		99751F6A0C8860A70146FB8D /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		9BF0A769B8CB474623AE8F74 /* ForgeConfigPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeConfigPrompts.swift; sourceTree = "<group>"; };
 		9E002CD819513C0820D42DF3 /* AgentEventLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentEventLogger.swift; sourceTree = "<group>"; };
 		9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitNodeView.swift; sourceTree = "<group>"; };
 		9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarMetrics.swift; sourceTree = "<group>"; };
@@ -485,6 +487,7 @@
 				9964C3D3A979B915F2434DAF /* ActivitySnapshotCommand.swift */,
 				8E49E4582AFF44F5057030E3 /* AgentCapabilityParser.swift */,
 				A014017376795403DB6AD56A /* AgentSetup.swift */,
+				9BF0A769B8CB474623AE8F74 /* ForgeConfigPrompts.swift */,
 				6E518EB16255BC5AC4967951 /* SummaryCommand.swift */,
 				027D11694354B37A74D44611 /* SummaryLog.swift */,
 			);
@@ -995,6 +998,7 @@
 				B6C05E6C34DD83B11063FB87 /* FileStatusRow.swift in Sources */,
 				F3153553CB31A6997A3F936F /* ForgeCLIInstaller.swift in Sources */,
 				B1B639AADCB9470C970103B8 /* ForgeConfig.swift in Sources */,
+				65F9F7C24F4FE3635F0B936C /* ForgeConfigPrompts.swift in Sources */,
 				1B65752028DE519CB345DAB8 /* ForgeSocketServer.swift in Sources */,
 				DEAC350B0F837DF5137CCCDF /* ForgeStore.swift in Sources */,
 				0567477E6F65BE0C1AE6043F /* FuzzyMatch.swift in Sources */,

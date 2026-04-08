@@ -102,6 +102,7 @@ struct SessionStateFile: Codable {
     var collapsedProjects: Set<UUID> = []
     var workspaceSummariesEnabled: Bool = true
     var summarizerCommand: String = "claude -p --model haiku"
+    var configAgentCommand: String = "claude --model opus $PROMPT"
     var restoreScrollback: Bool = false
     var summaries: [String: String] = [:]
     var scopes: [String: ScopeState] = [:]
@@ -118,6 +119,7 @@ struct SessionStateFile: Codable {
         collapsedProjects = try c.decodeIfPresent(Set<UUID>.self, forKey: .collapsedProjects) ?? []
         workspaceSummariesEnabled = try c.decodeIfPresent(Bool.self, forKey: .workspaceSummariesEnabled) ?? true
         summarizerCommand = try c.decodeIfPresent(String.self, forKey: .summarizerCommand) ?? "claude -p --model haiku"
+        configAgentCommand = try c.decodeIfPresent(String.self, forKey: .configAgentCommand) ?? "claude --model opus $PROMPT"
         restoreScrollback = try c.decodeIfPresent(Bool.self, forKey: .restoreScrollback) ?? false
         summaries = try c.decodeIfPresent([String: String].self, forKey: .summaries) ?? [:]
         scopes = try c.decodeIfPresent([String: ScopeState].self, forKey: .scopes) ?? [:]

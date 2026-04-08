@@ -408,7 +408,9 @@ private struct AppearanceSettingsContent: View {
 private struct WorkspaceSettingsContent: View {
     @State private var workspaceSummariesEnabled: Bool = true
     @State private var summarizerCommand: String = SummaryCommand.defaultCommand
+    @State private var configAgentCommand: String = "claude --model opus $PROMPT"
     @State private var debounceTask: DispatchWorkItem?
+    @State private var configDebounceTask: DispatchWorkItem?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -449,11 +451,39 @@ private struct WorkspaceSettingsContent: View {
                 }
                 .padding(.vertical, 10)
             }
+
+            SettingDivider()
+
+            SettingRow(title: "Config Agent", description: "Command used to generate and audit forge.json files from the workspace context menu.") {
+                EmptyView()
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Command")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
+                TextField("", text: $configAgentCommand)
+                    .textFieldStyle(.roundedBorder)
+                    .font(.system(size: 12, design: .monospaced))
+                    .onChange(of: configAgentCommand) { newValue in
+                        configDebounceTask?.cancel()
+                        let task = DispatchWorkItem {
+                            ForgeStore.shared.updateStateFields { $0.configAgentCommand = newValue }
+                        }
+                        configDebounceTask = task
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: task)
+                    }
+                Text("Use $PROMPT as a placeholder for the prompt. Runs in a visible terminal session.")
+                    .font(.system(size: 10))
+                    .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+            }
+            .padding(.vertical, 10)
         }
         .onAppear {
             let state = ForgeStore.shared.loadStateFields()
             workspaceSummariesEnabled = state.workspaceSummariesEnabled
             summarizerCommand = state.summarizerCommand
+            configAgentCommand = state.configAgentCommand
         }
     }
 }

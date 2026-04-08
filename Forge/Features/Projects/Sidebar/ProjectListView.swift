@@ -685,6 +685,22 @@ private struct WorkspaceRow: View {
                 Text("Rename")
             }
             Divider()
+            if FileManager.default.fileExists(atPath: workspace.path + "/forge.json") {
+                Button {
+                    launchConfigAgent(prompt: ForgeConfigPrompts.auditPrompt, title: "Audit Config")
+                } label: {
+                    Image(systemName: "checklist")
+                    Text("Audit Config")
+                }
+            } else {
+                Button {
+                    launchConfigAgent(prompt: ForgeConfigPrompts.generatePrompt, title: "Generate Config")
+                } label: {
+                    Image(systemName: "wand.and.stars")
+                    Text("Generate Config")
+                }
+            }
+            Divider()
             Button(role: .destructive) { showDeleteConfirmation = true } label: {
                 Image(systemName: "trash")
                 Text("Delete Workspace")
@@ -699,6 +715,19 @@ private struct WorkspaceRow: View {
         } message: {
             Text("This will permanently delete the workspace directory from disk.")
         }
+    }
+
+    private func launchConfigAgent(prompt: String, title: String) {
+        let template = ForgeStore.shared.loadStateFields().configAgentCommand
+        let escaped = prompt.replacingOccurrences(of: "\"", with: "\\\"")
+        let launchCommand = template.replacingOccurrences(of: "$PROMPT", with: "\"\(escaped)\"")
+        TerminalSessionManager.shared.createSession(
+            workingDirectory: workspace.path,
+            title: title,
+            launchCommand: launchCommand,
+            workspaceID: workspace.id,
+            icon: "gearshape"
+        )
     }
 }
 
