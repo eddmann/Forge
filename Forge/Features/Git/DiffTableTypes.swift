@@ -12,6 +12,37 @@ enum DiffRow {
     case splitLine(left: GitDiffLine?, right: GitDiffLine?, leftWordDiffs: [WordDiffSegment]?, rightWordDiffs: [WordDiffSegment]?)
     case inlineComment(comment: AgentReviewComment)
     case draftEditor(anchorLineID: String)
+
+    /// Text content for copy operations. Returns nil for non-text rows.
+    var copyableText: String? {
+        switch self {
+        case let .unifiedLine(line, _):
+            line.text
+        case let .splitLine(left, right, _, _):
+            right?.text ?? left?.text
+        case let .hunkHeader(hunk, _):
+            hunk.header
+        case .inlineComment, .draftEditor:
+            nil
+        }
+    }
+
+    /// Side-aware text extraction for split view copy.
+    func copyableText(side: SplitSelectionSide) -> String? {
+        switch self {
+        case let .unifiedLine(line, _):
+            line.text
+        case let .splitLine(left, right, _, _):
+            switch side {
+            case .left: left?.text
+            case .right: right?.text
+            }
+        case let .hunkHeader(hunk, _):
+            hunk.header
+        case .inlineComment, .draftEditor:
+            nil
+        }
+    }
 }
 
 // MARK: - DiffTableConfig

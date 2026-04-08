@@ -16,7 +16,7 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSScrollView()
-        let tableView = NSTableView()
+        let tableView = DiffTableView()
 
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("content"))
         column.resizingMask = .autoresizingMask
@@ -30,6 +30,9 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
         tableView.selectionHighlightStyle = .none
         tableView.usesAutomaticRowHeights = false
         tableView.allowsEmptySelection = true
+        tableView.contentLeadingInset = 0
+        tableView.isSplitMode = true
+        tableView.splitGutterInset = 58
 
         tableView.dataSource = context.coordinator
         tableView.delegate = context.coordinator
@@ -61,7 +64,7 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
 
     final class Coordinator: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         var parent: SplitDiffTableView
-        weak var tableView: NSTableView?
+        weak var tableView: DiffTableView?
         var rows: [DiffRow] = []
         var hunkIndices: [Int] = []
         var currentConfig: DiffTableConfig?
@@ -87,6 +90,8 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
             )
             rows = result.rows
             hunkIndices = result.hunkIndices
+            tableView?.diffRows = rows
+            tableView?.fontSize = config.fontSize
             tableView?.reloadData()
         }
 
@@ -174,7 +179,7 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
                 return cell
 
             case .unifiedLine:
-                return nil // Not used in split mode
+                return nil
             }
         }
 
@@ -185,15 +190,21 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
             switch rows[row] {
             case .hunkHeader:
                 return DiffCellMetrics.hunkHeaderHeight(fontSize: fontSize)
-            case .splitLine:
+            case .splitLine, .unifiedLine:
                 return DiffCellMetrics.lineRowHeight(fontSize: fontSize)
             case .inlineComment:
                 return 80
             case .draftEditor:
                 return 180
-            case .unifiedLine:
-                return DiffCellMetrics.lineRowHeight(fontSize: fontSize)
             }
+        }
+
+        func tableView(_ tv: NSTableView, rowViewForRow row: Int) -> NSTableRowView? {
+            let rowView = DiffTableRowView()
+            if let diffTV = tv as? DiffTableView {
+                rowView.highlightRect = diffTV.highlightXRange(forRow: row)
+            }
+            return rowView
         }
     }
 }
