@@ -70,6 +70,8 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
         var currentConfig: DiffTableConfig?
         var currentViewModel: Host?
         private var lastScrolledHunkIndex: Int?
+        private var lastRowIdentities: [String] = []
+        private var lastFontSize: CGFloat = 0
 
         init(parent: SplitDiffTableView) {
             self.parent = parent
@@ -79,10 +81,9 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
             currentConfig = config
             currentViewModel = viewModel
 
-            let multipleHunks = diff.hunks.count > 1
             let result = DiffRowBuilder.buildSplitRows(
                 hunks: diff.hunks,
-                multipleHunks: multipleHunks || diff.hunks.count == 1,
+                multipleHunks: diff.hunks.count > 1,
                 repoPath: config.repoPath,
                 filePath: config.filePath,
                 reviewStore: reviewStore,
@@ -92,7 +93,13 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
             hunkIndices = result.hunkIndices
             tableView?.diffRows = rows
             tableView?.fontSize = config.fontSize
-            tableView?.reloadData()
+
+            let newIdentities = rows.map(\.identity)
+            if newIdentities != lastRowIdentities || config.fontSize != lastFontSize {
+                lastRowIdentities = newIdentities
+                lastFontSize = config.fontSize
+                tableView?.reloadData()
+            }
         }
 
         func scrollToHunk(index: Int) {

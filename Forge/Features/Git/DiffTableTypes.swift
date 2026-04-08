@@ -13,6 +13,17 @@ enum DiffRow {
     case inlineComment(comment: AgentReviewComment)
     case draftEditor(anchorLineID: String)
 
+    /// Lightweight structural identity for change detection (avoids unnecessary reloadData).
+    var identity: String {
+        switch self {
+        case let .hunkHeader(_, index): "h\(index)"
+        case let .unifiedLine(line, _): "u\(line.id)"
+        case let .splitLine(left, right, _, _): "s\(left?.id ?? "")\(right?.id ?? "")"
+        case let .inlineComment(comment): "c\(comment.id)"
+        case let .draftEditor(id): "d\(id)"
+        }
+    }
+
     /// Text content for copy operations. Returns nil for non-text rows.
     var copyableText: String? {
         switch self {
@@ -77,7 +88,7 @@ enum DiffRowBuilder {
         var hunkIndices: [Int] = []
 
         for (hunkIdx, hunk) in hunks.enumerated() {
-            if multipleHunks || hunks.count == 1 {
+            if multipleHunks {
                 hunkIndices.append(rows.count)
                 rows.append(.hunkHeader(hunk: hunk, index: hunkIdx))
             }
@@ -120,7 +131,7 @@ enum DiffRowBuilder {
         var hunkIndices: [Int] = []
 
         for (hunkIdx, hunk) in hunks.enumerated() {
-            if multipleHunks || hunks.count == 1 {
+            if multipleHunks {
                 hunkIndices.append(rows.count)
                 rows.append(.hunkHeader(hunk: hunk, index: hunkIdx))
             }
