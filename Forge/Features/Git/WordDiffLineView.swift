@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct WordDiffLineView: View {
@@ -21,5 +22,36 @@ struct WordDiffLineView: View {
         case .added: Color.green.opacity(0.35)
         case .removed: Color.red.opacity(0.35)
         }
+    }
+
+    /// Builds an NSAttributedString with per-segment background colors for AppKit cell rendering.
+    static func attributedString(segments: [WordDiffSegment], fontSize: CGFloat) -> NSAttributedString {
+        let result = NSMutableAttributedString()
+        let font = NSFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
+
+        for segment in segments {
+            let attrs: [NSAttributedString.Key: Any] = switch segment.kind {
+            case .equal:
+                [
+                    .font: font,
+                    .foregroundColor: NSColor.labelColor
+                ]
+            case .added:
+                [
+                    .font: font,
+                    .foregroundColor: NSColor.labelColor,
+                    .backgroundColor: NSColor.systemGreen.withAlphaComponent(0.35)
+                ]
+            case .removed:
+                [
+                    .font: font,
+                    .foregroundColor: NSColor.labelColor,
+                    .backgroundColor: NSColor.systemRed.withAlphaComponent(0.35)
+                ]
+            }
+            result.append(NSAttributedString(string: segment.text, attributes: attrs))
+        }
+
+        return result
     }
 }

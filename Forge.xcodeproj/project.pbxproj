@@ -69,6 +69,7 @@
 		6E66D7FFCF8DFBB0390ECD49 /* FileStatusList.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC582D54CE2623E5734E1EEE /* FileStatusList.swift */; };
 		70C18486C2C2B8BCCF6EF853 /* CommandPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18E2BA9B896F72867C2704FC /* CommandPalette.swift */; };
 		7135B8F57163B17958BAAA26 /* ChangesTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FF87CF5EC77FF694158BAC /* ChangesTabView.swift */; };
+		725978DBB63F0C195F7FEFE3 /* UnifiedDiffTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAF4160F9DB818FD7AEC50FE /* UnifiedDiffTableView.swift */; };
 		73E1BF7F4B71A2601319ED03 /* ModalToastPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8836627A63A5FC5785B35DB2 /* ModalToastPanel.swift */; };
 		766D9CF7612E3BE9CEC14A9E /* WorkspaceDiffViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */; };
 		77AE960A4776D5A0A52AD199 /* CommandPaletteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D2513A6B4EB6E2718B01CE /* CommandPaletteItem.swift */; };
@@ -76,6 +77,7 @@
 		824C90E0DE7F062B5BE0702B /* ToastPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA171C5EE0F3CF9830676149 /* ToastPanel.swift */; };
 		8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */; };
 		83C38DE811797FDEC108A310 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB6C83CAC1F911908568BD7 /* StatusBarController.swift */; };
+		86A50B11CBBEA542AE8CE2D4 /* DiffTableTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0826627C87E49427EB6B8F26 /* DiffTableTypes.swift */; };
 		87DE037B3A7130EABAEEA4FC /* GitUnifiedDiffParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */; };
 		8932C47CE7A9158D452B4E4E /* WordDiffLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */; };
 		8B4C5CAD6ACD54E118395D79 /* SplitNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */; };
@@ -90,6 +92,7 @@
 		A5BD3BA67E0B7131054B2AD4 /* ToastManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277F7B623A62618F58935CEB /* ToastManager.swift */; };
 		A5E0E33106E041E304409673 /* AgentSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A014017376795403DB6AD56A /* AgentSetup.swift */; };
 		A6AC1E458EE45F2D0FDC703C /* SplitAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 243460106C0C757CFFBF6D4E /* SplitAnimator.swift */; };
+		AADB1DEF61EF8F53EEB878BB /* SplitDiffTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA0E1CD1E3F2DEB33CAB9D /* SplitDiffTableView.swift */; };
 		AB404BEE7FC486153DD784A2 /* WorkspaceWelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A33F98B22ADD7CD5183A9E /* WorkspaceWelcomeScreen.swift */; };
 		AD12FBB49FFE0B110FA16F4D /* SplitNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBFCA5701CEE5E34D6C159E /* SplitNode.swift */; };
 		B1B639AADCB9470C970103B8 /* ForgeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C422675759830D50E1003A2B /* ForgeConfig.swift */; };
@@ -109,10 +112,12 @@
 		C8EE75452F5337ABC30CAAFE /* BonsplitDebugCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */; };
 		CADD824CA25F9BC7DC4C07CF /* DemoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A3380FD3C5B17393F3CCCB /* DemoData.swift */; };
 		CC902EED542F094CEFCC2F78 /* libghostty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F9518B116ACF472BAE659D2 /* libghostty.a */; };
+		D1DBD1B8EB86A36CF4401295 /* DiffLineCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF77C8CF7F58E9C58A7E0C74 /* DiffLineCells.swift */; };
 		D22DD4E346A00578FC2AB34A /* AgentActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E462273D87AE64CBBE7EB1F3 /* AgentActivity.swift */; };
 		D3AC14E880180F1AEA725ABD /* TabDragPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4F0F389914743FA021ED2E /* TabDragPreview.swift */; };
 		D3B75B31144F373A322543BD /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F8D881C55D57EE673CB404 /* main.swift */; };
 		D3BD134D32903952D880E53C /* TerminalAppearanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53E8575792CD729D327E6C2A /* TerminalAppearanceView.swift */; };
+		D7D7672CD9D4E1F85F7D0167 /* DiffInlineViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE4BBA287E68D96655A160D /* DiffInlineViews.swift */; };
 		D80AF7ED304AE0FCA3C5E84F /* SummaryScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */; };
 		D9329A95BC037EA8F5E7C659 /* GhosttyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3624BDB8FD61A57C38FA30C /* GhosttyApp.swift */; };
 		D9645675D4C6E211F608B386 /* SendToAgentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */; };
@@ -160,12 +165,14 @@
 		00A33F98B22ADD7CD5183A9E /* WorkspaceWelcomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceWelcomeScreen.swift; sourceTree = "<group>"; };
 		027D11694354B37A74D44611 /* SummaryLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryLog.swift; sourceTree = "<group>"; };
 		07F919EC60D33B385F139603 /* Forge-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Forge-Bridging-Header.h"; sourceTree = "<group>"; };
+		0826627C87E49427EB6B8F26 /* DiffTableTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTableTypes.swift; sourceTree = "<group>"; };
 		09E805EE38B5FF260D35CE21 /* TerminalObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalObserver.swift; sourceTree = "<group>"; };
 		0B205456E82CD816617F8385 /* CommitCountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitCountStore.swift; sourceTree = "<group>"; };
 		0C342594BAD505C190C0CAB5 /* TabBarColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarColors.swift; sourceTree = "<group>"; };
 		0C67F3ACD4D8E2FD015C9B5E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0DC2B1C4E2E0CE097908C96B /* forge-cli */ = {isa = PBXFileReference; includeInIndex = 0; path = "forge-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DE29E80CC2891CE39E9AA50 /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
+		0DE4BBA287E68D96655A160D /* DiffInlineViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffInlineViews.swift; sourceTree = "<group>"; };
 		0F3839390BDE8DD11221E196 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		10150AB1CC6C4F8AE3423ABD /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
 		165C25925FC171DC2A54087F /* TerminalContainerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalContainerViewController.swift; sourceTree = "<group>"; };
@@ -189,6 +196,7 @@
 		3A4D2BD2E0F08EC30EB04939 /* ProcessesDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessesDrawer.swift; sourceTree = "<group>"; };
 		3C0E18D8DBAC71B87110136F /* SplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
 		411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitDebugCounters.swift; sourceTree = "<group>"; };
+		43EA0E1CD1E3F2DEB33CAB9D /* SplitDiffTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitDiffTableView.swift; sourceTree = "<group>"; };
 		447E8085460F22791A2E2002 /* GitDiffService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitDiffService.swift; sourceTree = "<group>"; };
 		47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSessionManager.swift; sourceTree = "<group>"; };
 		4D2846837C3C3B77437CA2B0 /* ProcessManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessManager.swift; sourceTree = "<group>"; };
@@ -257,6 +265,7 @@
 		B9E4187EE35799D24A79EF0B /* ghostty */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ghostty; path = Forge/Resources/ghostty; sourceTree = SOURCE_ROOT; };
 		BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryScheduler.swift; sourceTree = "<group>"; };
 		BC582D54CE2623E5734E1EEE /* FileStatusList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusList.swift; sourceTree = "<group>"; };
+		BF77C8CF7F58E9C58A7E0C74 /* DiffLineCells.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffLineCells.swift; sourceTree = "<group>"; };
 		C27615076A6D6DC12ADBB86E /* DiffViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffViewModel.swift; sourceTree = "<group>"; };
 		C2B68C999B71210CCBAAC317 /* SplitDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitDiffView.swift; sourceTree = "<group>"; };
 		C422675759830D50E1003A2B /* ForgeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeConfig.swift; sourceTree = "<group>"; };
@@ -286,6 +295,7 @@
 		E8C30B829376599F48CCB5C7 /* ReviewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewStore.swift; sourceTree = "<group>"; };
 		E9F9A1C5B81DD1DFC08BE0BD /* GhosttyTerminalViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyTerminalViewRepresentable.swift; sourceTree = "<group>"; };
 		EAD57FE43439B2C292022C07 /* Forge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Forge.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EAF4160F9DB818FD7AEC50FE /* UnifiedDiffTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedDiffTableView.swift; sourceTree = "<group>"; };
 		EC624B625847A5A30E6E3068 /* ActivityEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityEvent.swift; sourceTree = "<group>"; };
 		EDE6E9898D02521ED5E5A26C /* AgentCapabilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCapabilities.swift; sourceTree = "<group>"; };
 		F03D48F43AB138181D6CD761 /* TerminalSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSession.swift; sourceTree = "<group>"; };
@@ -638,13 +648,18 @@
 			children = (
 				77FF87CF5EC77FF694158BAC /* ChangesTabView.swift */,
 				868FBDD017F6B9CA822F6A7D /* ChangesViewModel.swift */,
+				0DE4BBA287E68D96655A160D /* DiffInlineViews.swift */,
+				BF77C8CF7F58E9C58A7E0C74 /* DiffLineCells.swift */,
+				0826627C87E49427EB6B8F26 /* DiffTableTypes.swift */,
 				39F12DDCB35F9733A5846460 /* DiffTabView.swift */,
 				C27615076A6D6DC12ADBB86E /* DiffViewModel.swift */,
 				447E8085460F22791A2E2002 /* GitDiffService.swift */,
 				B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */,
 				95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */,
+				43EA0E1CD1E3F2DEB33CAB9D /* SplitDiffTableView.swift */,
 				C2B68C999B71210CCBAAC317 /* SplitDiffView.swift */,
 				75F643170BE9658FD3E9B594 /* StatusViewModel.swift */,
+				EAF4160F9DB818FD7AEC50FE /* UnifiedDiffTableView.swift */,
 				8ED7ECF021E249100D45C7B2 /* UnifiedDiffView.swift */,
 				D8B6352ABACD0556576E6674 /* WordDiff.swift */,
 				59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */,
@@ -969,7 +984,10 @@
 				CADD824CA25F9BC7DC4C07CF /* DemoData.swift in Sources */,
 				1A651B037477F4DBA2ED094E /* DemoMode.swift in Sources */,
 				467529F0AC7B7CE258F5BBE4 /* DemoStateFactory.swift in Sources */,
+				D7D7672CD9D4E1F85F7D0167 /* DiffInlineViews.swift in Sources */,
+				D1DBD1B8EB86A36CF4401295 /* DiffLineCells.swift in Sources */,
 				B7070FB12D059250F93792F8 /* DiffTabView.swift in Sources */,
+				86A50B11CBBEA542AE8CE2D4 /* DiffTableTypes.swift in Sources */,
 				5050EFE698D87918D89621C2 /* DiffViewModel.swift in Sources */,
 				186B0FFC225E49680C7A1400 /* ExternalEditor.swift in Sources */,
 				958919E7AFE933A2ECE729BE /* FileStatus.swift in Sources */,
@@ -1016,6 +1034,7 @@
 				5250AFE57FA4E85444DAF169 /* SidebarViewController.swift in Sources */,
 				A6AC1E458EE45F2D0FDC703C /* SplitAnimator.swift in Sources */,
 				6301D6142F066E246ADA5117 /* SplitContainerView.swift in Sources */,
+				AADB1DEF61EF8F53EEB878BB /* SplitDiffTableView.swift in Sources */,
 				B4074675E659D561A121BCC9 /* SplitDiffView.swift in Sources */,
 				AD12FBB49FFE0B110FA16F4D /* SplitNode.swift in Sources */,
 				8B4C5CAD6ACD54E118395D79 /* SplitNodeView.swift in Sources */,
@@ -1051,6 +1070,7 @@
 				A5BD3BA67E0B7131054B2AD4 /* ToastManager.swift in Sources */,
 				824C90E0DE7F062B5BE0702B /* ToastPanel.swift in Sources */,
 				DF85061B496FA68855985CE6 /* ToastView.swift in Sources */,
+				725978DBB63F0C195F7FEFE3 /* UnifiedDiffTableView.swift in Sources */,
 				4C793C7041A31A190944A901 /* UnifiedDiffView.swift in Sources */,
 				660EC2752004FADA5827C386 /* WelcomeView.swift in Sources */,
 				E4733A69B65CD74E31153FA1 /* WordDiff.swift in Sources */,
