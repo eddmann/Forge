@@ -10,7 +10,10 @@ final class ChangesViewModel: ObservableObject {
     let repoPath: String
     let branchDiffRequest: GitDiffRequest?
 
-    @Published var fileDiffs: [GitFileDiff] = []
+    @Published var fileDiffs: [GitFileDiff] = [] {
+        didSet { recomputeAutoCollapsedLargeFiles() }
+    }
+
     @Published var isLoading = true
     @Published var error: String?
     @Published var viewMode: DiffViewMode = .init(rawValue: ForgeStore.shared.loadStateFields().diffViewMode) ?? .unified {
@@ -21,6 +24,8 @@ final class ChangesViewModel: ObservableObject {
 
     @Published var scrollToFilePath: String?
     @Published var collapsedFiles: Set<String> = []
+    @Published var autoCollapsedLargeFiles: Set<String> = []
+    private let largeDiffLineThreshold = 500
     @Published var contextExpanded = false
 
     @Published var draftComment: DraftCommentState?
@@ -260,6 +265,15 @@ final class ChangesViewModel: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func recomputeAutoCollapsedLargeFiles() {
+        var large: Set<String> = []
+        for file in fileDiffs where (file.additions + file.deletions) > largeDiffLineThreshold {
+            let path = file.newPath ?? file.oldPath ?? ""
+            if !path.isEmpty { large.insert(path) }
+        }
+        autoCollapsedLargeFiles = large
+    }
 
     private func makeUntrackedDiff(for path: String) -> GitFileDiff {
         let absolutePath = URL(fileURLWithPath: repoPath).appendingPathComponent(path).path

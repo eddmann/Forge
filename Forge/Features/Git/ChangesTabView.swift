@@ -51,14 +51,19 @@ struct ChangesTabView: View {
                         LazyVStack(spacing: 0) {
                             ForEach(viewModel.fileDiffs) { fileDiff in
                                 let filePath = fileDiff.newPath ?? fileDiff.oldPath ?? ""
-                                let isCollapsed = viewModel.collapsedFiles.contains(filePath)
+                                let isUserCollapsed = viewModel.collapsedFiles.contains(filePath)
+                                let isAutoCollapsed = viewModel.autoCollapsedLargeFiles.contains(filePath)
 
                                 // File header (clickable to collapse)
-                                fileHeader(fileDiff: fileDiff, isCollapsed: isCollapsed)
-                                    .id("file-\(filePath)")
+                                fileHeader(
+                                    fileDiff: fileDiff,
+                                    isUserCollapsed: isUserCollapsed,
+                                    isAutoCollapsed: isAutoCollapsed
+                                )
+                                .id("file-\(filePath)")
 
-                                // File diff content (collapsible)
-                                if !isCollapsed {
+                                // File diff content (hidden when user-collapsed or auto-collapsed as large)
+                                if !isUserCollapsed, !isAutoCollapsed {
                                     switch viewModel.viewMode {
                                     case .unified:
                                         ChangesUnifiedFileView(
@@ -80,15 +85,11 @@ struct ChangesTabView: View {
                     }
                     .onReceive(NotificationCenter.default.publisher(for: .scrollToFileInChanges)) { notification in
                         guard let filePath = notification.userInfo?["filePath"] as? String else { return }
-                        withAnimation {
-                            proxy.scrollTo("file-\(filePath)", anchor: .top)
-                        }
+                        proxy.scrollTo("file-\(filePath)", anchor: .top)
                     }
                     .onReceive(NotificationCenter.default.publisher(for: .scrollToFileInWorkspaceDiff)) { notification in
                         guard let filePath = notification.userInfo?["filePath"] as? String else { return }
-                        withAnimation {
-                            proxy.scrollTo("file-\(filePath)", anchor: .top)
-                        }
+                        proxy.scrollTo("file-\(filePath)", anchor: .top)
                     }
                 }
             }
@@ -175,13 +176,14 @@ struct ChangesTabView: View {
     // MARK: - File Header
 
     @ViewBuilder
-    private func fileHeader(fileDiff: GitFileDiff, isCollapsed: Bool) -> some View {
+    private func fileHeader(fileDiff: GitFileDiff, isUserCollapsed: Bool, isAutoCollapsed: Bool) -> some View {
         let filePath = fileDiff.newPath ?? fileDiff.oldPath ?? ""
+        let isCollapsed = isUserCollapsed || isAutoCollapsed
         HStack(spacing: 8) {
-            Image(systemName: "chevron.right")
+            Image(systemName: isAutoCollapsed ? "eye" : "chevron.right")
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(Color(nsColor: .tertiaryLabelColor))
-                .rotationEffect(.degrees(isCollapsed ? 0 : 90))
+                .rotationEffect(.degrees(isAutoCollapsed ? 0 : (isCollapsed ? 0 : 90)))
 
             Image(systemName: changeIcon(fileDiff.change))
                 .font(.system(size: 11))
@@ -200,6 +202,30 @@ struct ChangesTabView: View {
                     .lineLimit(1)
             }
 
+            if isAutoCollapsed {
+                Text("Large diff — \(fileDiff.additions + fileDiff.deletions) lines — click to show")
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+                    .lineLimit(1)
+            }
+
+            let commentCount = reviewStore.comments(in: viewModel.repoPath, filePath: filePath).count
+            if commentCount > 0 {
+                HStack(spacing: 3) {
+                    Image(systemName: "bubble.left.fill")
+                        .font(.system(size: 9))
+                    Text("\(commentCount)")
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                }
+                .foregroundColor(.accentColor)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(
+                    Capsule().fill(Color.accentColor.opacity(0.15))
+                )
+                .help("\(commentCount) review comment\(commentCount == 1 ? "" : "s")")
+            }
+
             Spacer()
 
             Text("+\(fileDiff.additions)")
@@ -215,7 +241,9 @@ struct ChangesTabView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.15)) {
-                if viewModel.collapsedFiles.contains(filePath) {
+                if viewModel.autoCollapsedLargeFiles.contains(filePath) {
+                    viewModel.autoCollapsedLargeFiles.remove(filePath)
+                } else if viewModel.collapsedFiles.contains(filePath) {
                     viewModel.collapsedFiles.remove(filePath)
                 } else {
                     viewModel.collapsedFiles.insert(filePath)

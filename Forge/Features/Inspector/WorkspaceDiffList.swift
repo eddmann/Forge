@@ -206,9 +206,16 @@ private struct WorkspaceFileRow: View {
     let fileDiff: GitFileDiff
     let onSelect: () -> Void
 
+    @ObservedObject private var reviewStore = ReviewStore.shared
     @State private var isHovered = false
 
     var body: some View {
+        let filePath = fileDiff.newPath ?? fileDiff.oldPath ?? ""
+        let hasComments: Bool = {
+            guard let repoPath = ProjectStore.shared.effectiveRootPath else { return false }
+            return !reviewStore.comments(in: repoPath, filePath: filePath).isEmpty
+        }()
+
         HStack(spacing: 6) {
             Image(systemName: changeSymbol)
                 .font(.system(size: 12, weight: .medium))
@@ -231,6 +238,13 @@ private struct WorkspaceFileRow: View {
             }
 
             Spacer()
+
+            if hasComments {
+                Circle()
+                    .fill(Color.accentColor)
+                    .frame(width: 6, height: 6)
+                    .help("Has review comments")
+            }
 
             HStack(spacing: 4) {
                 if fileDiff.additions > 0 {
