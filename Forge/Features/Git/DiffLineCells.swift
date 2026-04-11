@@ -42,12 +42,23 @@ final class DiffTableView: NSTableView {
     /// Gutter inset within each split half (comment btn + line number + padding).
     var splitGutterInset: CGFloat = 58
 
-    /// Shared horizontal scroll offset applied to code content only
-    /// (not gutter, hunk headers, or review rows).
+    /// Horizontal scroll offset for unified mode.
     var horizontalOffset: CGFloat = 0
 
-    /// Maximum code-content width across all rows; bounds horizontal scrolling.
+    /// Horizontal scroll offset for the split-mode left half.
+    var splitLeftOffset: CGFloat = 0
+
+    /// Horizontal scroll offset for the split-mode right half.
+    var splitRightOffset: CGFloat = 0
+
+    /// Maximum code-content width for unified mode.
     var maxCodeWidth: CGFloat = 0
+
+    /// Maximum code-content width for the split-mode left half.
+    var splitLeftMaxWidth: CGFloat = 0
+
+    /// Maximum code-content width for the split-mode right half.
+    var splitRightMaxWidth: CGFloat = 0
 
     /// Right padding inside a code cell — matches cell layout.
     let codeRightPadding: CGFloat = 4
@@ -105,35 +116,50 @@ final class DiffTableView: NSTableView {
         return max(0, bounds.width - contentLeadingInset - textPadding - codeRightPadding)
     }
 
-    var maxHorizontalOffset: CGFloat {
-        max(0, maxCodeWidth - visibleCodeWidth)
-    }
+    var maxUnifiedOffset: CGFloat { max(0, maxCodeWidth - visibleCodeWidth) }
+    var maxSplitLeftOffset: CGFloat { max(0, splitLeftMaxWidth - visibleCodeWidth) }
+    var maxSplitRightOffset: CGFloat { max(0, splitRightMaxWidth - visibleCodeWidth) }
 
-    /// Recomputes `maxCodeWidth` by scanning rows for the longest line of code.
+    /// Recomputes max code widths by scanning rows for the longest line.
     /// Call after `diffRows` or `fontSize` changes.
     func recomputeMaxCodeWidth() {
         let font = NSFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
         let cw = NSAttributedString(string: "M", attributes: [.font: font]).size().width
-        var maxLen = 0
-        for row in diffRows {
-            switch row {
-            case let .unifiedLine(line, _):
-                maxLen = max(maxLen, line.text.count)
-            case let .splitLine(left, right, _, _):
-                if let left { maxLen = max(maxLen, left.text.count) }
-                if let right { maxLen = max(maxLen, right.text.count) }
-            default:
-                break
+        if isSplitMode {
+            var maxLeft = 0
+            var maxRight = 0
+            for row in diffRows {
+                if case let .splitLine(left, right, _, _) = row {
+                    if let left { maxLeft = max(maxLeft, left.text.count) }
+                    if let right { maxRight = max(maxRight, right.text.count) }
+                }
             }
+            splitLeftMaxWidth = CGFloat(maxLeft) * cw
+            splitRightMaxWidth = CGFloat(maxRight) * cw
+        } else {
+            var maxLen = 0
+            for row in diffRows {
+                if case let .unifiedLine(line, _) = row {
+                    maxLen = max(maxLen, line.text.count)
+                }
+            }
+            maxCodeWidth = CGFloat(maxLen) * cw
         }
-        maxCodeWidth = CGFloat(maxLen) * cw
         clampOffsetAndApply()
     }
 
     private func clampOffsetAndApply() {
-        let clamped = min(max(0, horizontalOffset), maxHorizontalOffset)
-        if abs(clamped - horizontalOffset) > 0.01 {
-            horizontalOffset = clamped
+        var changed = false
+        if isSplitMode {
+            let l = min(max(0, splitLeftOffset), maxSplitLeftOffset)
+            if abs(l - splitLeftOffset) > 0.01 { splitLeftOffset = l; changed = true }
+            let r = min(max(0, splitRightOffset), maxSplitRightOffset)
+            if abs(r - splitRightOffset) > 0.01 { splitRightOffset = r; changed = true }
+        } else {
+            let u = min(max(0, horizontalOffset), maxUnifiedOffset)
+            if abs(u - horizontalOffset) > 0.01 { horizontalOffset = u; changed = true }
+        }
+        if changed {
             applyHorizontalOffsetToVisibleCells()
             refreshAllVisibleHighlights()
         }
@@ -146,19 +172,39 @@ final class DiffTableView: NSTableView {
             if let unified = cell as? UnifiedLineCellView {
                 unified.applyHorizontalOffset(horizontalOffset)
             } else if let split = cell as? SplitLineCellView {
-                split.applyHorizontalOffset(horizontalOffset)
+                split.applyHorizontalOffsets(left: splitLeftOffset, right: splitRightOffset)
             }
         }
     }
 
     override func scrollWheel(with event: NSEvent) {
         let dx = event.scrollingDeltaX
-        if abs(dx) > 0.01, maxHorizontalOffset > 0 {
-            let newOffset = min(max(0, horizontalOffset - dx), maxHorizontalOffset)
-            if abs(newOffset - horizontalOffset) > 0.01 {
-                horizontalOffset = newOffset
-                applyHorizontalOffsetToVisibleCells()
-                refreshAllVisibleHighlights()
+        if abs(dx) > 0.01 {
+            if isSplitMode {
+                let point = convert(event.locationInWindow, from: nil)
+                let side = splitSide(atX: point.x)
+                if side == .left, maxSplitLeftOffset > 0 {
+                    let new = min(max(0, splitLeftOffset - dx), maxSplitLeftOffset)
+                    if abs(new - splitLeftOffset) > 0.01 {
+                        splitLeftOffset = new
+                        applyHorizontalOffsetToVisibleCells()
+                        refreshAllVisibleHighlights()
+                    }
+                } else if side == .right, maxSplitRightOffset > 0 {
+                    let new = min(max(0, splitRightOffset - dx), maxSplitRightOffset)
+                    if abs(new - splitRightOffset) > 0.01 {
+                        splitRightOffset = new
+                        applyHorizontalOffsetToVisibleCells()
+                        refreshAllVisibleHighlights()
+                    }
+                }
+            } else if maxUnifiedOffset > 0 {
+                let new = min(max(0, horizontalOffset - dx), maxUnifiedOffset)
+                if abs(new - horizontalOffset) > 0.01 {
+                    horizontalOffset = new
+                    applyHorizontalOffsetToVisibleCells()
+                    refreshAllVisibleHighlights()
+                }
             }
         }
         super.scrollWheel(with: event)
@@ -180,18 +226,21 @@ final class DiffTableView: NSTableView {
 
         let textStartX: CGFloat
         let lineText: String?
+        let offset: CGFloat
 
         if isSplitMode {
             let side = activeSide ?? splitSide(atX: point.x)
             lineText = diffRows[r].copyableText(side: side)
             textStartX = splitTextStartX(side: side)
+            offset = side == .left ? splitLeftOffset : splitRightOffset
         } else {
             lineText = diffRows[r].copyableText
             textStartX = unifiedTextStartX
+            offset = horizontalOffset
         }
 
         guard lineText != nil else { return nil }
-        let charIdx = max(0, Int((point.x - textStartX + horizontalOffset) / charWidth))
+        let charIdx = max(0, Int((point.x - textStartX + offset) / charWidth))
         let lineLen = lineText?.count ?? 0
         return DiffTextPosition(row: r, charIndex: min(charIdx, lineLen))
     }
@@ -322,16 +371,19 @@ final class DiffTableView: NSTableView {
         let lineLen: Int
         let textStartX: CGFloat
         let textEndX: CGFloat
+        let offset: CGFloat
 
         if isSplitMode, let side = activeSide {
             lineLen = diffRows[row].copyableText(side: side)?.count ?? 0
             textStartX = splitTextStartX(side: side)
             let halfWidth = bounds.width / 2
             textEndX = (side == .left ? halfWidth : bounds.width) - codeRightPadding
+            offset = side == .left ? splitLeftOffset : splitRightOffset
         } else {
             lineLen = diffRows[row].copyableText?.count ?? 0
             textStartX = unifiedTextStartX
             textEndX = bounds.width - codeRightPadding
+            offset = horizontalOffset
         }
 
         let isSingleRow = sel.start.row == sel.end.row
@@ -353,8 +405,8 @@ final class DiffTableView: NSTableView {
         }
 
         guard endChar > startChar else { return nil }
-        var sx = textStartX + CGFloat(startChar) * charWidth - horizontalOffset
-        var ex = textStartX + CGFloat(endChar) * charWidth - horizontalOffset
+        var sx = textStartX + CGFloat(startChar) * charWidth - offset
+        var ex = textStartX + CGFloat(endChar) * charWidth - offset
         sx = max(textStartX, sx)
         ex = min(textEndX, ex)
         guard ex > sx else { return nil }
@@ -950,9 +1002,9 @@ final class SplitLineCellView: NSView {
         )
     }
 
-    func applyHorizontalOffset(_ offset: CGFloat) {
-        leftHalf.applyHorizontalOffset(offset)
-        rightHalf.applyHorizontalOffset(offset)
+    func applyHorizontalOffsets(left: CGFloat, right: CGFloat) {
+        leftHalf.applyHorizontalOffset(left)
+        rightHalf.applyHorizontalOffset(right)
     }
 }
 

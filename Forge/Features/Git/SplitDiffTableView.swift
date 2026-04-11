@@ -97,7 +97,8 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
 
             let newIdentities = rows.map(\.identity)
             if newIdentities != lastRowIdentities || config.fontSize != lastFontSize {
-                tableView?.horizontalOffset = 0
+                tableView?.splitLeftOffset = 0
+                tableView?.splitRightOffset = 0
                 lastRowIdentities = newIdentities
                 lastFontSize = config.fontSize
                 tableView?.reloadData()
@@ -164,7 +165,7 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
                     }
                 )
                 if let diffTV = tableView as? DiffTableView {
-                    cell.applyHorizontalOffset(diffTV.horizontalOffset)
+                    cell.applyHorizontalOffsets(left: diffTV.splitLeftOffset, right: diffTV.splitRightOffset)
                 }
                 return cell
 
