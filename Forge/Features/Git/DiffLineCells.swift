@@ -116,9 +116,17 @@ final class DiffTableView: NSTableView {
         return max(0, bounds.width - contentLeadingInset - textPadding - codeRightPadding)
     }
 
-    var maxUnifiedOffset: CGFloat { max(0, maxCodeWidth - visibleCodeWidth) }
-    var maxSplitLeftOffset: CGFloat { max(0, splitLeftMaxWidth - visibleCodeWidth) }
-    var maxSplitRightOffset: CGFloat { max(0, splitRightMaxWidth - visibleCodeWidth) }
+    var maxUnifiedOffset: CGFloat {
+        max(0, maxCodeWidth - visibleCodeWidth)
+    }
+
+    var maxSplitLeftOffset: CGFloat {
+        max(0, splitLeftMaxWidth - visibleCodeWidth)
+    }
+
+    var maxSplitRightOffset: CGFloat {
+        max(0, splitRightMaxWidth - visibleCodeWidth)
+    }
 
     /// Recomputes max code widths by scanning rows for the longest line.
     /// Call after `diffRows` or `fontSize` changes.
