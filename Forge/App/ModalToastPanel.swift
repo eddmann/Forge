@@ -6,101 +6,40 @@ import SwiftUI
 final class ModalToastPanel {
     static let shared = ModalToastPanel()
 
-    private var panel: NSPanel?
-    private var windowObservers: [Any] = []
-    private var themeCancellable: AnyCancellable?
+    private var hostingView: NSView?
+    private weak var attachedWindow: NSWindow?
 
-    private init() {
-        themeCancellable = TerminalAppearanceStore.shared.$config
-            .map(\.theme)
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] theme in
-                self?.panel?.appearance = theme.nsAppearance
-            }
-    }
+    private init() {}
 
     func present() {
-        if let panel, panel.isVisible {
-            reposition(panel)
-            return
-        }
+        if hostingView != nil { return }
 
-        guard let mainWindow = NSApp.mainWindow ?? NSApp.keyWindow else { return }
-        let mainFrame = mainWindow.frame
-
-        let panel = NSPanel(
-            contentRect: mainFrame,
-            styleMask: [.nonactivatingPanel, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        )
-        panel.titlebarAppearsTransparent = true
-        panel.titleVisibility = .hidden
-        panel.isMovableByWindowBackground = false
-        panel.level = .floating
-        panel.hasShadow = false
-        panel.backgroundColor = .clear
-        panel.isOpaque = false
-        panel.hidesOnDeactivate = false
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        panel.becomesKeyOnlyIfNeeded = true
-        panel.ignoresMouseEvents = false
-        panel.appearance = TerminalAppearanceStore.shared.config.theme.nsAppearance
+        guard let window = NSApp.mainWindow ?? NSApp.keyWindow,
+              let contentView = window.contentView else { return }
 
         let rootView = ZStack {
             Color.black.opacity(0.35)
             ModalToastView()
         }
         .ignoresSafeArea()
-        let overlayView = NSHostingController(rootView: rootView)
-        overlayView.view.frame = panel.contentView?.bounds ?? .zero
-        overlayView.view.autoresizingMask = [.width, .height]
-        panel.contentView?.addSubview(overlayView.view)
 
-        reposition(panel)
-        panel.orderFront(nil)
+        let host = NSHostingView(rootView: rootView)
+        host.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(host)
+        NSLayoutConstraint.activate([
+            host.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            host.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            host.topAnchor.constraint(equalTo: contentView.topAnchor),
+            host.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
 
-        self.panel = panel
-        observeMainWindow()
+        hostingView = host
+        attachedWindow = window
     }
 
     func hide() {
-        panel?.orderOut(nil)
-        panel = nil
-        removeWindowObservers()
-    }
-
-    // MARK: - Positioning
-
-    private func reposition(_ panel: NSPanel) {
-        guard let main = NSApp.mainWindow ?? NSApp.keyWindow else { return }
-        panel.setFrame(main.frame, display: true)
-    }
-
-    // MARK: - Window Tracking
-
-    private func observeMainWindow() {
-        removeWindowObservers()
-        guard let main = NSApp.mainWindow ?? NSApp.keyWindow else { return }
-
-        let moveObs = NotificationCenter.default.addObserver(
-            forName: NSWindow.didMoveNotification, object: main, queue: .main
-        ) { [weak self] _ in
-            if let panel = self?.panel { self?.reposition(panel) }
-        }
-        let resizeObs = NotificationCenter.default.addObserver(
-            forName: NSWindow.didResizeNotification, object: main, queue: .main
-        ) { [weak self] _ in
-            if let panel = self?.panel { self?.reposition(panel) }
-        }
-        windowObservers = [moveObs, resizeObs]
-    }
-
-    private func removeWindowObservers() {
-        for obs in windowObservers {
-            NotificationCenter.default.removeObserver(obs)
-        }
-        windowObservers = []
+        hostingView?.removeFromSuperview()
+        hostingView = nil
+        attachedWindow = nil
     }
 }
