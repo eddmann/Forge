@@ -42,6 +42,16 @@ final class DiffTableView: NSTableView {
     /// Gutter inset within each split half (comment btn + line number + padding).
     var splitGutterInset: CGFloat = 58
 
+    /// Shared horizontal scroll offset applied to code content only
+    /// (not gutter, hunk headers, or review rows).
+    var horizontalOffset: CGFloat = 0
+
+    /// Maximum code-content width across all rows; bounds horizontal scrolling.
+    var maxCodeWidth: CGFloat = 0
+
+    /// Right padding inside a code cell — matches cell layout.
+    let codeRightPadding: CGFloat = 4
+
     private var anchor: DiffTextPosition?
     private var current: DiffTextPosition?
     private var activeSide: SplitSelectionSide?
@@ -84,6 +94,81 @@ final class DiffTableView: NSTableView {
         x < bounds.width / 2 ? .left : .right
     }
 
+    // MARK: - Horizontal scroll
+
+    /// Width of the visible code region (excludes gutter and right padding).
+    private var visibleCodeWidth: CGFloat {
+        if isSplitMode {
+            let halfWidth = bounds.width / 2
+            return max(0, halfWidth - splitGutterInset - textPadding - codeRightPadding)
+        }
+        return max(0, bounds.width - contentLeadingInset - textPadding - codeRightPadding)
+    }
+
+    var maxHorizontalOffset: CGFloat {
+        max(0, maxCodeWidth - visibleCodeWidth)
+    }
+
+    /// Recomputes `maxCodeWidth` by scanning rows for the longest line of code.
+    /// Call after `diffRows` or `fontSize` changes.
+    func recomputeMaxCodeWidth() {
+        let font = NSFont.monospacedSystemFont(ofSize: fontSize, weight: .regular)
+        let cw = NSAttributedString(string: "M", attributes: [.font: font]).size().width
+        var maxLen = 0
+        for row in diffRows {
+            switch row {
+            case let .unifiedLine(line, _):
+                maxLen = max(maxLen, line.text.count)
+            case let .splitLine(left, right, _, _):
+                if let left { maxLen = max(maxLen, left.text.count) }
+                if let right { maxLen = max(maxLen, right.text.count) }
+            default:
+                break
+            }
+        }
+        maxCodeWidth = CGFloat(maxLen) * cw
+        clampOffsetAndApply()
+    }
+
+    private func clampOffsetAndApply() {
+        let clamped = min(max(0, horizontalOffset), maxHorizontalOffset)
+        if abs(clamped - horizontalOffset) > 0.01 {
+            horizontalOffset = clamped
+            applyHorizontalOffsetToVisibleCells()
+            refreshAllVisibleHighlights()
+        }
+    }
+
+    func applyHorizontalOffsetToVisibleCells() {
+        let range = rows(in: visibleRect)
+        for r in range.lowerBound ..< range.upperBound {
+            guard let cell = view(atColumn: 0, row: r, makeIfNecessary: false) else { continue }
+            if let unified = cell as? UnifiedLineCellView {
+                unified.applyHorizontalOffset(horizontalOffset)
+            } else if let split = cell as? SplitLineCellView {
+                split.applyHorizontalOffset(horizontalOffset)
+            }
+        }
+    }
+
+    override func scrollWheel(with event: NSEvent) {
+        let dx = event.scrollingDeltaX
+        if abs(dx) > 0.01, maxHorizontalOffset > 0 {
+            let newOffset = min(max(0, horizontalOffset - dx), maxHorizontalOffset)
+            if abs(newOffset - horizontalOffset) > 0.01 {
+                horizontalOffset = newOffset
+                applyHorizontalOffsetToVisibleCells()
+                refreshAllVisibleHighlights()
+            }
+        }
+        super.scrollWheel(with: event)
+    }
+
+    override func layout() {
+        super.layout()
+        clampOffsetAndApply()
+    }
+
     // MARK: - Hit testing
 
     private func textPosition(at windowPoint: NSPoint) -> DiffTextPosition? {
@@ -106,7 +191,7 @@ final class DiffTableView: NSTableView {
         }
 
         guard lineText != nil else { return nil }
-        let charIdx = max(0, Int((point.x - textStartX) / charWidth))
+        let charIdx = max(0, Int((point.x - textStartX + horizontalOffset) / charWidth))
         let lineLen = lineText?.count ?? 0
         return DiffTextPosition(row: r, charIndex: min(charIdx, lineLen))
     }
@@ -236,13 +321,17 @@ final class DiffTableView: NSTableView {
 
         let lineLen: Int
         let textStartX: CGFloat
+        let textEndX: CGFloat
 
         if isSplitMode, let side = activeSide {
             lineLen = diffRows[row].copyableText(side: side)?.count ?? 0
             textStartX = splitTextStartX(side: side)
+            let halfWidth = bounds.width / 2
+            textEndX = (side == .left ? halfWidth : bounds.width) - codeRightPadding
         } else {
             lineLen = diffRows[row].copyableText?.count ?? 0
             textStartX = unifiedTextStartX
+            textEndX = bounds.width - codeRightPadding
         }
 
         let isSingleRow = sel.start.row == sel.end.row
@@ -264,8 +353,11 @@ final class DiffTableView: NSTableView {
         }
 
         guard endChar > startChar else { return nil }
-        let sx = textStartX + CGFloat(startChar) * charWidth
-        let ex = textStartX + CGFloat(endChar) * charWidth
+        var sx = textStartX + CGFloat(startChar) * charWidth - horizontalOffset
+        var ex = textStartX + CGFloat(endChar) * charWidth - horizontalOffset
+        sx = max(textStartX, sx)
+        ex = min(textEndX, ex)
+        guard ex > sx else { return nil }
         return (sx, ex)
     }
 
@@ -358,7 +450,9 @@ final class UnifiedLineCellView: NSView {
     private let oldLineNumberField = NSTextField(labelWithString: "")
     private let newLineNumberField = NSTextField(labelWithString: "")
     private let prefixField = NSTextField(labelWithString: "")
+    private let codeClipView = NSView()
     private let contentField = NSTextField(labelWithString: "")
+    private var contentLeadingConstraint: NSLayoutConstraint!
 
     private var onComment: (() -> Void)?
     private var showCommentButton = false
@@ -386,7 +480,7 @@ final class UnifiedLineCellView: NSView {
         commentButton.target = self
         commentButton.action = #selector(commentTapped)
 
-        for view in [commentButton, oldLineNumberField, newLineNumberField, prefixField, contentField] {
+        for view in [commentButton, oldLineNumberField, newLineNumberField, prefixField, codeClipView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
@@ -401,11 +495,20 @@ final class UnifiedLineCellView: NSView {
         prefixField.alignment = .center
         prefixField.isSelectable = false
 
+        // Clipping container — content scrolls horizontally inside this, but never
+        // bleeds into the gutter or past the cell's trailing edge.
+        codeClipView.wantsLayer = true
+        codeClipView.layer?.masksToBounds = true
+
+        contentField.translatesAutoresizingMaskIntoConstraints = false
         contentField.isSelectable = false
         contentField.allowsExpansionToolTips = true
         contentField.lineBreakMode = .byClipping
         contentField.maximumNumberOfLines = 1
         contentField.cell?.truncatesLastVisibleLine = true
+        codeClipView.addSubview(contentField)
+
+        contentLeadingConstraint = contentField.leadingAnchor.constraint(equalTo: codeClipView.leadingAnchor)
 
         NSLayoutConstraint.activate([
             commentButton.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -425,9 +528,13 @@ final class UnifiedLineCellView: NSView {
             prefixField.centerYAnchor.constraint(equalTo: centerYAnchor),
             prefixField.widthAnchor.constraint(equalToConstant: 16),
 
-            contentField.leadingAnchor.constraint(equalTo: prefixField.trailingAnchor, constant: 4),
-            contentField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
-            contentField.centerYAnchor.constraint(equalTo: centerYAnchor)
+            codeClipView.leadingAnchor.constraint(equalTo: prefixField.trailingAnchor, constant: 4),
+            codeClipView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
+            codeClipView.topAnchor.constraint(equalTo: topAnchor),
+            codeClipView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            contentLeadingConstraint,
+            contentField.centerYAnchor.constraint(equalTo: codeClipView.centerYAnchor)
         ])
 
         // Install a single tracking area with .inVisibleRect — AppKit auto-recalculates
@@ -486,6 +593,10 @@ final class UnifiedLineCellView: NSView {
 
     override func mouseExited(with _: NSEvent) {
         commentButton.isHidden = true
+    }
+
+    func applyHorizontalOffset(_ offset: CGFloat) {
+        contentLeadingConstraint.constant = -offset
     }
 
     @objc private func commentTapped() {
@@ -627,7 +738,9 @@ final class HunkHeaderCellView: NSView {
 final class SplitHalfCellView: NSView {
     private let commentButton = NSButton()
     private let lineNumberField = NSTextField(labelWithString: "")
+    private let codeClipView = NSView()
     private let contentField = NSTextField(labelWithString: "")
+    private var contentLeadingConstraint: NSLayoutConstraint!
 
     private var onComment: (() -> Void)?
     private var showCommentButton = false
@@ -658,15 +771,23 @@ final class SplitHalfCellView: NSView {
         lineNumberField.textColor = .tertiaryLabelColor
         lineNumberField.isSelectable = false
 
+        codeClipView.wantsLayer = true
+        codeClipView.layer?.masksToBounds = true
+
         contentField.isSelectable = false
-        contentField.lineBreakMode = .byTruncatingTail
+        contentField.lineBreakMode = .byClipping
         contentField.maximumNumberOfLines = 1
         contentField.cell?.truncatesLastVisibleLine = true
 
-        for view in [commentButton, lineNumberField, contentField] {
+        for view in [commentButton, lineNumberField, codeClipView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             addSubview(view)
         }
+
+        contentField.translatesAutoresizingMaskIntoConstraints = false
+        codeClipView.addSubview(contentField)
+
+        contentLeadingConstraint = contentField.leadingAnchor.constraint(equalTo: codeClipView.leadingAnchor)
 
         NSLayoutConstraint.activate([
             commentButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
@@ -678,9 +799,13 @@ final class SplitHalfCellView: NSView {
             lineNumberField.centerYAnchor.constraint(equalTo: centerYAnchor),
             lineNumberField.widthAnchor.constraint(equalToConstant: 32),
 
-            contentField.leadingAnchor.constraint(equalTo: lineNumberField.trailingAnchor, constant: 8),
-            contentField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
-            contentField.centerYAnchor.constraint(equalTo: centerYAnchor)
+            codeClipView.leadingAnchor.constraint(equalTo: lineNumberField.trailingAnchor, constant: 8),
+            codeClipView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
+            codeClipView.topAnchor.constraint(equalTo: topAnchor),
+            codeClipView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            contentLeadingConstraint,
+            contentField.centerYAnchor.constraint(equalTo: codeClipView.centerYAnchor)
         ])
 
         let area = NSTrackingArea(
@@ -738,6 +863,10 @@ final class SplitHalfCellView: NSView {
 
     override func mouseExited(with _: NSEvent) {
         commentButton.isHidden = true
+    }
+
+    func applyHorizontalOffset(_ offset: CGFloat) {
+        contentLeadingConstraint.constant = -offset
     }
 
     @objc private func commentTapped() {
@@ -819,6 +948,11 @@ final class SplitLineCellView: NSView {
             wordDiffs: rightWordDiffs, showCommentButton: showCommentButton,
             onComment: { if let right { onComment(right, .new) } }
         )
+    }
+
+    func applyHorizontalOffset(_ offset: CGFloat) {
+        leftHalf.applyHorizontalOffset(offset)
+        rightHalf.applyHorizontalOffset(offset)
     }
 }
 

@@ -92,9 +92,11 @@ struct UnifiedDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
             hunkIndices = result.hunkIndices
             tableView?.diffRows = rows
             tableView?.fontSize = config.fontSize
+            tableView?.recomputeMaxCodeWidth()
 
             let newIdentities = rows.map(\.identity)
             if newIdentities != lastRowIdentities || config.fontSize != lastFontSize {
+                tableView?.horizontalOffset = 0
                 lastRowIdentities = newIdentities
                 lastFontSize = config.fontSize
                 tableView?.reloadData()
@@ -161,6 +163,9 @@ struct UnifiedDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
                         cfg.onComment(line, side)
                     }
                 )
+                if let diffTV = tableView as? DiffTableView {
+                    cell.applyHorizontalOffset(diffTV.horizontalOffset)
+                }
                 return cell
 
             case let .inlineComment(comment):
