@@ -162,9 +162,9 @@ Lifecycle hooks that run during workspace creation and deletion:
 
 Both fields accept a single command string or an array.
 
-**Setup** runs after the clone completes and ports are allocated. All port env vars and `COMPOSE_PROJECT_NAME` are available. Commands run sequentially and stop on first failure.
+**Setup** runs after the clone completes and ports are allocated. All port env vars and `COMPOSE_PROJECT_NAME` are available. Commands run sequentially in the user's default shell, stop on first failure, and time out after 120 seconds.
 
-**Teardown** runs before the workspace directory is deleted. Commands run sequentially but failures don't block deletion. If no teardown is defined and `compose` is configured, Forge automatically runs `docker compose down`.
+**Teardown** runs before the workspace directory is deleted. Commands run sequentially in the user's default shell, time out after 120 seconds, but failures don't block deletion. If no teardown is defined and `compose` is configured, Forge automatically runs `docker compose down`.
 
 ---
 

@@ -202,9 +202,8 @@ struct ProjectListView: View {
                     store.activeWorkspaceID = ws.id
                     ToastManager.shared.dismissModal()
                     if let failure = setupFailed {
-                        let detail = failure.errorOutput ?? failure.failedCommand ?? "Unknown error"
                         ToastManager.shared.show(
-                            "Setup failed: \(detail)", severity: .error, duration: 8.0,
+                            "Setup failed: \(failure.message)", severity: .error, duration: 8.0,
                             action: .init(label: "Open Terminal") {
                                 TerminalSessionManager.shared.createSession(workingDirectory: ws.path)
                             }
@@ -244,8 +243,7 @@ struct ProjectListView: View {
                 store.deleteWorkspace(id: workspace.id)
                 ToastManager.shared.dismissModal()
                 if let failure = teardownFailure {
-                    let detail = failure.errorOutput ?? failure.failedCommand ?? "Unknown error"
-                    ToastManager.shared.show("Teardown failed: \(detail)", severity: .warning, duration: 5.0)
+                    ToastManager.shared.show("Teardown failed: \(failure.message)", severity: .warning, duration: 5.0)
                 } else {
                     ToastManager.shared.show("Deleted workspace '\(name)'")
                 }

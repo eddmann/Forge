@@ -243,9 +243,8 @@ final class CommandPaletteViewModel: ObservableObject {
                         store.activeWorkspaceID = ws.id
                         ToastManager.shared.dismissModal()
                         if let failure = setupFailed {
-                            let detail = failure.errorOutput ?? failure.failedCommand ?? "Unknown error"
                             ToastManager.shared.show(
-                                "Setup failed: \(detail)", severity: .error, duration: 8.0,
+                                "Setup failed: \(failure.message)", severity: .error, duration: 8.0,
                                 action: .init(label: "Open Terminal") {
                                     TerminalSessionManager.shared.createSession(workingDirectory: ws.path)
                                 }

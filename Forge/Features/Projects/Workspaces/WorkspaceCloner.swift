@@ -391,11 +391,40 @@ enum WorkspaceCloner {
         let success: Bool
         let failedCommand: String?
         let errorOutput: String?
+        let exitStatus: Int32?
+        let timedOut: Bool
+
+        var message: String {
+            if timedOut {
+                let prefix = failedCommand.map { "\($0) timed out after \(Int(WorkspaceCloner.lifecycleCommandTimeout))s." }
+                    ?? "Command timed out after \(Int(WorkspaceCloner.lifecycleCommandTimeout))s."
+                guard let errorOutput, !errorOutput.isEmpty else { return prefix }
+                return "\(prefix)\n\(errorOutput)"
+            }
+
+            return switch (failedCommand, errorOutput, exitStatus) {
+            case let (.some(command), .some(output), _):
+                "\(command)\n\(output)"
+            case let (.some(command), nil, .some(status)):
+                "\(command) exited with status \(status)."
+            case let (.some(command), nil, nil):
+                command
+            case let (nil, .some(output), _):
+                output
+            case let (nil, nil, .some(status)):
+                "Command exited with status \(status)."
+            case (nil, nil, nil):
+                "Unknown error"
+            }
+        }
     }
 
+    private static let lifecycleCommandTimeout: TimeInterval = 120
+    private static let lifecycleTerminateGracePeriod: TimeInterval = 5
+
     /// Run workspace lifecycle commands (setup/teardown) synchronously.
-    /// Each command runs via /bin/sh with the same environment a workspace
-    /// shell would have (allocated ports, COMPOSE_PROJECT_NAME, FORGE_SOCKET, etc.).
+    /// Each command runs in the user's default shell with the same environment a
+    /// workspace shell would have (allocated ports, COMPOSE_PROJECT_NAME, FORGE_SOCKET, etc.).
     @discardableResult
     static func runLifecycleCommands(
         _ commands: [String],
@@ -405,10 +434,13 @@ enum WorkspaceCloner {
         projectName: String? = nil,
         stopOnFailure: Bool = false
     ) -> LifecycleResult {
+        var firstFailure: LifecycleResult?
+
         for command in commands {
             let process = Process()
-            process.executableURL = URL(fileURLWithPath: "/bin/sh")
-            process.arguments = ["-c", command]
+            let shell = lifecycleShell(for: command)
+            process.executableURL = URL(fileURLWithPath: shell.executable)
+            process.arguments = shell.arguments
             process.currentDirectoryURL = URL(fileURLWithPath: directory)
 
             // Start from the same base environment that workspace shells use
@@ -423,26 +455,129 @@ enum WorkspaceCloner {
                 environment[key] = value
             }
             process.environment = environment
-            process.standardOutput = Pipe()
+            let outPipe = Pipe()
             let errPipe = Pipe()
+            process.standardOutput = outPipe
             process.standardError = errPipe
 
             do {
                 try process.run()
-                process.waitUntilExit()
-                if process.terminationStatus != 0 {
-                    let stderr = String(data: errPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8)?
-                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                var stdout = Data()
+                var stderr = Data()
+                let outputGroup = DispatchGroup()
+
+                outputGroup.enter()
+                DispatchQueue.global().async {
+                    stdout = outPipe.fileHandleForReading.readDataToEndOfFile()
+                    outputGroup.leave()
+                }
+
+                outputGroup.enter()
+                DispatchQueue.global().async {
+                    stderr = errPipe.fileHandleForReading.readDataToEndOfFile()
+                    outputGroup.leave()
+                }
+
+                let didTimeOut = waitForLifecycleProcess(process)
+                outputGroup.wait()
+                let stdoutText = String(data: stdout, encoding: .utf8) ?? ""
+                let stderrText = String(data: stderr, encoding: .utf8) ?? ""
+
+                if didTimeOut || process.terminationStatus != 0 {
+                    let failure = LifecycleResult(
+                        success: false,
+                        failedCommand: command,
+                        errorOutput: summarizedLifecycleOutput(stdout: stdoutText, stderr: stderrText),
+                        exitStatus: process.terminationStatus,
+                        timedOut: didTimeOut
+                    )
+
                     if stopOnFailure {
-                        return LifecycleResult(success: false, failedCommand: command, errorOutput: stderr)
+                        return failure
+                    }
+                    if firstFailure == nil {
+                        firstFailure = failure
                     }
                 }
             } catch {
+                let failure = LifecycleResult(
+                    success: false,
+                    failedCommand: command,
+                    errorOutput: error.localizedDescription,
+                    exitStatus: nil,
+                    timedOut: false
+                )
                 if stopOnFailure {
-                    return LifecycleResult(success: false, failedCommand: command, errorOutput: error.localizedDescription)
+                    return failure
+                }
+                if firstFailure == nil {
+                    firstFailure = failure
                 }
             }
         }
-        return LifecycleResult(success: true, failedCommand: nil, errorOutput: nil)
+
+        return firstFailure ?? LifecycleResult(
+            success: true,
+            failedCommand: nil,
+            errorOutput: nil,
+            exitStatus: nil,
+            timedOut: false
+        )
+    }
+
+    private static func lifecycleShell(for command: String) -> (executable: String, arguments: [String]) {
+        let shell = ShellEnvironment.defaultShell
+        let shellName = URL(fileURLWithPath: shell).lastPathComponent
+
+        switch shellName {
+        case "zsh", "bash", "fish":
+            return (shell, ["-l", "-i", "-c", command])
+        default:
+            return (shell, ["-c", command])
+        }
+    }
+
+    private static func pipeContents(_ pipe: Pipe) -> String {
+        String(data: pipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
+    }
+
+    private static func summarizedLifecycleOutput(stdout: String, stderr: String) -> String? {
+        let sections = [stdout, stderr]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        guard !sections.isEmpty else { return nil }
+
+        let combined = sections.joined(separator: "\n")
+        let maxCharacters = 2000
+        guard combined.count > maxCharacters else { return combined }
+
+        let tail = combined.suffix(maxCharacters)
+        return "...\(tail)"
+    }
+
+    private static func waitForLifecycleProcess(_ process: Process) -> Bool {
+        let didExit = DispatchSemaphore(value: 0)
+        process.terminationHandler = { _ in
+            didExit.signal()
+        }
+
+        let waitResult = didExit.wait(timeout: .now() + lifecycleCommandTimeout)
+        guard waitResult == .timedOut else {
+            process.waitUntilExit()
+            return false
+        }
+
+        if process.isRunning {
+            process.terminate()
+            let terminateResult = didExit.wait(timeout: .now() + lifecycleTerminateGracePeriod)
+            if terminateResult == .timedOut, process.isRunning {
+                kill(process.processIdentifier, SIGKILL)
+                _ = didExit.wait(timeout: .now() + lifecycleTerminateGracePeriod)
+            }
+        }
+
+        process.waitUntilExit()
+        return true
     }
 }
