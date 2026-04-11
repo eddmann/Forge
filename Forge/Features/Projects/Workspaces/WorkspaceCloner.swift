@@ -76,7 +76,8 @@ enum WorkspaceCloner {
             setupResult = runLifecycleCommands(
                 setup.commands, in: destPath, env: portEnv,
                 workspaceName: name, projectName: projectName,
-                stopOnFailure: true
+                stopOnFailure: true,
+                progress: progress
             )
         }
 
@@ -144,7 +145,8 @@ enum WorkspaceCloner {
                 progress?("Running teardown scripts…")
                 teardownResult = runLifecycleCommands(
                     teardown.commands, in: workspace.path, env: portEnv,
-                    workspaceName: workspace.name, projectName: projectName
+                    workspaceName: workspace.name, projectName: projectName,
+                    progress: progress
                 )
             } else if config.compose != nil {
                 // Auto compose down if no explicit teardown
@@ -155,7 +157,8 @@ enum WorkspaceCloner {
                     teardownResult = runLifecycleCommands(
                         ["docker compose -f \(composeFile) down"],
                         in: workspace.path, env: portEnv,
-                        workspaceName: workspace.name, projectName: projectName
+                        workspaceName: workspace.name, projectName: projectName,
+                        progress: progress
                     )
                 }
             }
@@ -432,7 +435,8 @@ enum WorkspaceCloner {
         env: [String: String] = [:],
         workspaceName: String? = nil,
         projectName: String? = nil,
-        stopOnFailure: Bool = false
+        stopOnFailure: Bool = false,
+        progress: ((String) -> Void)? = nil
     ) -> LifecycleResult {
         var firstFailure: LifecycleResult?
 
@@ -462,26 +466,15 @@ enum WorkspaceCloner {
 
             do {
                 try process.run()
-                var stdout = Data()
-                var stderr = Data()
-                let outputGroup = DispatchGroup()
-
-                outputGroup.enter()
-                DispatchQueue.global().async {
-                    stdout = outPipe.fileHandleForReading.readDataToEndOfFile()
-                    outputGroup.leave()
-                }
-
-                outputGroup.enter()
-                DispatchQueue.global().async {
-                    stderr = errPipe.fileHandleForReading.readDataToEndOfFile()
-                    outputGroup.leave()
-                }
-
-                let didTimeOut = waitForLifecycleProcess(process)
-                outputGroup.wait()
-                let stdoutText = String(data: stdout, encoding: .utf8) ?? ""
-                let stderrText = String(data: stderr, encoding: .utf8) ?? ""
+                let streamed = streamLifecycleOutput(
+                    process: process,
+                    outPipe: outPipe,
+                    errPipe: errPipe,
+                    progress: progress
+                )
+                let didTimeOut = streamed.didTimeOut
+                let stdoutText = streamed.stdout
+                let stderrText = streamed.stderr
 
                 if didTimeOut || process.terminationStatus != 0 {
                     let failure = LifecycleResult(
@@ -554,6 +547,102 @@ enum WorkspaceCloner {
 
         let tail = combined.suffix(maxCharacters)
         return "...\(tail)"
+    }
+
+    private static func streamLifecycleOutput(
+        process: Process,
+        outPipe: Pipe,
+        errPipe: Pipe,
+        progress: ((String) -> Void)?
+    ) -> (stdout: String, stderr: String, didTimeOut: Bool) {
+        let lock = NSLock()
+        var stdoutData = Data()
+        var stderrData = Data()
+        var stdoutPartial = ""
+        var stderrPartial = ""
+        var lastEmit = Date.distantPast
+        let throttleInterval: TimeInterval = 0.2
+        let group = DispatchGroup()
+
+        func handleChunk(_ data: Data, isStderr: Bool) {
+            lock.lock()
+            defer { lock.unlock() }
+            if isStderr {
+                stderrData.append(data)
+            } else {
+                stdoutData.append(data)
+            }
+            guard progress != nil, let chunk = String(data: data, encoding: .utf8) else { return }
+
+            var buffer = (isStderr ? stderrPartial : stdoutPartial) + chunk
+            buffer = buffer.replacingOccurrences(of: "\r\n", with: "\n")
+            let pieces = buffer.components(separatedBy: CharacterSet(charactersIn: "\n\r"))
+            let trailing = pieces.last ?? ""
+            if isStderr { stderrPartial = trailing } else { stdoutPartial = trailing }
+
+            var newest: String?
+            for line in pieces.dropLast() {
+                let cleaned = sanitizeLifecycleLine(line)
+                if !cleaned.isEmpty { newest = cleaned }
+            }
+            guard let newest else { return }
+
+            let now = Date()
+            if now.timeIntervalSince(lastEmit) >= throttleInterval {
+                lastEmit = now
+                let snapshot = newest
+                DispatchQueue.main.async { progress?(snapshot) }
+            }
+        }
+
+        group.enter()
+        outPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if data.isEmpty {
+                handle.readabilityHandler = nil
+                group.leave()
+            } else {
+                handleChunk(data, isStderr: false)
+            }
+        }
+
+        group.enter()
+        errPipe.fileHandleForReading.readabilityHandler = { handle in
+            let data = handle.availableData
+            if data.isEmpty {
+                handle.readabilityHandler = nil
+                group.leave()
+            } else {
+                handleChunk(data, isStderr: true)
+            }
+        }
+
+        let didTimeOut = waitForLifecycleProcess(process)
+        group.wait()
+
+        let stdoutText = String(data: stdoutData, encoding: .utf8) ?? ""
+        let stderrText = String(data: stderrData, encoding: .utf8) ?? ""
+        return (stdoutText, stderrText, didTimeOut)
+    }
+
+    private static func sanitizeLifecycleLine(_ line: String) -> String {
+        // Strip CSI ANSI escape sequences (colors, cursor moves, etc.)
+        let ansiPattern = "\u{001B}\\[[0-?]*[ -/]*[@-~]"
+        var stripped = line
+        if let regex = try? NSRegularExpression(pattern: ansiPattern) {
+            let range = NSRange(stripped.startIndex..., in: stripped)
+            stripped = regex.stringByReplacingMatches(in: stripped, range: range, withTemplate: "")
+        }
+        // Drop remaining control characters apart from tab.
+        stripped = String(stripped.unicodeScalars.filter { scalar in
+            scalar == "\t" || !(scalar.value < 0x20 || scalar.value == 0x7F)
+        })
+        let trimmed = stripped.trimmingCharacters(in: .whitespaces)
+        let maxLength = 120
+        if trimmed.count > maxLength {
+            return String(trimmed.suffix(maxLength))
+        }
+        return trimmed
     }
 
     private static func waitForLifecycleProcess(_ process: Process) -> Bool {
