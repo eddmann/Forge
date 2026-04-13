@@ -499,6 +499,25 @@ enum DiffCellMetrics {
     static func hunkHeaderHeight(fontSize: CGFloat) -> CGFloat {
         ceil(fontSize * 1.2) + 6
     }
+
+    /// Measures inline comment card height using NSAttributedString text measurement.
+    /// Returns the exact height needed, or 80 if the comment fits within the default.
+    static func commentRowHeight(text: String, fontSize: CGFloat, availableWidth: CGFloat) -> CGFloat {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return 80 }
+
+        // Text area width: total - horizontal padding (16*2) - bar (3) - inner leading/trailing (10+10)
+        let textWidth = max(100, availableWidth - 32 - 3 - 20)
+        let font = NSFont.systemFont(ofSize: fontSize)
+        let attrString = NSAttributedString(string: trimmed, attributes: [.font: font])
+        let textRect = attrString.boundingRect(
+            with: NSSize(width: textWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading]
+        )
+        // header row (~18) + VStack spacing (6) + text height + inner vertical padding (8+8) + outer vertical padding (8+8)
+        let total = ceil(18 + 6 + textRect.height + 16 + 16)
+        return max(80, total)
+    }
 }
 
 // MARK: - Unified Line Cell

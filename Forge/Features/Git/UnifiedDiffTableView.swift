@@ -204,8 +204,9 @@ struct UnifiedDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
                 return DiffCellMetrics.hunkHeaderHeight(fontSize: fontSize)
             case .unifiedLine, .splitLine:
                 return DiffCellMetrics.lineRowHeight(fontSize: fontSize)
-            case .inlineComment:
-                return 80
+            case let .inlineComment(comment):
+                let width = tableView?.bounds.width ?? 500
+                return DiffCellMetrics.commentRowHeight(text: comment.text, fontSize: fontSize, availableWidth: width)
             case .draftEditor:
                 return 180
             }
@@ -233,8 +234,8 @@ extension UnifiedDiffTableView {
                 height += DiffCellMetrics.hunkHeaderHeight(fontSize: fontSize)
             case .unifiedLine, .splitLine:
                 height += DiffCellMetrics.lineRowHeight(fontSize: fontSize)
-            case .inlineComment:
-                height += 80
+            case let .inlineComment(comment):
+                height += DiffCellMetrics.commentRowHeight(text: comment.text, fontSize: fontSize, availableWidth: 500)
             case .draftEditor:
                 height += 180
             }

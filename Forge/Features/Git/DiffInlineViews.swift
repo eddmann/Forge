@@ -54,7 +54,7 @@ struct DiffInlineCommentCard<Host: DiffCommentHost>: View {
                     .opacity(0.7)
                 }
 
-                Text(comment.text)
+                Text(comment.text.trimmingCharacters(in: .whitespacesAndNewlines))
                     .font(.system(size: CGFloat(appearance.config.diffFontSize)))
                     .foregroundColor(.primary)
                     .fixedSize(horizontal: false, vertical: true)
