@@ -46,7 +46,7 @@ class CommitCountStore: ObservableObject {
         let wsID = workspace.id
 
         DispatchQueue.global(qos: .utility).async {
-            let result = Git.shared.run(in: path, args: ["rev-list", "--count", "\(parentBranch)..HEAD"])
+            let result = Git.shared.run(in: path, args: ["rev-list", "--count", "origin/\(parentBranch)..HEAD"])
             guard result.success, let count = Int(result.trimmedOutput) else { return }
             DispatchQueue.main.async { [weak self] in
                 self?.countByWorkspace[wsID] = count
