@@ -147,7 +147,12 @@ class TerminalCache {
 
         switch commandName {
         case "claude": return "\(base) --resume \(agentSessionID)"
-        case "codex": return "\(base) --resume \(agentSessionID)"
+        case "codex":
+            // Codex uses `resume <sessionID>` subcommand, not a --resume flag.
+            guard let range = base.range(of: commandName) else { return base }
+            var result = base
+            result.replaceSubrange(range, with: "\(commandName) resume \(agentSessionID)")
+            return result
         default: return base
         }
     }

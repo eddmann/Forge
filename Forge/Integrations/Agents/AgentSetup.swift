@@ -155,26 +155,44 @@ class AgentSetup {
             try? data.write(to: URL(fileURLWithPath: hooksPath))
         }
 
-        // config.toml — enrich terminal title with status word
+        // config.toml — enrich terminal title with status word and enable hooks
         let configPath = codexDir + "/config.toml"
         var configLines: [String] = []
         if let existing = try? String(contentsOfFile: configPath, encoding: .utf8) {
             configLines = existing.components(separatedBy: "\n")
         }
 
+        var configChanged = false
+
         // Check if [tui] section with terminal_title already exists
         let hasTuiTitle = configLines.contains { $0.trimmingCharacters(in: .whitespaces).hasPrefix("terminal_title") }
         if !hasTuiTitle {
-            // Find or create [tui] section
             let hasTuiSection = configLines.contains { $0.trimmingCharacters(in: .whitespaces) == "[tui]" }
             if !hasTuiSection {
                 configLines.append("")
                 configLines.append("[tui]")
             }
-            // Add terminal_title after [tui]
             if let tuiIndex = configLines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces) == "[tui]" }) {
                 configLines.insert("terminal_title = [\"spinner\", \"status\", \"project\"]", at: tuiIndex + 1)
             }
+            configChanged = true
+        }
+
+        // Enable codex_hooks feature flag so hooks.json is honoured
+        let hasHooksFlag = configLines.contains { $0.trimmingCharacters(in: .whitespaces).hasPrefix("codex_hooks") }
+        if !hasHooksFlag {
+            let hasFeaturesSection = configLines.contains { $0.trimmingCharacters(in: .whitespaces) == "[features]" }
+            if !hasFeaturesSection {
+                configLines.append("")
+                configLines.append("[features]")
+            }
+            if let featIdx = configLines.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces) == "[features]" }) {
+                configLines.insert("codex_hooks = true", at: featIdx + 1)
+            }
+            configChanged = true
+        }
+
+        if configChanged {
             try? configLines.joined(separator: "\n").write(toFile: configPath, atomically: true, encoding: .utf8)
         }
     }
