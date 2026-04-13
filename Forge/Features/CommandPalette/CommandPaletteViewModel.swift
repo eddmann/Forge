@@ -233,6 +233,11 @@ final class CommandPaletteViewModel: ObservableObject {
                             DispatchQueue.main.async {
                                 ToastManager.shared.showModal(step)
                             }
+                        },
+                        streamLine: { line in
+                            DispatchQueue.main.async {
+                                ToastManager.shared.appendModalStreamLine(line)
+                            }
                         }
                     )
                     let ws = result.workspace

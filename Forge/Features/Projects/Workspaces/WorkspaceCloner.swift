@@ -18,7 +18,8 @@ enum WorkspaceCloner {
         projectName: String,
         projectPath: String,
         parentBranch: String,
-        progress: ((String) -> Void)? = nil
+        progress: ((String) -> Void)? = nil,
+        streamLine: ((String) -> Void)? = nil
     ) throws -> CreateResult {
         let existingNames = ProjectStore.shared.workspaces.map(\.name)
         let name = WorkspaceNaming.generateUnique(existing: existingNames)
@@ -77,7 +78,8 @@ enum WorkspaceCloner {
                 setup.commands, in: destPath, env: portEnv,
                 workspaceName: name, projectName: projectName,
                 stopOnFailure: true,
-                progress: progress
+                progress: progress,
+                streamLine: streamLine
             )
         }
 
@@ -135,7 +137,7 @@ enum WorkspaceCloner {
     // MARK: - Delete Workspace
 
     @discardableResult
-    static func deleteWorkspace(_ workspace: Workspace, progress: ((String) -> Void)? = nil) -> LifecycleResult? {
+    static func deleteWorkspace(_ workspace: Workspace, progress: ((String) -> Void)? = nil, streamLine: ((String) -> Void)? = nil) -> LifecycleResult? {
         // Run teardown commands from forge.json before removing files
         var teardownResult: LifecycleResult?
         let portEnv = workspace.allocatedPorts.mapValues(String.init)
@@ -146,7 +148,8 @@ enum WorkspaceCloner {
                 teardownResult = runLifecycleCommands(
                     teardown.commands, in: workspace.path, env: portEnv,
                     workspaceName: workspace.name, projectName: projectName,
-                    progress: progress
+                    progress: progress,
+                    streamLine: streamLine
                 )
             } else if config.compose != nil {
                 // Auto compose down if no explicit teardown
@@ -158,7 +161,8 @@ enum WorkspaceCloner {
                         ["docker compose -f \(composeFile) down"],
                         in: workspace.path, env: portEnv,
                         workspaceName: workspace.name, projectName: projectName,
-                        progress: progress
+                        progress: progress,
+                        streamLine: streamLine
                     )
                 }
             }
@@ -436,7 +440,8 @@ enum WorkspaceCloner {
         workspaceName: String? = nil,
         projectName: String? = nil,
         stopOnFailure: Bool = false,
-        progress: ((String) -> Void)? = nil
+        progress: ((String) -> Void)? = nil,
+        streamLine: ((String) -> Void)? = nil
     ) -> LifecycleResult {
         var firstFailure: LifecycleResult?
 
@@ -470,7 +475,7 @@ enum WorkspaceCloner {
                     process: process,
                     outPipe: outPipe,
                     errPipe: errPipe,
-                    progress: progress
+                    streamLine: streamLine ?? progress
                 )
                 let didTimeOut = streamed.didTimeOut
                 let stdoutText = streamed.stdout
@@ -553,7 +558,7 @@ enum WorkspaceCloner {
         process: Process,
         outPipe: Pipe,
         errPipe: Pipe,
-        progress: ((String) -> Void)?
+        streamLine: ((String) -> Void)?
     ) -> (stdout: String, stderr: String, didTimeOut: Bool) {
         let lock = NSLock()
         var stdoutData = Data()
@@ -572,7 +577,7 @@ enum WorkspaceCloner {
             } else {
                 stdoutData.append(data)
             }
-            guard progress != nil, let chunk = String(data: data, encoding: .utf8) else { return }
+            guard streamLine != nil, let chunk = String(data: data, encoding: .utf8) else { return }
 
             var buffer = (isStderr ? stderrPartial : stdoutPartial) + chunk
             buffer = buffer.replacingOccurrences(of: "\r\n", with: "\n")
@@ -591,7 +596,7 @@ enum WorkspaceCloner {
             if now.timeIntervalSince(lastEmit) >= throttleInterval {
                 lastEmit = now
                 let snapshot = newest
-                DispatchQueue.main.async { progress?(snapshot) }
+                DispatchQueue.main.async { streamLine?(snapshot) }
             }
         }
 

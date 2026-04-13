@@ -191,6 +191,11 @@ struct ProjectListView: View {
                         DispatchQueue.main.async {
                             ToastManager.shared.showModal(step)
                         }
+                    },
+                    streamLine: { line in
+                        DispatchQueue.main.async {
+                            ToastManager.shared.appendModalStreamLine(line)
+                        }
                     }
                 )
                 let ws = result.workspace
@@ -233,11 +238,19 @@ struct ProjectListView: View {
         }
         ProcessManager.shared.clear()
         DispatchQueue.global(qos: .userInitiated).async {
-            let teardownFailure = WorkspaceCloner.deleteWorkspace(workspace, progress: { step in
-                DispatchQueue.main.async {
-                    ToastManager.shared.showModal(step)
+            let teardownFailure = WorkspaceCloner.deleteWorkspace(
+                workspace,
+                progress: { step in
+                    DispatchQueue.main.async {
+                        ToastManager.shared.showModal(step)
+                    }
+                },
+                streamLine: { line in
+                    DispatchQueue.main.async {
+                        ToastManager.shared.appendModalStreamLine(line)
+                    }
                 }
-            })
+            )
             DispatchQueue.main.async {
                 deletingWorkspaceIDs.remove(workspace.id)
                 store.deleteWorkspace(id: workspace.id)

@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import SwiftUI
 
 @MainActor
 final class ToastManager: ObservableObject {
@@ -28,6 +29,9 @@ final class ToastManager: ObservableObject {
 
     @Published private(set) var currentToast: Toast?
     @Published private(set) var modalToast: Toast?
+    @Published private(set) var modalStreamLines: [String] = []
+
+    private let maxStreamLines = 5
 
     // MARK: - Private
 
@@ -65,11 +69,22 @@ final class ToastManager: ObservableObject {
     func showModal(_ message: String, severity: Severity = .success) {
         let toast = Toast(message: message, severity: severity, action: nil, duration: 0)
         modalToast = toast
+        modalStreamLines = []
         ModalToastPanel.shared.present()
+    }
+
+    func appendModalStreamLine(_ line: String) {
+        withAnimation(.easeInOut(duration: 0.12)) {
+            modalStreamLines.append(line)
+            if modalStreamLines.count > maxStreamLines {
+                modalStreamLines.removeFirst(modalStreamLines.count - maxStreamLines)
+            }
+        }
     }
 
     func dismissModal() {
         modalToast = nil
+        modalStreamLines = []
         ModalToastPanel.shared.hide()
     }
 }
