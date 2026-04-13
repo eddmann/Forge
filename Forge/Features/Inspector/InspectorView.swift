@@ -107,6 +107,10 @@ struct InspectorView: View {
                 inspectorState.persist()
             }
         }
+        .onChange(of: store.configReloadTrigger) { _, _ in
+            discoverCommands()
+            loadProcesses()
+        }
     }
 
     private func discoverCommands() {

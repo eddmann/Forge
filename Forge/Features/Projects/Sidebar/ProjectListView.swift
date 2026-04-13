@@ -686,6 +686,12 @@ private struct WorkspaceRow: View {
             Divider()
             if FileManager.default.fileExists(atPath: workspace.path + "/forge.json") {
                 Button {
+                    ProjectStore.shared.reloadForgeConfig(workspaceID: workspace.id)
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                    Text("Reload Config")
+                }
+                Button {
                     launchConfigAgent(prompt: ForgeConfigPrompts.auditPrompt, title: "Audit Config")
                 } label: {
                     Image(systemName: "checklist")

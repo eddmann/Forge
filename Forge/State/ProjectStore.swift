@@ -24,6 +24,7 @@ class ProjectStore: ObservableObject {
     @Published var availableEditors: [ExternalEditor] = []
     @Published var gitRefreshTrigger: UInt = 0
     @Published var creatingWorkspaceForProject: Set<UUID> = []
+    @Published var configReloadTrigger: UInt = 0
 
     func requestGitRefresh() {
         gitRefreshTrigger += 1
@@ -264,6 +265,35 @@ class ProjectStore: ObservableObject {
         }
         workspaces[index].status = status
         saveAll()
+    }
+
+    /// Re-read forge.json for a workspace, re-allocate ports, and notify observers.
+    func reloadForgeConfig(workspaceID: UUID) {
+        guard let idx = workspaces.firstIndex(where: { $0.id == workspaceID }) else { return }
+        let ws = workspaces[idx]
+
+        if let config = ForgeConfig.load(from: ws.path),
+           let requested = config.ports, !requested.isEmpty
+        {
+            let result = PortAllocator.allocatePorts(
+                requested: requested,
+                existingClaims: ws.allocatedPorts
+            )
+            workspaces[idx].allocatedPorts = result.allocated
+            var details: [String: String] = [:]
+            for (envVar, portConfig) in requested {
+                if let detail = portConfig.detail {
+                    details[envVar] = detail
+                }
+            }
+            workspaces[idx].portDetails = details
+        } else {
+            workspaces[idx].allocatedPorts = [:]
+            workspaces[idx].portDetails = [:]
+        }
+
+        saveAll()
+        configReloadTrigger += 1
     }
 
     private func restoreSelection() {
