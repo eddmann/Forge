@@ -84,7 +84,7 @@ struct ProjectListView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: 0) {
                         ForEach(groupedProjects, id: \.title) { group in
                             Text(group.title.uppercased())
                                 .font(.system(size: 10, weight: .semibold))
@@ -97,6 +97,7 @@ struct ProjectListView: View {
                                 ProjectSection(
                                     project: project,
                                     workspaces: store.workspaces(for: project.id),
+                                    activeWorkspaceID: store.activeProjectID == project.id ? store.activeWorkspaceID : nil,
                                     isCreatingWorkspace: creatingWorkspaceForProject.contains(project.id),
                                     deletingWorkspaceIDs: deletingWorkspaceIDs,
                                     mergingWorkspaceIDs: mergingWorkspaceIDs,
@@ -283,9 +284,9 @@ struct ProjectListView: View {
 // MARK: - Project Section
 
 private struct ProjectSection: View {
-    @ObservedObject private var store = ProjectStore.shared
     let project: Project
     let workspaces: [Workspace]
+    let activeWorkspaceID: UUID?
     let isCreatingWorkspace: Bool
     let deletingWorkspaceIDs: Set<UUID>
     let mergingWorkspaceIDs: Set<UUID>
@@ -304,12 +305,13 @@ private struct ProjectSection: View {
     @State private var showRemoveConfirmation = false
 
     private var isProjectActive: Bool {
-        store.activeProjectID == project.id && store.activeWorkspaceID == nil
+        ProjectStore.shared.activeProjectID == project.id && activeWorkspaceID == nil
     }
 
     init(
         project: Project,
         workspaces: [Workspace],
+        activeWorkspaceID: UUID?,
         isCreatingWorkspace: Bool,
         deletingWorkspaceIDs: Set<UUID>,
         mergingWorkspaceIDs: Set<UUID>,
@@ -324,6 +326,7 @@ private struct ProjectSection: View {
     ) {
         self.project = project
         self.workspaces = workspaces
+        self.activeWorkspaceID = activeWorkspaceID
         self.isCreatingWorkspace = isCreatingWorkspace
         self.deletingWorkspaceIDs = deletingWorkspaceIDs
         self.mergingWorkspaceIDs = mergingWorkspaceIDs
@@ -450,6 +453,7 @@ private struct ProjectSection: View {
                 ForEach(workspaces) { workspace in
                     WorkspaceRow(
                         workspace: workspace,
+                        isActive: activeWorkspaceID == workspace.id,
                         isDeleting: deletingWorkspaceIDs.contains(workspace.id),
                         isMerging: mergingWorkspaceIDs.contains(workspace.id),
                         onSelect: { onSelectWorkspace(workspace) },
@@ -517,6 +521,7 @@ private struct ProjectSection: View {
 
 private struct WorkspaceRow: View {
     let workspace: Workspace
+    let isActive: Bool
     let isDeleting: Bool
     let isMerging: Bool
     let onSelect: () -> Void
@@ -524,12 +529,7 @@ private struct WorkspaceRow: View {
     let onDelete: () -> Void
     let onRename: (String) -> Void
 
-    @ObservedObject private var store = ProjectStore.shared
     @ObservedObject private var agentEventStore = AgentEventStore.shared
-
-    private var isActive: Bool {
-        store.activeProjectID == workspace.projectID && store.activeWorkspaceID == workspace.id
-    }
 
     @ObservedObject private var summaryStore = SummaryStore.shared
     @ObservedObject private var commitCountStore = CommitCountStore.shared
