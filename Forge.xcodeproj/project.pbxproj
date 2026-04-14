@@ -19,6 +19,7 @@
 		1B65752028DE519CB345DAB8 /* ForgeSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */; };
 		1C0AEA61EA5DEA5E2847EAD1 /* AgentCapabilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE6E9898D02521ED5E5A26C /* AgentCapabilities.swift */; };
 		1C121FFC047C8B2497C556D9 /* AgentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE1F53D3088D83C929C6089 /* AgentStore.swift */; };
+		1F38AC11DB453888432AF558 /* TerminalMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF5A7BA514431716E83A430D /* TerminalMethods.swift */; };
 		20C407A650E8850652C0EE78 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0C67F3ACD4D8E2FD015C9B5E /* Assets.xcassets */; };
 		214A25DA441E4CA4149ACC7E /* ProcessesDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4D2BD2E0F08EC30EB04939 /* ProcessesDrawer.swift */; };
 		227D8A9991C1E52BE92D2B4B /* BonsplitConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2C640E2A64288AE183298D /* BonsplitConfiguration.swift */; };
@@ -29,6 +30,7 @@
 		2D45B233B746EEEEFB436AEF /* TabBarColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C342594BAD505C190C0CAB5 /* TabBarColors.swift */; };
 		32AA8DE2E57C810B1FC02B29 /* GitDiffService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447E8085460F22791A2E2002 /* GitDiffService.swift */; };
 		35DDF4BBBAADD20B50582174 /* SplitOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688827BF577108EF9FFD38F8 /* SplitOrientation.swift */; };
+		3BEF3C05868D56C76E4A409D /* AppMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11AD46F49B2F9BDB295E198 /* AppMethods.swift */; };
 		3C391F6FF78E99BD75053CBC /* TerminalContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 165C25925FC171DC2A54087F /* TerminalContainerViewController.swift */; };
 		3DD3AEA2B0CB40D49AA3892D /* BonsplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FE24D12EFC16A9E835DFD3 /* BonsplitView.swift */; };
 		3FF161D6FC74BF72BACE1CF4 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDD54FF735F21B48ED884859 /* InspectorView.swift */; };
@@ -135,10 +137,12 @@
 		DEAC350B0F837DF5137CCCDF /* ForgeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A90616935E4BDC25E834E9B /* ForgeStore.swift */; };
 		DF49C321DAD4350EFE68125A /* GitDiffModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50575BD258BDA402F95EE53 /* GitDiffModels.swift */; };
 		DF85061B496FA68855985CE6 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50BD07A979DFB5309C7168A3 /* ToastView.swift */; };
+		E05D81355408108E01A6BA0D /* AgentMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D5D8DE561ABD1A7433942E /* AgentMethods.swift */; };
 		E0B0011E31FC00183E2E9953 /* ShellEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 512FB160F659513F1441B40F /* ShellEnvironment.swift */; };
 		E4733A69B65CD74E31153FA1 /* WordDiff.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B6352ABACD0556576E6674 /* WordDiff.swift */; };
 		E52D47766A9E2B7BE40BAECD /* pokemon-sprites in Resources */ = {isa = PBXBuildFile; fileRef = 72F5381FD45049EF3C7CE858 /* pokemon-sprites */; };
 		E648AB552ED0F339B98CDB27 /* TerminalAppearanceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5A832DC1A1CA840C037625 /* TerminalAppearanceStore.swift */; };
+		E94648870C0893E9A806F68B /* WorkspaceMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56952364984FDE126EF0E86E /* WorkspaceMethods.swift */; };
 		E9935234B95FAF969A02353A /* TerminalTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE0283AAF15EE234022748C7 /* TerminalTab.swift */; };
 		E9F327F7F66C401F89C3CA61 /* StatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75F643170BE9658FD3E9B594 /* StatusViewModel.swift */; };
 		EA6AE32F44FB744BAB361458 /* GhosttyTerminalViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9F9A1C5B81DD1DFC08BE0BD /* GhosttyTerminalViewRepresentable.swift */; };
@@ -212,6 +216,7 @@
 		512FB160F659513F1441B40F /* ShellEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellEnvironment.swift; sourceTree = "<group>"; };
 		53E8575792CD729D327E6C2A /* TerminalAppearanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalAppearanceView.swift; sourceTree = "<group>"; };
 		5692E40E8CC3135ACC22733D /* Tab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tab.swift; sourceTree = "<group>"; };
+		56952364984FDE126EF0E86E /* WorkspaceMethods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceMethods.swift; sourceTree = "<group>"; };
 		58123122FDD0E29B7DBF9352 /* SplitViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewContainer.swift; sourceTree = "<group>"; };
 		58D7AB481543402B43A8E777 /* ForgeCLIInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeCLIInstaller.swift; sourceTree = "<group>"; };
 		599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandDiscovery.swift; sourceTree = "<group>"; };
@@ -237,6 +242,7 @@
 		7701E79B028746189D17A0A7 /* PaneState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneState.swift; sourceTree = "<group>"; };
 		77AA38CFD1009E5B845E6970 /* TerminalSearchOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSearchOverlay.swift; sourceTree = "<group>"; };
 		77FF87CF5EC77FF694158BAC /* ChangesTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesTabView.swift; sourceTree = "<group>"; };
+		78D5D8DE561ABD1A7433942E /* AgentMethods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentMethods.swift; sourceTree = "<group>"; };
 		79BF2869844D4AADB3EFF3E5 /* GhosttyTerminalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyTerminalView.swift; sourceTree = "<group>"; };
 		7E28C3575AE17D6490A76432 /* Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workspace.swift; sourceTree = "<group>"; };
 		839E65E109DAFF8720308214 /* TerminalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalCache.swift; sourceTree = "<group>"; };
@@ -278,6 +284,7 @@
 		BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryScheduler.swift; sourceTree = "<group>"; };
 		BC582D54CE2623E5734E1EEE /* FileStatusList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatusList.swift; sourceTree = "<group>"; };
 		BF77C8CF7F58E9C58A7E0C74 /* DiffLineCells.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffLineCells.swift; sourceTree = "<group>"; };
+		C11AD46F49B2F9BDB295E198 /* AppMethods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMethods.swift; sourceTree = "<group>"; };
 		C27615076A6D6DC12ADBB86E /* DiffViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffViewModel.swift; sourceTree = "<group>"; };
 		C2B68C999B71210CCBAAC317 /* SplitDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitDiffView.swift; sourceTree = "<group>"; };
 		C422675759830D50E1003A2B /* ForgeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeConfig.swift; sourceTree = "<group>"; };
@@ -312,6 +319,7 @@
 		EAF4160F9DB818FD7AEC50FE /* UnifiedDiffTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedDiffTableView.swift; sourceTree = "<group>"; };
 		EC624B625847A5A30E6E3068 /* ActivityEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityEvent.swift; sourceTree = "<group>"; };
 		EDE6E9898D02521ED5E5A26C /* AgentCapabilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCapabilities.swift; sourceTree = "<group>"; };
+		EF5A7BA514431716E83A430D /* TerminalMethods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalMethods.swift; sourceTree = "<group>"; };
 		F03D48F43AB138181D6CD761 /* TerminalSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSession.swift; sourceTree = "<group>"; };
 		F2BD7C813556607AFCF0EAFB /* BranchPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BranchPickerView.swift; sourceTree = "<group>"; };
 		F3624BDB8FD61A57C38FA30C /* GhosttyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyApp.swift; sourceTree = "<group>"; };
@@ -706,7 +714,11 @@
 		CB32C149A3A3345EA848093E /* RPCMethods */ = {
 			isa = PBXGroup;
 			children = (
+				78D5D8DE561ABD1A7433942E /* AgentMethods.swift */,
+				C11AD46F49B2F9BDB295E198 /* AppMethods.swift */,
 				D5D72BC927E95BBB0E8A2219 /* SystemMethods.swift */,
+				EF5A7BA514431716E83A430D /* TerminalMethods.swift */,
+				56952364984FDE126EF0E86E /* WorkspaceMethods.swift */,
 			);
 			path = RPCMethods;
 			sourceTree = "<group>";
@@ -990,11 +1002,13 @@
 				14CB2C84FC65B925A953F23E /* AgentEventStore.swift in Sources */,
 				C3273E02B9C26B2417368297 /* AgentHookInstaller.swift in Sources */,
 				95668F7CED1D165D912E2656 /* AgentInfoPopoverView.swift in Sources */,
+				E05D81355408108E01A6BA0D /* AgentMethods.swift in Sources */,
 				0C401CA4784BC5616BB7AA5D /* AgentReviewPayloadBuilder.swift in Sources */,
 				A5E0E33106E041E304409673 /* AgentSetup.swift in Sources */,
 				1C121FFC047C8B2497C556D9 /* AgentStore.swift in Sources */,
 				A00B446E499123071A80471B /* AgentWorkTracker.swift in Sources */,
 				4E353DD84E747CCAAC3E9A85 /* AppDelegate.swift in Sources */,
+				3BEF3C05868D56C76E4A409D /* AppMethods.swift in Sources */,
 				227D8A9991C1E52BE92D2B4B /* BonsplitConfiguration.swift in Sources */,
 				61EAB7F9E8DBF4632D654669 /* BonsplitController.swift in Sources */,
 				C8EE75452F5337ABC30CAAFE /* BonsplitDebugCounters.swift in Sources */,
@@ -1095,6 +1109,7 @@
 				D3BD134D32903952D880E53C /* TerminalAppearanceView.swift in Sources */,
 				42E7DC31BEDCE5A34140C5AB /* TerminalCache.swift in Sources */,
 				3C391F6FF78E99BD75053CBC /* TerminalContainerViewController.swift in Sources */,
+				1F38AC11DB453888432AF558 /* TerminalMethods.swift in Sources */,
 				673D256E6787F286D9EEC05B /* TerminalObserver.swift in Sources */,
 				BDFE5633A7BD7DE5713ED754 /* TerminalSearchOverlay.swift in Sources */,
 				5D01EFD91635AEE66ECBE336 /* TerminalSearchState.swift in Sources */,
@@ -1116,6 +1131,7 @@
 				56CF6611305E42E7DE701ACD /* WorkspaceDiffList.swift in Sources */,
 				766D9CF7612E3BE9CEC14A9E /* WorkspaceDiffViewModel.swift in Sources */,
 				47D58A9420DF78510F52BBF7 /* WorkspaceGitWatcher.swift in Sources */,
+				E94648870C0893E9A806F68B /* WorkspaceMethods.swift in Sources */,
 				F4F6CC41FF265C9DA098D17E /* WorkspaceNaming.swift in Sources */,
 				AB404BEE7FC486153DD784A2 /* WorkspaceWelcomeScreen.swift in Sources */,
 				D3B75B31144F373A322543BD /* main.swift in Sources */,

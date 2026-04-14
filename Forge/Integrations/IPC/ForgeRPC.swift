@@ -59,9 +59,30 @@ enum ForgeRPC {
     static let protocolVersion = 1
 
     static let methods: [String: ForgeRPCMethod.Type] = [
+        // system.*
         SystemPing.name: SystemPing.self,
         SystemIdentify.name: SystemIdentify.self,
-        SystemCapabilities.name: SystemCapabilities.self
+        SystemCapabilities.name: SystemCapabilities.self,
+        // app.*
+        AppNotify.name: AppNotify.self,
+        AppTree.name: AppTree.self,
+        AppLog.name: AppLog.self,
+        // workspace.*
+        WorkspaceList.name: WorkspaceList.self,
+        WorkspaceCurrent.name: WorkspaceCurrent.self,
+        WorkspaceSelect.name: WorkspaceSelect.self,
+        // terminal.*
+        TerminalList.name: TerminalList.self,
+        TerminalReadScreen.name: TerminalReadScreen.self,
+        TerminalSendText.name: TerminalSendText.self,
+        TerminalSendKey.name: TerminalSendKey.self,
+        TerminalOpenAgent.name: TerminalOpenAgent.self,
+        // agent.*
+        AgentEvent.name: AgentEvent.self,
+        AgentSetStatus.name: AgentSetStatus.self,
+        AgentClearStatus.name: AgentClearStatus.self,
+        AgentSetProgress.name: AgentSetProgress.self,
+        AgentClearProgress.name: AgentClearProgress.self
     ]
 
     /// Dispatch a parsed JSON-RPC envelope. Returns the wire response dict that
