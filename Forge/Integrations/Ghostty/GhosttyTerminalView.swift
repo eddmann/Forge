@@ -7,6 +7,9 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
     var sessionID: UUID?
     var onProcessExit: ((UUID) -> Void)?
 
+    /// Per-surface search state, observed by the overlay rendered above the terminal.
+    let searchState = TerminalSearchState()
+
     private var surface: ghostty_surface_t?
     private var surfaceContext: Unmanaged<GhosttySurfaceContext>?
     private var hasStartedProcess = false
@@ -357,6 +360,32 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
             ghostty_surface_set_focus(surface, false)
         }
         return result
+    }
+
+    // MARK: - Search
+
+    /// Invoke a Ghostty surface binding action by its string name.
+    /// Used to drive search (`search:<needle>`, `navigate_search:next`, `end_search`)
+    /// and other actions that don't have a dedicated C entry point.
+    @discardableResult
+    func performBindingAction(_ action: String) -> Bool {
+        guard let surface else { return false }
+        return action.withCString { cString in
+            ghostty_surface_binding_action(surface, cString, UInt(strlen(cString)))
+        }
+    }
+
+    /// Cmd+F entry point. Toggles the search overlay; if it's already open, refocuses
+    /// the field so the user can re-search without aiming the mouse.
+    @objc func findInTerminal(_: Any?) {
+        if searchState.isVisible {
+            searchState.focusToken &+= 1
+        } else {
+            searchState.isVisible = true
+            searchState.total = nil
+            searchState.selected = nil
+            searchState.focusToken &+= 1
+        }
     }
 
     // MARK: - Copy & Paste

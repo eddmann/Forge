@@ -232,6 +232,41 @@ class GhosttyApp {
             return true
         case GHOSTTY_ACTION_RING_BELL:
             return true
+        case GHOSTTY_ACTION_END_SEARCH:
+            if target.tag == GHOSTTY_TARGET_SURFACE {
+                let userdata = ghostty_surface_userdata(target.target.surface)
+                if let ptr = userdata {
+                    let ctx = Unmanaged<GhosttySurfaceContext>.fromOpaque(ptr).takeUnretainedValue()
+                    DispatchQueue.main.async {
+                        ctx.view?.searchState.reset()
+                    }
+                }
+            }
+            return true
+        case GHOSTTY_ACTION_SEARCH_TOTAL:
+            if target.tag == GHOSTTY_TARGET_SURFACE {
+                let userdata = ghostty_surface_userdata(target.target.surface)
+                if let ptr = userdata {
+                    let ctx = Unmanaged<GhosttySurfaceContext>.fromOpaque(ptr).takeUnretainedValue()
+                    let total = action.action.search_total.total
+                    DispatchQueue.main.async {
+                        ctx.view?.searchState.total = total >= 0 ? Int(total) : nil
+                    }
+                }
+            }
+            return true
+        case GHOSTTY_ACTION_SEARCH_SELECTED:
+            if target.tag == GHOSTTY_TARGET_SURFACE {
+                let userdata = ghostty_surface_userdata(target.target.surface)
+                if let ptr = userdata {
+                    let ctx = Unmanaged<GhosttySurfaceContext>.fromOpaque(ptr).takeUnretainedValue()
+                    let selected = action.action.search_selected.selected
+                    DispatchQueue.main.async {
+                        ctx.view?.searchState.selected = selected >= 0 ? Int(selected) : nil
+                    }
+                }
+            }
+            return true
         default:
             return false
         }

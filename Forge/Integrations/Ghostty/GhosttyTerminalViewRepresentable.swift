@@ -42,9 +42,19 @@ struct PaneContentView: View {
         manager.paneCount > 1
     }
 
+    private var termView: GhosttyTerminalView? {
+        guard let session = TerminalSessionManager.shared.session(for: sessionID) else { return nil }
+        return TerminalCache.shared.terminalView(for: session)
+    }
+
     var body: some View {
         ZStack(alignment: .topTrailing) {
             GhosttyTerminalViewRepresentable(sessionID: sessionID)
+
+            if let termView, termView.searchState.isVisible {
+                TerminalSearchOverlay(termView: termView, state: termView.searchState)
+                    .transition(.opacity.animation(.easeInOut(duration: 0.12)))
+            }
 
             if showCloseButton, isHovering {
                 Button(action: onClose) {
