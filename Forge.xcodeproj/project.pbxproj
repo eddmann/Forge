@@ -112,6 +112,7 @@
 		BBD8AE2D99990E0BE2681B70 /* TabBarMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */; };
 		BDFE5633A7BD7DE5713ED754 /* TerminalSearchOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AA38CFD1009E5B845E6970 /* TerminalSearchOverlay.swift */; };
 		BF0BCA07938D96A6D897E1C8 /* CommandDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */; };
+		C3273E02B9C26B2417368297 /* AgentHookInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = E933B0C6052DEC30210330BC /* AgentHookInstaller.swift */; };
 		C570FF0EF21F8683B536CAC4 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67FC7642C53676D66D0BD42 /* main.swift */; };
 		C8EE75452F5337ABC30CAAFE /* BonsplitDebugCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */; };
 		CADD824CA25F9BC7DC4C07CF /* DemoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A3380FD3C5B17393F3CCCB /* DemoData.swift */; };
@@ -301,6 +302,7 @@
 		E462273D87AE64CBBE7EB1F3 /* AgentActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentActivity.swift; sourceTree = "<group>"; };
 		E79EB0D856F2E78068B504FC /* AgentConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentConfig.swift; sourceTree = "<group>"; };
 		E8C30B829376599F48CCB5C7 /* ReviewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewStore.swift; sourceTree = "<group>"; };
+		E933B0C6052DEC30210330BC /* AgentHookInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentHookInstaller.swift; sourceTree = "<group>"; };
 		E9F9A1C5B81DD1DFC08BE0BD /* GhosttyTerminalViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyTerminalViewRepresentable.swift; sourceTree = "<group>"; };
 		EAD57FE43439B2C292022C07 /* Forge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Forge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EAF4160F9DB818FD7AEC50FE /* UnifiedDiffTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedDiffTableView.swift; sourceTree = "<group>"; };
@@ -492,6 +494,7 @@
 			children = (
 				9964C3D3A979B915F2434DAF /* ActivitySnapshotCommand.swift */,
 				8E49E4582AFF44F5057030E3 /* AgentCapabilityParser.swift */,
+				E933B0C6052DEC30210330BC /* AgentHookInstaller.swift */,
 				A014017376795403DB6AD56A /* AgentSetup.swift */,
 				9BF0A769B8CB474623AE8F74 /* ForgeConfigPrompts.swift */,
 				6E518EB16255BC5AC4967951 /* SummaryCommand.swift */,
@@ -971,6 +974,7 @@
 				2642F6F94CF38C2D37E37D83 /* AgentConfig.swift in Sources */,
 				1ADCE9E20D14A95F005B6033 /* AgentEventLogger.swift in Sources */,
 				14CB2C84FC65B925A953F23E /* AgentEventStore.swift in Sources */,
+				C3273E02B9C26B2417368297 /* AgentHookInstaller.swift in Sources */,
 				95668F7CED1D165D912E2656 /* AgentInfoPopoverView.swift in Sources */,
 				0C401CA4784BC5616BB7AA5D /* AgentReviewPayloadBuilder.swift in Sources */,
 				A5E0E33106E041E304409673 /* AgentSetup.swift in Sources */,

@@ -6,7 +6,11 @@ class AgentSetup {
     static let shared = AgentSetup()
 
     /// Marker comment used to identify Forge-managed hook entries.
-    private static let forgeMarker = "forge event"
+    static let forgeMarker = "forge event"
+
+    /// Shared installer used by every agent that ships standard JSON hook settings
+    /// (Claude Code, Codex). Pi/OpenCode use TypeScript bridge files instead.
+    private static let installer = AgentHookInstaller(ownershipMarker: forgeMarker)
 
     private init() {}
 
@@ -19,78 +23,98 @@ class AgentSetup {
         trustClaudeCodeClonesDir()
     }
 
+    // MARK: - Public Inspection / Removal
+
+    /// Whether Forge-managed hooks are currently present in Claude Code's settings.
+    func hasClaudeCodeHooks() -> Bool {
+        Self.installer.isInstalled(settingsURL: claudeSettingsURL)
+    }
+
+    /// Whether Forge-managed hooks are currently present in Codex's hooks file.
+    func hasCodexHooks() -> Bool {
+        Self.installer.isInstalled(settingsURL: codexHooksURL)
+    }
+
+    /// Remove Forge-managed hooks from Claude Code's settings, preserving user hooks.
+    func removeClaudeCodeHooks() throws {
+        try Self.installer.uninstall(settingsURL: claudeSettingsURL)
+    }
+
+    /// Remove Forge-managed hooks from Codex's settings, preserving user hooks.
+    func removeCodexHooks() throws {
+        try Self.installer.uninstall(settingsURL: codexHooksURL)
+    }
+
     // MARK: - Claude Code
+
+    private var claudeSettingsURL: URL {
+        URL(fileURLWithPath: NSHomeDirectory() + "/.claude/settings.json")
+    }
+
+    /// Build hook entries — guarded by FORGE_SESSION so hooks only fire inside Forge.
+    /// Uses if/then/fi (not &&) so exit code is always 0 when outside Forge.
+    private static func claudeHook(_ event: String) -> String {
+        "if [ -n \"$FORGE_SESSION\" ]; then forge event claude \(event); fi"
+    }
+
+    /// Hook groups for Claude Code, keyed by event name.
+    private static let claudeHookGroups: [String: [[String: Any]]] = [
+        "SessionStart": [
+            ["hooks": [["type": "command", "command": claudeHook("session_start")]]]
+        ],
+        "PreToolUse": [
+            ["hooks": [["type": "command", "command": claudeHook("tool_start")]]]
+        ],
+        "PostToolUse": [
+            ["hooks": [["type": "command", "command": claudeHook("tool_end")]]]
+        ],
+        "Stop": [
+            ["hooks": [["type": "command", "command": claudeHook("stop")]]]
+        ],
+        "UserPromptSubmit": [
+            ["hooks": [["type": "command", "command": claudeHook("prompt")]]]
+        ],
+        "Notification": [
+            ["matcher": "permission_prompt|elicitation_dialog",
+             "hooks": [["type": "command", "command": claudeHook("notification")]]]
+        ]
+    ]
 
     /// Writes hooks to ~/.claude/settings.json (only if ~/.claude/ exists)
     private func installClaudeCodeHooks() {
-        let settingsPath = NSHomeDirectory() + "/.claude/settings.json"
-        let dir = (settingsPath as NSString).deletingLastPathComponent
-        let fm = FileManager.default
-
-        // Only install if Claude Code is already set up
-        guard fm.fileExists(atPath: dir) else { return }
-
-        // Read existing settings
-        var settings: [String: Any] = [:]
-        if let data = fm.contents(atPath: settingsPath),
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        {
-            settings = json
-        }
-
-        /// Build hook entries — guarded by FORGE_SESSION so hooks only fire inside Forge
-        /// Uses if/then/fi (not &&) so exit code is always 0 when outside Forge
-        func claudeHook(_ event: String) -> String {
-            "if [ -n \"$FORGE_SESSION\" ]; then forge event claude \(event); fi"
-        }
-        let hooks: [String: Any] = [
-            "SessionStart": [
-                ["hooks": [["type": "command", "command": claudeHook("session_start")]]]
-            ],
-            "PreToolUse": [
-                ["hooks": [["type": "command", "command": claudeHook("tool_start")]]]
-            ],
-            "PostToolUse": [
-                ["hooks": [["type": "command", "command": claudeHook("tool_end")]]]
-            ],
-            "Stop": [
-                ["hooks": [["type": "command", "command": claudeHook("stop")]]]
-            ],
-            "UserPromptSubmit": [
-                ["hooks": [["type": "command", "command": claudeHook("prompt")]]]
-            ],
-            "Notification": [
-                ["matcher": "permission_prompt|elicitation_dialog",
-                 "hooks": [["type": "command", "command": claudeHook("notification")]]]
-            ]
-        ]
-
-        // Merge — replace existing Forge hooks, preserve user hooks
-        var existingHooks = settings["hooks"] as? [String: Any] ?? [:]
-        for (event, newEntries) in hooks {
-            var eventEntries = existingHooks[event] as? [[String: Any]] ?? []
-            // Remove old Forge entries (identified by "forge event" in command)
-            eventEntries.removeAll { entry in
-                guard let hookList = entry["hooks"] as? [[String: Any]] else { return false }
-                return hookList.contains { hook in
-                    (hook["command"] as? String)?.contains(Self.forgeMarker) == true
-                }
-            }
-            // Add new entries
-            if let newArray = newEntries as? [[String: Any]] {
-                eventEntries.append(contentsOf: newArray)
-            }
-            existingHooks[event] = eventEntries
-        }
-        settings["hooks"] = existingHooks
-
-        // Write back
-        if let data = try? JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys]) {
-            try? data.write(to: URL(fileURLWithPath: settingsPath))
-        }
+        let dir = claudeSettingsURL.deletingLastPathComponent()
+        guard FileManager.default.fileExists(atPath: dir.path) else { return }
+        try? Self.installer.install(settingsURL: claudeSettingsURL, hooks: Self.claudeHookGroups)
     }
 
     // MARK: - Codex
+
+    private var codexHooksURL: URL {
+        URL(fileURLWithPath: NSHomeDirectory() + "/.codex/hooks.json")
+    }
+
+    private static func codexHook(_ event: String) -> String {
+        "if [ -n \"$FORGE_SESSION\" ]; then forge event codex \(event); fi"
+    }
+
+    /// Hook groups for Codex, keyed by event name.
+    private static let codexHookGroups: [String: [[String: Any]]] = [
+        "SessionStart": [
+            ["hooks": [["type": "command", "command": codexHook("session_start")]]]
+        ],
+        "PreToolUse": [
+            ["hooks": [["type": "command", "command": codexHook("tool_start")]]]
+        ],
+        "PostToolUse": [
+            ["hooks": [["type": "command", "command": codexHook("tool_end")]]]
+        ],
+        "UserPromptSubmit": [
+            ["hooks": [["type": "command", "command": codexHook("prompt")]]]
+        ],
+        "Stop": [
+            ["hooks": [["type": "command", "command": codexHook("stop")]]]
+        ]
+    ]
 
     /// Writes hooks to ~/.codex/hooks.json and TUI config to ~/.codex/config.toml (only if ~/.codex/ exists)
     private func installCodexHooks() {
@@ -100,60 +124,7 @@ class AgentSetup {
         // Only install if Codex is already set up
         guard fm.fileExists(atPath: codexDir) else { return }
 
-        // hooks.json — guarded by FORGE_SESSION, if/then/fi for clean exit code
-        let hooksPath = codexDir + "/hooks.json"
-        func codexHook(_ event: String) -> String {
-            "if [ -n \"$FORGE_SESSION\" ]; then forge event codex \(event); fi"
-        }
-        let hooks: [String: Any] = [
-            "hooks": [
-                "SessionStart": [
-                    ["hooks": [["type": "command", "command": codexHook("session_start")]]]
-                ],
-                "PreToolUse": [
-                    ["hooks": [["type": "command", "command": codexHook("tool_start")]]]
-                ],
-                "PostToolUse": [
-                    ["hooks": [["type": "command", "command": codexHook("tool_end")]]]
-                ],
-                "UserPromptSubmit": [
-                    ["hooks": [["type": "command", "command": codexHook("prompt")]]]
-                ],
-                "Stop": [
-                    ["hooks": [["type": "command", "command": codexHook("stop")]]]
-                ]
-            ]
-        ]
-
-        // Read existing, merge Forge hooks
-        var existingRoot: [String: Any] = [:]
-        if let data = fm.contents(atPath: hooksPath),
-           let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        {
-            existingRoot = json
-        }
-
-        var existingHooks = existingRoot["hooks"] as? [String: Any] ?? [:]
-        let newHooks = hooks["hooks"] as? [String: Any] ?? [:]
-
-        for (event, newEntries) in newHooks {
-            var eventEntries = existingHooks[event] as? [[String: Any]] ?? []
-            eventEntries.removeAll { entry in
-                guard let hookList = entry["hooks"] as? [[String: Any]] else { return false }
-                return hookList.contains { hook in
-                    (hook["command"] as? String)?.contains(Self.forgeMarker) == true
-                }
-            }
-            if let newArray = newEntries as? [[String: Any]] {
-                eventEntries.append(contentsOf: newArray)
-            }
-            existingHooks[event] = eventEntries
-        }
-        existingRoot["hooks"] = existingHooks
-
-        if let data = try? JSONSerialization.data(withJSONObject: existingRoot, options: [.prettyPrinted, .sortedKeys]) {
-            try? data.write(to: URL(fileURLWithPath: hooksPath))
-        }
+        try? Self.installer.install(settingsURL: codexHooksURL, hooks: Self.codexHookGroups)
 
         // config.toml — enrich terminal title with status word and enable hooks
         let configPath = codexDir + "/config.toml"
