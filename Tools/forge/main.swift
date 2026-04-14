@@ -12,31 +12,65 @@ guard args.count >= 2 else {
     exit(1)
 }
 
+let subargs = Array(args.dropFirst(2))
+
 switch args[1] {
+// Legacy fire-and-forget hooks (used by installed agent hook scripts)
 case "event":
-    guard args.count >= 4 else {
+    guard subargs.count >= 2 else {
         FileHandle.standardError.write(Data("Usage: forge event <agent> <event_type>\n".utf8))
         exit(1)
     }
-    let agent = args[2]
-    let eventType = args[3]
-    sendEvent(agent: agent, eventType: eventType)
+    sendEvent(agent: subargs[0], eventType: subargs[1])
 
 case "open-agent":
-    guard args.count >= 3 else {
+    guard let command = subargs.first else {
         FileHandle.standardError.write(Data("Usage: forge open-agent <agent-command>\n".utf8))
         exit(1)
     }
-    openAgent(command: args[2])
+    openAgent(command: command)
 
+// Universal escape hatch
 case "rpc":
-    guard args.count >= 3 else {
+    guard let method = subargs.first else {
         FileHandle.standardError.write(Data("Usage: forge rpc <method> [json-params]\n".utf8))
         exit(1)
     }
-    let method = args[2]
-    let paramsArg: String? = args.count >= 4 ? args[3] : nil
-    sendRPC(method: method, paramsJSON: paramsArg)
+    sendRPC(method: method, paramsJSON: subargs.count >= 2 ? subargs[1] : nil)
+
+// Sugar subcommands (system.*)
+case "ping":
+    callMethod("system.ping", params: [:])
+
+case "identify":
+    callMethod("system.identify", params: identifyParams(from: subargs))
+
+case "capabilities":
+    callMethod("system.capabilities", params: [:])
+
+// Sugar (app.*)
+case "notify":
+    callMethod("app.notify", params: parseNotifyArgs(subargs))
+
+case "tree":
+    var params: [String: Any] = [:]
+    if let ws = optionValue(subargs, "--workspace") { params["workspace_id"] = ws }
+    callMethod("app.tree", params: params)
+
+case "log":
+    callMethod("app.log", params: parseLogArgs(subargs))
+
+// Sugar (workspace.*)
+case "workspace":
+    dispatchWorkspace(subargs)
+
+// Sugar (terminal.*)
+case "terminal":
+    dispatchTerminal(subargs)
+
+// Sugar (agent.*)
+case "agent":
+    dispatchAgent(subargs)
 
 case "--help", "-h", "help":
     printUsage()
@@ -254,20 +288,47 @@ func printUsage() {
     let usage = """
     Usage: forge <command> [arguments]
 
-    Commands:
-      event <agent> <event_type>    Pipe agent hook JSON from stdin to Forge
-      open-agent <agent-command>    Open a new agent tab in Forge
-      rpc <method> [json-params]    Invoke a JSON-RPC method directly
+    System:
+      ping                              Health check
+      identify                          Resolve current session/workspace/project
+      capabilities                      List all supported RPC methods
 
-    Environment:
-      FORGE_SOCKET    Path to Forge socket (default: ~/.forge/state/forge.sock)
-      FORGE_SESSION   Terminal session UUID (auto-set by Forge)
+    App:
+      notify --title T [--body B] [--subtitle S]   Fire a user notification
+      tree [--workspace ID]                        Dump UI topology as JSON
+      log <message> [--level info|warn|error]      Append to workspace activity log
 
-    Examples:
-      echo '{"tool_name":"Bash"}' | forge event claude tool_start
-      forge open-agent claude
-      forge rpc system.ping
-      forge rpc system.identify '{"workspace_id":"..."}'
+    Workspace:
+      workspace list [--project ID]     List workspaces
+      workspace current                 Show the active workspace
+      workspace select <id>             Switch to a workspace
+
+    Terminal:
+      terminal list [--workspace ID]              List sessions
+      terminal read [--lines N]                   Capture scrollback
+      terminal send <text>                        Type text into a session
+      terminal send-key <key>                     Send a key (Return, Ctrl-C, ...)
+      terminal open-agent <command>               Spawn a new agent tab
+
+    Agent:
+      agent event <agent> <event_type>            Forward hook event (reads JSON stdin)
+      agent status <text>                         Push presence string
+      agent progress <0-100>                      Push progress percent
+      agent clear <status|progress>               Clear pushed state
+
+    Advanced:
+      rpc <method> [json-params]        Invoke any RPC method directly
+      event <agent> <event_type>        Legacy hook forwarder (stdin -> agent_event)
+      open-agent <command>              Legacy open-agent shortcut
+
+    Environment (auto-set by Forge in spawned shells):
+      FORGE_SOCKET         Path to Forge socket
+      FORGE_SESSION        Terminal session UUID (used by terminal/agent commands)
+      FORGE_WORKSPACE_ID   Active workspace UUID
+      FORGE_PROJECT_ID     Active project UUID
+
+    Global flags (where meaningful):
+      --session ID --workspace ID --project ID    Override env-var scope
 
     """
     FileHandle.standardError.write(Data(usage.utf8))

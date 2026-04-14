@@ -48,6 +48,9 @@ enum AgentSetStatus: ForgeRPCMethod {
         guard let text = params["text"] as? String else {
             throw ForgeRPCError.invalidParams("'text' is required")
         }
+        guard AgentEventStore.shared.tabID(forSession: sid) != nil else {
+            throw ForgeRPCError.notFound("No session \(sid.uuidString)")
+        }
         let agent = (params["agent"] as? String) ?? "unknown"
         AgentEventStore.shared.setPushedStatus(sessionID: sid, agent: agent, text: text)
         return ["ok": true]
@@ -63,6 +66,9 @@ enum AgentClearStatus: ForgeRPCMethod {
     static func handle(params: [String: Any]) throws -> [String: Any] {
         guard let sid = (params["session_id"] as? String).flatMap(UUID.init(uuidString:)) else {
             throw ForgeRPCError.invalidParams("'session_id' is required")
+        }
+        guard AgentEventStore.shared.tabID(forSession: sid) != nil else {
+            throw ForgeRPCError.notFound("No session \(sid.uuidString)")
         }
         AgentEventStore.shared.setPushedStatus(sessionID: sid, agent: "unknown", text: nil)
         return ["ok": true]
@@ -85,6 +91,9 @@ enum AgentSetProgress: ForgeRPCMethod {
         guard let percent = params["percent"] as? Int else {
             throw ForgeRPCError.invalidParams("'percent' is required (int 0–100)")
         }
+        guard AgentEventStore.shared.tabID(forSession: sid) != nil else {
+            throw ForgeRPCError.notFound("No session \(sid.uuidString)")
+        }
         let agent = (params["agent"] as? String) ?? "unknown"
         AgentEventStore.shared.setPushedProgress(sessionID: sid, agent: agent, percent: percent)
         return ["ok": true]
@@ -100,6 +109,9 @@ enum AgentClearProgress: ForgeRPCMethod {
     static func handle(params: [String: Any]) throws -> [String: Any] {
         guard let sid = (params["session_id"] as? String).flatMap(UUID.init(uuidString:)) else {
             throw ForgeRPCError.invalidParams("'session_id' is required")
+        }
+        guard AgentEventStore.shared.tabID(forSession: sid) != nil else {
+            throw ForgeRPCError.notFound("No session \(sid.uuidString)")
         }
         AgentEventStore.shared.setPushedProgress(sessionID: sid, agent: "unknown", percent: nil)
         return ["ok": true]

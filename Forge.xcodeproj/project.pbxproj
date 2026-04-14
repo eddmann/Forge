@@ -102,6 +102,7 @@
 		AADB1DEF61EF8F53EEB878BB /* SplitDiffTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EA0E1CD1E3F2DEB33CAB9D /* SplitDiffTableView.swift */; };
 		AB404BEE7FC486153DD784A2 /* WorkspaceWelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A33F98B22ADD7CD5183A9E /* WorkspaceWelcomeScreen.swift */; };
 		AD12FBB49FFE0B110FA16F4D /* SplitNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBFCA5701CEE5E34D6C159E /* SplitNode.swift */; };
+		B0FBA1663B919D35602C204D /* Sugar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1724A0612695CAFAFDFAA11E /* Sugar.swift */; };
 		B1B639AADCB9470C970103B8 /* ForgeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C422675759830D50E1003A2B /* ForgeConfig.swift */; };
 		B2A94F3E550AC00F336C7D1D /* MainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFD8D52036236C912F9A75B /* MainWindowController.swift */; };
 		B2B4FD154A101B336B2366C3 /* CommandPaletteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678513C7ACB1E46831448273 /* CommandPaletteView.swift */; };
@@ -189,6 +190,7 @@
 		165C25925FC171DC2A54087F /* TerminalContainerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalContainerViewController.swift; sourceTree = "<group>"; };
 		16CBFE7A0F60D63CBB4B6E17 /* TabID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabID.swift; sourceTree = "<group>"; };
 		17205892BB4CD21C1A347A75 /* BonsplitPaneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitPaneManager.swift; sourceTree = "<group>"; };
+		1724A0612695CAFAFDFAA11E /* Sugar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sugar.swift; sourceTree = "<group>"; };
 		17988CA2EA98D7A6396E2B91 /* ExternalEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalEditor.swift; sourceTree = "<group>"; };
 		18E2BA9B896F72867C2704FC /* CommandPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandPalette.swift; sourceTree = "<group>"; };
 		1A84E6A2F7CC7832E0DA529E /* FiraCode-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FiraCode-Regular.ttf"; sourceTree = "<group>"; };
@@ -447,6 +449,7 @@
 			isa = PBXGroup;
 			children = (
 				D67FC7642C53676D66D0BD42 /* main.swift */,
+				1724A0612695CAFAFDFAA11E /* Sugar.swift */,
 			);
 			name = forge;
 			path = Tools/forge;
@@ -982,6 +985,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B0FBA1663B919D35602C204D /* Sugar.swift in Sources */,
 				C570FF0EF21F8683B536CAC4 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
