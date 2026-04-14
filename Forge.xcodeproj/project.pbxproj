@@ -77,6 +77,7 @@
 		766D9CF7612E3BE9CEC14A9E /* WorkspaceDiffViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */; };
 		77AE960A4776D5A0A52AD199 /* CommandPaletteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D2513A6B4EB6E2718B01CE /* CommandPaletteItem.swift */; };
 		792DB5B7CE3CD212E63347F3 /* JetBrainsMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */; };
+		794D28BAC34D00D30FCF7FAA /* SystemMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D72BC927E95BBB0E8A2219 /* SystemMethods.swift */; };
 		824C90E0DE7F062B5BE0702B /* ToastPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA171C5EE0F3CF9830676149 /* ToastPanel.swift */; };
 		8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */; };
 		83C38DE811797FDEC108A310 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB6C83CAC1F911908568BD7 /* StatusBarController.swift */; };
@@ -84,6 +85,7 @@
 		87DE037B3A7130EABAEEA4FC /* GitUnifiedDiffParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */; };
 		8932C47CE7A9158D452B4E4E /* WordDiffLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */; };
 		8B4C5CAD6ACD54E118395D79 /* SplitNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */; };
+		90987ACFDEBC83E0342A4D16 /* ForgeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E77365CA7E63CC467F9F5C1 /* ForgeRPC.swift */; };
 		95668F7CED1D165D912E2656 /* AgentInfoPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */; };
 		958919E7AFE933A2ECE729BE /* FileStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557D56D0DBFDC04108086ED /* FileStatus.swift */; };
 		9BF204E729543B6E9E689976 /* TerminalAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A330C61E147E9935FB2584 /* TerminalAppearance.swift */; };
@@ -200,6 +202,7 @@
 		39F12DDCB35F9733A5846460 /* DiffTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTabView.swift; sourceTree = "<group>"; };
 		3A4D2BD2E0F08EC30EB04939 /* ProcessesDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessesDrawer.swift; sourceTree = "<group>"; };
 		3C0E18D8DBAC71B87110136F /* SplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
+		3E77365CA7E63CC467F9F5C1 /* ForgeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeRPC.swift; sourceTree = "<group>"; };
 		411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitDebugCounters.swift; sourceTree = "<group>"; };
 		43EA0E1CD1E3F2DEB33CAB9D /* SplitDiffTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitDiffTableView.swift; sourceTree = "<group>"; };
 		447E8085460F22791A2E2002 /* GitDiffService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitDiffService.swift; sourceTree = "<group>"; };
@@ -289,6 +292,7 @@
 		D4F8D881C55D57EE673CB404 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		D50575BD258BDA402F95EE53 /* GitDiffModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitDiffModels.swift; sourceTree = "<group>"; };
 		D557D56D0DBFDC04108086ED /* FileStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStatus.swift; sourceTree = "<group>"; };
+		D5D72BC927E95BBB0E8A2219 /* SystemMethods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMethods.swift; sourceTree = "<group>"; };
 		D627948FA55948A30B930C29 /* ghostty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ghostty.h; sourceTree = "<group>"; };
 		D67FC7642C53676D66D0BD42 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		D8B6352ABACD0556576E6674 /* WordDiff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiff.swift; sourceTree = "<group>"; };
@@ -336,7 +340,9 @@
 			isa = PBXGroup;
 			children = (
 				9E002CD819513C0820D42DF3 /* AgentEventLogger.swift */,
+				3E77365CA7E63CC467F9F5C1 /* ForgeRPC.swift */,
 				A30A1096487E610C93B39E7E /* ForgeSocketServer.swift */,
+				CB32C149A3A3345EA848093E /* RPCMethods */,
 			);
 			path = IPC;
 			sourceTree = "<group>";
@@ -697,6 +703,14 @@
 			path = Features;
 			sourceTree = "<group>";
 		};
+		CB32C149A3A3345EA848093E /* RPCMethods */ = {
+			isa = PBXGroup;
+			children = (
+				D5D72BC927E95BBB0E8A2219 /* SystemMethods.swift */,
+			);
+			path = RPCMethods;
+			sourceTree = "<group>";
+		};
 		CF0A3A241E217E2A9BE534D1 /* Demo */ = {
 			isa = PBXGroup;
 			children = (
@@ -1012,6 +1026,7 @@
 				F3153553CB31A6997A3F936F /* ForgeCLIInstaller.swift in Sources */,
 				B1B639AADCB9470C970103B8 /* ForgeConfig.swift in Sources */,
 				65F9F7C24F4FE3635F0B936C /* ForgeConfigPrompts.swift in Sources */,
+				90987ACFDEBC83E0342A4D16 /* ForgeRPC.swift in Sources */,
 				1B65752028DE519CB345DAB8 /* ForgeSocketServer.swift in Sources */,
 				DEAC350B0F837DF5137CCCDF /* ForgeStore.swift in Sources */,
 				0567477E6F65BE0C1AE6043F /* FuzzyMatch.swift in Sources */,
@@ -1065,6 +1080,7 @@
 				FAC454390C347F8C1D33EB1F /* SummaryLog.swift in Sources */,
 				D80AF7ED304AE0FCA3C5E84F /* SummaryScheduler.swift in Sources */,
 				69BA6066822D2EC3ECF04AAA /* SummaryStore.swift in Sources */,
+				794D28BAC34D00D30FCF7FAA /* SystemMethods.swift in Sources */,
 				440BF1A6FAD5DDC760BD501E /* Tab.swift in Sources */,
 				2D45B233B746EEEEFB436AEF /* TabBarColors.swift in Sources */,
 				BBD8AE2D99990E0BE2681B70 /* TabBarMetrics.swift in Sources */,

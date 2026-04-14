@@ -146,26 +146,42 @@ final class ForgeSocketServer {
             return
         }
 
-        processMessage(line)
+        if let response = processMessage(line) {
+            Self.writeResponse(response, to: fd)
+        }
     }
 
     // MARK: - Message Processing
 
-    private func processMessage(_ json: String) {
+    /// Returns a response dict to write back to the client, or nil for
+    /// fire-and-forget legacy commands that don't have a reply.
+    private func processMessage(_ json: String) -> [String: Any]? {
         guard let data = json.data(using: .utf8),
-              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let command = dict["command"] as? String
+              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
         else {
-            return
+            return nil
         }
 
+        // New JSON-RPC envelope: {"method": "...", "params": {...}}
+        // Dispatch synchronously on main so we can write the response before the
+        // client's connection times out / we close the fd.
+        if dict["method"] is String {
+            return DispatchQueue.main.sync {
+                MainActor.assumeIsolated {
+                    ForgeRPC.dispatch(envelope: dict)
+                }
+            }
+        }
+
+        // Legacy envelope: {"command": "...", ...} — no response expected.
+        guard let command = dict["command"] as? String else { return nil }
         let sessionID = (dict["session"] as? String).flatMap { UUID(uuidString: $0) }
 
         switch command {
         case "agent_event":
             guard let agent = dict["agent"] as? String,
                   let event = dict["event"] as? String
-            else { return }
+            else { return nil }
             let eventData = dict["data"] as? [String: Any] ?? [:]
             DispatchQueue.main.async {
                 AgentEventStore.shared.handleAgentEvent(
@@ -177,13 +193,26 @@ final class ForgeSocketServer {
             }
 
         case "open_agent":
-            guard let agentCommand = dict["agent_command"] as? String else { return }
+            guard let agentCommand = dict["agent_command"] as? String else { return nil }
             DispatchQueue.main.async {
                 Self.openAgentTab(agentCommand: agentCommand, sessionID: sessionID)
             }
 
         default:
             break
+        }
+        return nil
+    }
+
+    private static func writeResponse(_ response: [String: Any], to fd: Int32) {
+        guard let data = try? JSONSerialization.data(withJSONObject: response, options: [.sortedKeys]),
+              var line = String(data: data, encoding: .utf8)
+        else {
+            return
+        }
+        line += "\n"
+        line.withCString { ptr in
+            _ = Darwin.write(fd, ptr, strlen(ptr))
         }
     }
 
