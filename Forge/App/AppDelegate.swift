@@ -53,6 +53,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         // Start socket server for CLI communication
         ForgeSocketServer.shared.start()
 
+        // Watch each project/workspace's .git/HEAD so branch/dirty state stays
+        // fresh when the user commits or switches branches outside Forge.
+        WorkspaceGitWatcher.shared.start(store: ProjectStore.shared)
+
         // Write shell integration scripts for scrollback restore
         ShellEnvironment.ensureShellIntegration()
 

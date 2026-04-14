@@ -40,6 +40,7 @@
 		440BF1A6FAD5DDC760BD501E /* Tab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5692E40E8CC3135ACC22733D /* Tab.swift */; };
 		44E8410998E0416714800A1B /* NavigationDirection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63A477301682EA23DAA59E81 /* NavigationDirection.swift */; };
 		467529F0AC7B7CE258F5BBE4 /* DemoStateFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A6CD1CBB80B47266E1EF60 /* DemoStateFactory.swift */; };
+		47D58A9420DF78510F52BBF7 /* WorkspaceGitWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8663DB06DC2E7319D471DFB9 /* WorkspaceGitWatcher.swift */; };
 		4C793C7041A31A190944A901 /* UnifiedDiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED7ECF021E249100D45C7B2 /* UnifiedDiffView.swift */; };
 		4E353DD84E747CCAAC3E9A85 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749EB54C1D9FD07119776AA4 /* AppDelegate.swift */; };
 		4E5B37050E49C380D5DDC77A /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE29E80CC2891CE39E9AA50 /* MainSplitViewController.swift */; };
@@ -235,6 +236,7 @@
 		79BF2869844D4AADB3EFF3E5 /* GhosttyTerminalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyTerminalView.swift; sourceTree = "<group>"; };
 		7E28C3575AE17D6490A76432 /* Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workspace.swift; sourceTree = "<group>"; };
 		839E65E109DAFF8720308214 /* TerminalCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalCache.swift; sourceTree = "<group>"; };
+		8663DB06DC2E7319D471DFB9 /* WorkspaceGitWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceGitWatcher.swift; sourceTree = "<group>"; };
 		868FBDD017F6B9CA822F6A7D /* ChangesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesViewModel.swift; sourceTree = "<group>"; };
 		8836627A63A5FC5785B35DB2 /* ModalToastPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalToastPanel.swift; sourceTree = "<group>"; };
 		8A1D2E8F62597C740B62B4D0 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
@@ -589,6 +591,7 @@
 			children = (
 				2B48636B23896A11A9644925 /* GitClient.swift */,
 				66919BFBD1A6FF892D421033 /* ProcessGitClient.swift */,
+				8663DB06DC2E7319D471DFB9 /* WorkspaceGitWatcher.swift */,
 			);
 			path = Git;
 			sourceTree = "<group>";
@@ -1092,6 +1095,7 @@
 				2B397FF767CF6F8ADE761955 /* WorkspaceCommit.swift in Sources */,
 				56CF6611305E42E7DE701ACD /* WorkspaceDiffList.swift in Sources */,
 				766D9CF7612E3BE9CEC14A9E /* WorkspaceDiffViewModel.swift in Sources */,
+				47D58A9420DF78510F52BBF7 /* WorkspaceGitWatcher.swift in Sources */,
 				F4F6CC41FF265C9DA098D17E /* WorkspaceNaming.swift in Sources */,
 				AB404BEE7FC486153DD784A2 /* WorkspaceWelcomeScreen.swift in Sources */,
 				D3B75B31144F373A322543BD /* main.swift in Sources */,
