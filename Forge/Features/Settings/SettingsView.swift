@@ -675,6 +675,8 @@ private struct AgentEditorInline: View {
                     .font(.system(size: 12, design: .monospaced))
             }
 
+            AgentHooksSection(agentCommand: command)
+
             HStack {
                 Spacer()
                 Button(action: { save() }) {
@@ -701,6 +703,112 @@ private struct AgentEditorInline: View {
         }
         let rc = reviewCommand.trimmingCharacters(in: .whitespacesAndNewlines)
         onSave(AgentConfig(id: agentID, name: name, command: command, args: args, environmentVars: envVars, reviewCommand: rc.isEmpty ? nil : rc))
+    }
+}
+
+// MARK: - Agent Hooks
+
+/// Inline section showing whether Forge-managed hooks are present in the agent's
+/// settings file, with install / remove buttons. Only renders for agents that
+/// use the JSON hook installer (currently Claude Code and Codex).
+private struct AgentHooksSection: View {
+    let agentCommand: String
+
+    @State private var isInstalled: Bool = false
+    @State private var lastError: String?
+
+    private enum Kind {
+        case claude, codex
+
+        var label: String {
+            switch self {
+            case .claude: "~/.claude/settings.json"
+            case .codex: "~/.codex/hooks.json"
+            }
+        }
+    }
+
+    private var kind: Kind? {
+        switch agentCommand {
+        case "claude": .claude
+        case "codex": .codex
+        default: nil
+        }
+    }
+
+    var body: some View {
+        if let kind {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Forge Hooks").font(.system(size: 11, weight: .medium)).foregroundColor(.secondary)
+                Text("Lets Forge track agent activity (start, tool use, idle) for live status and notifications.")
+                    .font(.system(size: 10))
+                    .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(isInstalled ? Color.green : Color(nsColor: NSColor(white: 0.35, alpha: 1.0)))
+                        .frame(width: 7, height: 7)
+
+                    Text(isInstalled ? "Installed" : "Not installed")
+                        .font(.system(size: 12))
+                        .foregroundColor(.primary)
+
+                    Text(kind.label)
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+
+                    Spacer()
+
+                    if isInstalled {
+                        Button("Reinstall") { install(kind) }.controlSize(.small)
+                        Button("Remove", role: .destructive) { remove(kind) }.controlSize(.small)
+                    } else {
+                        Button("Install") { install(kind) }.controlSize(.small)
+                    }
+                }
+                .padding(.top, 2)
+
+                if let lastError {
+                    Text(lastError)
+                        .font(.system(size: 10))
+                        .foregroundColor(.red)
+                }
+            }
+            .onAppear { refresh(kind) }
+            .onChange(of: agentCommand) { _, _ in refresh(kind) }
+        }
+    }
+
+    private func refresh(_ kind: Kind) {
+        switch kind {
+        case .claude: isInstalled = AgentSetup.shared.hasClaudeCodeHooks()
+        case .codex: isInstalled = AgentSetup.shared.hasCodexHooks()
+        }
+        lastError = nil
+    }
+
+    private func install(_ kind: Kind) {
+        do {
+            switch kind {
+            case .claude: try AgentSetup.shared.installClaudeCodeHooksThrowing()
+            case .codex: try AgentSetup.shared.installCodexHooksThrowing()
+            }
+            refresh(kind)
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    private func remove(_ kind: Kind) {
+        do {
+            switch kind {
+            case .claude: try AgentSetup.shared.removeClaudeCodeHooks()
+            case .codex: try AgentSetup.shared.removeCodexHooks()
+            }
+            refresh(kind)
+        } catch {
+            lastError = error.localizedDescription
+        }
     }
 }
 

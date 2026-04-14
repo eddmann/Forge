@@ -45,6 +45,16 @@ class AgentSetup {
         try Self.installer.uninstall(settingsURL: codexHooksURL)
     }
 
+    /// Public, throwing install for the Settings UI. Unlike the silent boot-time
+    /// install, this surfaces errors so the user can act on them.
+    func installClaudeCodeHooksThrowing() throws {
+        try Self.installer.install(settingsURL: claudeSettingsURL, hooks: Self.claudeHookGroups)
+    }
+
+    func installCodexHooksThrowing() throws {
+        try Self.installer.install(settingsURL: codexHooksURL, hooks: Self.codexHookGroups)
+    }
+
     // MARK: - Claude Code
 
     private var claudeSettingsURL: URL {
