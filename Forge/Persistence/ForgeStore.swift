@@ -20,6 +20,7 @@ private struct ProjectEntry: Codable {
     var defaultBranch: String
     var createdAt: Date
     var lastActiveAt: Date?
+    var kind: String?
     var workspaces: [WorkspaceEntry]
 
     init(project: Project, workspaces: [Workspace]) {
@@ -29,6 +30,7 @@ private struct ProjectEntry: Codable {
         defaultBranch = project.defaultBranch
         createdAt = project.createdAt
         lastActiveAt = project.lastActiveAt
+        kind = project.kind == .normal ? nil : project.kind.rawValue
         self.workspaces = workspaces.map { WorkspaceEntry(workspace: $0) }
     }
 
@@ -39,7 +41,8 @@ private struct ProjectEntry: Codable {
             path: path,
             defaultBranch: defaultBranch,
             createdAt: createdAt,
-            lastActiveAt: lastActiveAt
+            lastActiveAt: lastActiveAt,
+            kind: kind.flatMap(ProjectKind.init(rawValue:)) ?? .normal
         )
     }
 
@@ -390,6 +393,12 @@ final class ForgeStore {
 
     var reviewsDir: URL {
         let dir = forgeDir.appendingPathComponent("reviews")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    var scratchDir: URL {
+        let dir = forgeDir.appendingPathComponent("scratch")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir
     }

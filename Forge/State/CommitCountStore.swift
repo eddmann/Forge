@@ -41,6 +41,12 @@ class CommitCountStore: ObservableObject {
     }
 
     private func refreshCount(for workspace: Workspace) {
+        // Scratch projects have no remote / parent branch — short-circuit.
+        if workspace.isScratch {
+            countByWorkspace[workspace.id] = 0
+            return
+        }
+
         let path = workspace.path
         let parentBranch = workspace.parentBranch
         let wsID = workspace.id

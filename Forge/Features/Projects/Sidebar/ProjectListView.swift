@@ -15,6 +15,7 @@ struct ProjectListView: View {
 
     @State private var deletingWorkspaceIDs: Set<UUID> = []
     @State private var mergingWorkspaceIDs: Set<UUID> = []
+    @State private var promotingScratch: Project?
 
     private var sortedProjects: [Project] {
         store.projects.sorted {
@@ -32,6 +33,10 @@ struct ProjectListView: View {
         }
     }
 
+    private var scratchProjects: [Project] {
+        filteredProjects.filter(\.isScratch)
+    }
+
     private var groupedProjects: [(title: String, projects: [Project])] {
         let calendar = Calendar.current
         let now = Date()
@@ -42,7 +47,7 @@ struct ProjectListView: View {
         var thisWeek: [Project] = []
         var older: [Project] = []
 
-        for project in filteredProjects {
+        for project in filteredProjects where !project.isScratch {
             let date = project.lastActiveAt ?? project.createdAt
             if date >= startOfToday {
                 today.append(project)
@@ -77,7 +82,7 @@ struct ProjectListView: View {
                     Spacer()
                 }
                 .frame(maxWidth: .infinity)
-            } else if groupedProjects.isEmpty {
+            } else if groupedProjects.isEmpty, scratchProjects.isEmpty {
                 Text("No matches")
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
@@ -85,6 +90,28 @@ struct ProjectListView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
+                        if !scratchProjects.isEmpty {
+                            Text("SCRATCH")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+                                .padding(.horizontal, 14)
+                                .padding(.top, 12)
+                                .padding(.bottom, 4)
+                            ForEach(scratchProjects) { scratch in
+                                if let workspace = store.workspaces(for: scratch.id).first {
+                                    ScratchRow(
+                                        scratch: scratch,
+                                        workspace: workspace,
+                                        isActive: store.activeProjectID == scratch.id,
+                                        isDeleting: deletingWorkspaceIDs.contains(workspace.id),
+                                        onSelect: { store.selectProject(scratch.id) },
+                                        onRename: { newName in renameScratch(scratch, to: newName) },
+                                        onDelete: { deleteScratch(workspace) }
+                                    )
+                                }
+                            }
+                        }
+
                         ForEach(groupedProjects, id: \.title) { group in
                             Text(group.title.uppercased())
                                 .font(.system(size: 10, weight: .semibold))
@@ -159,6 +186,25 @@ struct ProjectListView: View {
         }
         .padding(.top, 38)
         .background(.clear)
+        .sheet(item: $promotingScratch) { scratch in
+            if let workspace = store.workspaces(for: scratch.id).first {
+                ScratchPromoteSheet(
+                    scratch: scratch,
+                    workspace: workspace,
+                    onCancel: { promotingScratch = nil },
+                    onPromote: { parentDir, name in
+                        promotingScratch = nil
+                        promoteScratch(scratch, workspace: workspace, parentDir: parentDir, finalName: name)
+                    }
+                )
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .promoteScratchRequested)) { note in
+            guard let id = note.object as? UUID,
+                  let scratch = store.projects.first(where: { $0.id == id })
+            else { return }
+            promotingScratch = scratch
+        }
     }
 
     // MARK: - Actions
@@ -167,9 +213,67 @@ struct ProjectListView: View {
         NotificationCenter.default.post(name: .openProjectRequested, object: nil)
     }
 
+    private func renameScratch(_ scratch: Project, to newName: String) {
+        guard let index = store.projects.firstIndex(where: { $0.id == scratch.id }) else { return }
+        store.projects[index].name = newName
+        ForgeStore.shared.saveProjectData(projects: store.projects, workspaces: store.workspaces)
+    }
+
+    private func promoteScratch(_ scratch: Project, workspace: Workspace, parentDir: URL, finalName: String) {
+        // Close any open terminal tabs for this scratch
+        let tabsToClose = TerminalSessionManager.shared.tabs.filter { $0.workspaceID == workspace.id }.map(\.id)
+        for tabID in tabsToClose {
+            TerminalSessionManager.shared.closeTab(id: tabID)
+        }
+        ProcessManager.shared.clear()
+
+        ToastManager.shared.showModal("Promoting scratch…")
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                let result = try ScratchPromotion.promote(
+                    scratch: scratch,
+                    workspace: workspace,
+                    parentDir: parentDir,
+                    finalName: finalName,
+                    progress: { step in
+                        DispatchQueue.main.async { ToastManager.shared.showModal(step) }
+                    },
+                    streamLine: { line in
+                        DispatchQueue.main.async { ToastManager.shared.appendModalStreamLine(line) }
+                    }
+                )
+                DispatchQueue.main.async {
+                    store.applyPromotion(scratchID: scratch.id, scratchWorkspaceID: workspace.id, promoted: result)
+                    ToastManager.shared.dismissModal()
+                    ToastManager.shared.show("Promoted to '\(result.project.name)'")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    ToastManager.shared.dismissModal()
+                    ToastManager.shared.show(error.localizedDescription, severity: .error, duration: 6.0)
+                }
+            }
+        }
+    }
+
+    private func deleteScratch(_ workspace: Workspace) {
+        deletingWorkspaceIDs.insert(workspace.id)
+        ProcessManager.shared.clear()
+        DispatchQueue.global(qos: .userInitiated).async {
+            AgentSetup.shared.untrustCodexProject(path: workspace.path)
+            if FileManager.default.fileExists(atPath: workspace.path) {
+                try? FileManager.default.removeItem(atPath: workspace.path)
+            }
+            DispatchQueue.main.async {
+                deletingWorkspaceIDs.remove(workspace.id)
+                store.deleteWorkspace(id: workspace.id)
+                ToastManager.shared.show("Deleted scratch")
+            }
+        }
+    }
+
     private func selectProject(_ project: Project) {
-        store.activeProjectID = project.id
-        store.activeWorkspaceID = nil
+        store.selectProject(project.id)
     }
 
     private func selectWorkspace(_ workspace: Workspace) {

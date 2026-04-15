@@ -177,6 +177,7 @@ extension ActivityEventKind {
         switch self {
         case .workspaceCreated: "plus.circle.fill"
         case .workspaceMerged: "arrow.triangle.merge"
+        case .scratchCreated: "scribble"
         case .agentUpdate: "text.bubble.fill"
         case .reviewSent: "paperplane.circle.fill"
         }
@@ -186,6 +187,7 @@ extension ActivityEventKind {
         switch self {
         case .workspaceCreated: .green
         case .workspaceMerged: .purple
+        case .scratchCreated: .green
         case .agentUpdate: .blue
         case .reviewSent: .orange
         }

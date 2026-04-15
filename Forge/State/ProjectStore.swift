@@ -171,6 +171,17 @@ class ProjectStore: ObservableObject {
 
     // MARK: - Project Actions
 
+    /// Centralized project selection. Sets both IDs together for scratch projects.
+    func selectProject(_ projectID: UUID) {
+        guard let project = projects.first(where: { $0.id == projectID }) else { return }
+        activeProjectID = project.id
+        if project.isScratch {
+            activeWorkspaceID = workspaces(for: project.id).first?.id
+        } else {
+            activeWorkspaceID = nil
+        }
+    }
+
     func addProject(from url: URL) {
         guard !projects.contains(where: { $0.path == url.path }) else {
             if let existing = projects.first(where: { $0.path == url.path }) {
@@ -189,12 +200,80 @@ class ProjectStore: ObservableObject {
         Task { @MainActor in ToastManager.shared.show("Added project '\(project.name)'") }
     }
 
+    /// Apply the result of a successful promotion: replace the scratch records with the new project + workspace.
+    func applyPromotion(scratchID: UUID, scratchWorkspaceID: UUID, promoted: ScratchPromotion.Result) {
+        // Drop scratch records (the directory has already moved, don't try to delete it again)
+        workspaces.removeAll { $0.id == scratchWorkspaceID }
+        projects.removeAll { $0.id == scratchID }
+        ForgeStore.shared.updateStateFields { state in
+            state.collapsedProjects.remove(scratchID)
+        }
+
+        // Add new normal project + workspace
+        projects.append(promoted.project)
+        // Workspace was constructed with the new project's ID inside the cloner, so it's already correct.
+        workspaces.append(promoted.workspace.workspace)
+
+        // Activate the new pair
+        activeProjectID = promoted.project.id
+        activeWorkspaceID = promoted.workspace.workspace.id
+
+        let wsID = promoted.workspace.workspace.id
+        Task { @MainActor in
+            TerminalSessionManager.shared.newlyCreatedWorkspaceIDs.insert(wsID)
+        }
+        let parentBranch = promoted.workspace.workspace.parentBranch
+        Task { @MainActor in
+            ActivityLogStore.shared.append(workspaceID: wsID, event: ActivityEvent(
+                kind: .workspaceCreated,
+                title: "Workspace created",
+                detail: "Created from \(parentBranch)"
+            ))
+        }
+        saveAll()
+    }
+
+    /// Create a scratch project + paired workspace at `~/.forge/scratch/<auto-name>/`.
+    /// Both records are persisted together; selection lands on both immediately.
+    func createScratch() throws {
+        let result = try WorkspaceCloner.createScratch()
+        let projectID = UUID()
+        let project = Project(
+            id: projectID,
+            name: result.name,
+            path: result.path,
+            defaultBranch: result.branch,
+            kind: .scratch
+        )
+        var workspace = result.workspace
+        workspace.projectID = projectID
+
+        projects.append(project)
+        workspaces.append(workspace)
+        let wsID = workspace.id
+        Task { @MainActor in
+            TerminalSessionManager.shared.newlyCreatedWorkspaceIDs.insert(wsID)
+        }
+        Task { @MainActor in
+            ActivityLogStore.shared.append(workspaceID: wsID, event: ActivityEvent(
+                kind: .scratchCreated,
+                title: "Scratch created"
+            ))
+        }
+        saveAll()
+        activeProjectID = projectID
+        activeWorkspaceID = workspace.id
+        Task { @MainActor in ToastManager.shared.show("Created scratch '\(result.name)'") }
+    }
+
     func removeProject(id: UUID) {
         // Remove associated workspaces
         let projectWorkspaces = workspaces.filter { $0.projectID == id }
         for ws in projectWorkspaces {
             AgentSetup.shared.untrustCodexProject(path: ws.path)
-            try? FileManager.default.removeItem(atPath: ws.path)
+            if FileManager.default.fileExists(atPath: ws.path) {
+                try? FileManager.default.removeItem(atPath: ws.path)
+            }
         }
         workspaces.removeAll { $0.projectID == id }
 
@@ -213,6 +292,11 @@ class ProjectStore: ObservableObject {
     // MARK: - Workspace Actions
 
     func addWorkspace(_ workspace: Workspace) {
+        // Defensive: scratch projects are single-workspace by design. Use createScratch instead.
+        if let project = projects.first(where: { $0.id == workspace.projectID }), project.isScratch {
+            assertionFailure("Cannot add a workspace to a scratch project; use createScratch")
+            return
+        }
         workspaces.append(workspace)
         let wsID = workspace.id
         Task { @MainActor in
@@ -246,6 +330,19 @@ class ProjectStore: ObservableObject {
         }
 
         workspaces.removeAll { $0.id == id }
+
+        // For scratch projects, the project and workspace are one entity — drop the project record too.
+        let scratchProjectID = projects.first(where: { $0.id == workspace.projectID && $0.isScratch })?.id
+        if let scratchProjectID {
+            projects.removeAll { $0.id == scratchProjectID }
+            ForgeStore.shared.updateStateFields { state in
+                state.collapsedProjects.remove(scratchProjectID)
+            }
+            if activeProjectID == scratchProjectID {
+                activeProjectID = projects.first?.id
+            }
+        }
+
         if activeWorkspaceID == id {
             activeWorkspaceID = nil
         }

@@ -63,4 +63,9 @@ struct Workspace: Identifiable, Codable, Equatable, Hashable {
         allocatedPorts = try c.decodeIfPresent([String: Int].self, forKey: .allocatedPorts) ?? [:]
         portDetails = try c.decodeIfPresent([String: String].self, forKey: .portDetails) ?? [:]
     }
+
+    /// Whether this workspace belongs to a scratch project. Cold-path lookup via ProjectStore.
+    var isScratch: Bool {
+        ProjectStore.shared.projects.first(where: { $0.id == projectID })?.isScratch ?? false
+    }
 }

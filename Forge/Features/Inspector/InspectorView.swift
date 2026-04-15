@@ -14,7 +14,12 @@ struct InspectorView: View {
     @State private var commands: [ProjectCommand] = []
 
     private var activeTab: InspectorTab {
-        InspectorTab(rawValue: inspectorState.current.activeTab) ?? .working
+        let tab = InspectorTab(rawValue: inspectorState.current.activeTab) ?? .working
+        // Workspace tab is meaningless for scratch — fall back to working.
+        if tab == .workspace, store.activeWorkspace?.isScratch == true {
+            return .working
+        }
+        return tab
     }
 
     private var activeTabBinding: Binding<InspectorTab> {
@@ -22,6 +27,13 @@ struct InspectorView: View {
             get: { activeTab },
             set: { newTab in inspectorState.update { $0.activeTab = newTab.rawValue } }
         )
+    }
+
+    private var availableTabs: [InspectorTab] {
+        if store.activeWorkspace?.isScratch == true {
+            return [.working]
+        }
+        return InspectorTab.allCases
     }
 
     private var commandsExpandedBinding: Binding<Bool> {
@@ -40,9 +52,9 @@ struct InspectorView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Tab bar — only show when a workspace is active
-            if store.activeWorkspace != nil {
-                InspectorTabBar(activeTab: activeTabBinding)
+            // Tab bar — only show when a workspace is active and there's more than one tab
+            if store.activeWorkspace != nil, availableTabs.count > 1 {
+                InspectorTabBar(activeTab: activeTabBinding, tabs: availableTabs)
                     .zIndex(1)
             }
 
@@ -155,12 +167,13 @@ struct InspectorView: View {
 
 private struct InspectorTabBar: View {
     @Binding var activeTab: InspectorTab
+    let tabs: [InspectorTab]
     private let theme = TerminalAppearanceStore.shared.config.theme
 
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
-                ForEach(InspectorTab.allCases, id: \.self) { tab in
+                ForEach(tabs, id: \.self) { tab in
                     tabCell(tab)
                 }
             }

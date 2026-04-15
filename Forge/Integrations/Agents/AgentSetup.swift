@@ -30,7 +30,8 @@ class AgentSetup {
         installCodexHooks()
         installPiExtension()
         installOpenCodePlugin()
-        trustClaudeCodeClonesDir()
+        trustClaudeCodeDir(path: ForgeStore.shared.clonesDir.path)
+        trustClaudeCodeDir(path: ForgeStore.shared.scratchDir.path)
     }
 
     // MARK: - Public Inspection / Removal
@@ -344,10 +345,10 @@ class AgentSetup {
 
     // MARK: - Workspace Trust
 
-    /// Trusts the Forge clones directory in Claude Code's config so new workspaces
-    /// skip the interactive trust dialog. Claude Code walks up parent directories
-    /// when checking trust, so a single entry for the clones dir covers all children.
-    private func trustClaudeCodeClonesDir() {
+    /// Trusts a Forge directory in Claude Code's config so descendants skip the trust dialog.
+    /// Claude Code walks up parent directories when checking trust, so a single entry covers
+    /// all children. Used for both `~/.forge/clones/` and `~/.forge/scratch/`.
+    func trustClaudeCodeDir(path: String) {
         let configPath = NSHomeDirectory() + "/.claude.json"
         let fm = FileManager.default
 
@@ -358,14 +359,13 @@ class AgentSetup {
             config = json
         }
 
-        let clonesPath = ForgeStore.shared.clonesDir.path
         var projects = config["projects"] as? [String: Any] ?? [:]
-        var projectEntry = projects[clonesPath] as? [String: Any] ?? [:]
+        var projectEntry = projects[path] as? [String: Any] ?? [:]
 
         guard projectEntry["hasTrustDialogAccepted"] as? Bool != true else { return }
 
         projectEntry["hasTrustDialogAccepted"] = true
-        projects[clonesPath] = projectEntry
+        projects[path] = projectEntry
         config["projects"] = projects
 
         if let data = try? JSONSerialization.data(withJSONObject: config, options: [.prettyPrinted, .sortedKeys]) {

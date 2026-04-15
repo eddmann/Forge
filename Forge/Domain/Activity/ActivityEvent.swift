@@ -5,6 +5,7 @@ import Foundation
 enum ActivityEventKind: String, Codable {
     case workspaceCreated
     case workspaceMerged
+    case scratchCreated
     case agentUpdate
     case reviewSent
 

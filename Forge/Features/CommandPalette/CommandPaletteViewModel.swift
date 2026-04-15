@@ -84,6 +84,9 @@ final class CommandPaletteViewModel: ObservableObject {
                 }
             }
 
+            // Skip implicit workspace entries for scratch projects — they're shown as the project itself.
+            if project.isScratch { continue }
+
             // Score workspaces
             for ws in projectWorkspaces {
                 let isCurrent = ws.id == activeWorkspaceID
@@ -145,10 +148,17 @@ final class CommandPaletteViewModel: ObservableObject {
     }
 
     private func buildDo(query: String) -> CPSection? {
+        // Filter out "New Workspace" when the active project is a scratch (single-workspace invariant)
+        let isScratchActive = ProjectStore.shared.activeProject?.isScratch == true
+        let availableActions = actions.filter { action in
+            if isScratchActive, action.id == "new-ws" { return false }
+            return true
+        }
+
         let items: [CPItem] = if query.isEmpty {
-            actions.map { .action($0) }
+            availableActions.map { .action($0) }
         } else {
-            actions.compactMap { action -> (CPItem, Int)? in
+            availableActions.compactMap { action -> (CPItem, Int)? in
                 guard let score = FuzzyMatch.score(pattern: query, in: action.name) else { return nil }
                 return (.action(action), score)
             }
@@ -190,8 +200,7 @@ final class CommandPaletteViewModel: ObservableObject {
 
         switch item {
         case let .project(id, _, _):
-            store.activeProjectID = id
-            store.activeWorkspaceID = nil
+            store.selectProject(id)
 
         case let .workspace(id, _, _, _):
             guard let ws = store.workspaces.first(where: { $0.id == id }) else { return }
@@ -287,6 +296,9 @@ final class CommandPaletteViewModel: ObservableObject {
 
         case "add-project":
             NotificationCenter.default.post(name: .openProjectRequested, object: nil)
+
+        case "new-scratch":
+            NotificationCenter.default.post(name: .newScratchRequested, object: nil)
 
         default:
             // Editor actions: "editor-<name>"

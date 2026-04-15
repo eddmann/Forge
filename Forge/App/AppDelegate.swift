@@ -89,6 +89,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             name: .openProjectRequested,
             object: nil
         )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(newScratch(_:)),
+            name: .newScratchRequested,
+            object: nil
+        )
+    }
+
+    @objc func newScratch(_: Any?) {
+        MainActor.assumeIsolated {
+            do {
+                try ProjectStore.shared.createScratch()
+            } catch {
+                ToastManager.shared.show("Failed to create scratch: \(error.localizedDescription)", severity: .error)
+            }
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_: NSApplication) -> Bool {
@@ -178,6 +195,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         let openProjectItem = NSMenuItem(title: "Open Project…", action: #selector(openProject(_:)), keyEquivalent: "o")
         openProjectItem.keyEquivalentModifierMask = [.command, .shift]
         menu.addItem(openProjectItem)
+        let newScratchItem = NSMenuItem(title: "New Scratch", action: #selector(newScratch(_:)), keyEquivalent: "n")
+        newScratchItem.keyEquivalentModifierMask = [.command, .shift]
+        menu.addItem(newScratchItem)
         let recentItem = NSMenuItem(title: "Open Recent", action: nil, keyEquivalent: "")
         openRecentSubmenu = NSMenu()
         openRecentSubmenu.delegate = self
@@ -583,8 +603,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
     @objc func openRecentProject(_ sender: NSMenuItem) {
         guard let projectID = sender.representedObject as? UUID else { return }
-        ProjectStore.shared.activeProjectID = projectID
-        ProjectStore.shared.activeWorkspaceID = nil
+        ProjectStore.shared.selectProject(projectID)
     }
 
     @objc func openInFinder(_: Any?) {

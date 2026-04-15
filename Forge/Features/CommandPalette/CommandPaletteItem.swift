@@ -101,6 +101,10 @@ struct CPAction: Identifiable, Hashable {
         id: "add-project", name: "Add Project",
         subtitle: "Open a project directory", icon: "folder.badge.plus", shortcut: "\u{21E7}\u{2318}O"
     )
+    static let newScratch = CPAction(
+        id: "new-scratch", name: "New Scratch",
+        subtitle: "Create a throwaway prototype project", icon: "scribble", shortcut: "\u{21E7}\u{2318}N"
+    )
 
     static func openInEditor(_ editor: ExternalEditor) -> CPAction {
         CPAction(
@@ -112,7 +116,7 @@ struct CPAction: Identifiable, Hashable {
     static func all(editors: [ExternalEditor]) -> [CPAction] {
         var actions: [CPAction] = [
             .newWorkspace, .newTab, .splitVertical, .splitHorizontal,
-            .toggleSidebar, .toggleInspector, .settings, .addProject
+            .toggleSidebar, .toggleInspector, .settings, .addProject, .newScratch
         ]
         for editor in editors {
             actions.append(openInEditor(editor))

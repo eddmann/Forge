@@ -71,6 +71,16 @@ final class WorkspaceDiffViewModel: ObservableObject {
             return
         }
 
+        // Scratch projects have no remote / parent branch — show empty state.
+        if workspace.isScratch {
+            fileDiffs = []
+            commits = []
+            stats = nil
+            isLoading = false
+            error = nil
+            return
+        }
+
         let parentRef = "origin/\(workspace.parentBranch)"
 
         // Check if HEAD has changed — skip redundant work

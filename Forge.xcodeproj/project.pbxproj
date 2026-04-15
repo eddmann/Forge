@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0567477E6F65BE0C1AE6043F /* FuzzyMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFE8F3B9F661EEE7E768E66C /* FuzzyMatch.swift */; };
+		075E4E76C3E6C7A8EC13D6E4 /* ScratchPromoteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35BC3B6503AA758A21B99208 /* ScratchPromoteSheet.swift */; };
 		07E751BB3DB8C5A551D114AD /* CommandPaletteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BCD87FD2A8EFF1229D24CB /* CommandPaletteViewModel.swift */; };
 		0C401CA4784BC5616BB7AA5D /* AgentReviewPayloadBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */; };
 		10ABE7EA8B508FD50BC72C8D /* ProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2846837C3C3B77437CA2B0 /* ProcessManager.swift */; };
@@ -62,6 +63,7 @@
 		6620650A4F8E1CB27057FE5B /* TerminalSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03D48F43AB138181D6CD761 /* TerminalSession.swift */; };
 		673D256E6787F286D9EEC05B /* TerminalObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E805EE38B5FF260D35CE21 /* TerminalObserver.swift */; };
 		676341BCA86E78A23161ED1B /* PaneID.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8ADAE09E2AF777777761B7F /* PaneID.swift */; };
+		68DF03F84175B8E5523CA4A0 /* ScratchRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FC596E17C296C974E47EB55 /* ScratchRow.swift */; };
 		68F2EED67A1677F528879B69 /* ActivityLogTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96FC34B5B33A1ABC9CC4605 /* ActivityLogTabView.swift */; };
 		694668C2FDEE836BC7B3F22D /* PaneState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7701E79B028746189D17A0A7 /* PaneState.swift */; };
 		69BA6066822D2EC3ECF04AAA /* SummaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D10E6E44336CA3AE64223EDF /* SummaryStore.swift */; };
@@ -127,6 +129,7 @@
 		D3AC14E880180F1AEA725ABD /* TabDragPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4F0F389914743FA021ED2E /* TabDragPreview.swift */; };
 		D3B75B31144F373A322543BD /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F8D881C55D57EE673CB404 /* main.swift */; };
 		D3BD134D32903952D880E53C /* TerminalAppearanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53E8575792CD729D327E6C2A /* TerminalAppearanceView.swift */; };
+		D74A0B01A4F093FD9CB7AF4F /* ScratchPromotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFA73A07E126E121C1472B4 /* ScratchPromotion.swift */; };
 		D7D7672CD9D4E1F85F7D0167 /* DiffInlineViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE4BBA287E68D96655A160D /* DiffInlineViews.swift */; };
 		D80AF7ED304AE0FCA3C5E84F /* SummaryScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB2960124F5F2D90BC89C6A5 /* SummaryScheduler.swift */; };
 		D9329A95BC037EA8F5E7C659 /* GhosttyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3624BDB8FD61A57C38FA30C /* GhosttyApp.swift */; };
@@ -204,11 +207,13 @@
 		324C6BF661A3B57C7A0FE4DC /* TabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItem.swift; sourceTree = "<group>"; };
 		33009813506A712F05C01586 /* WorkspaceNaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceNaming.swift; sourceTree = "<group>"; };
 		33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentReviewPayloadBuilder.swift; sourceTree = "<group>"; };
+		35BC3B6503AA758A21B99208 /* ScratchPromoteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPromoteSheet.swift; sourceTree = "<group>"; };
 		37D513FDDCFEDCD851ADC4A6 /* PokemonDex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonDex.swift; sourceTree = "<group>"; };
 		39F12DDCB35F9733A5846460 /* DiffTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTabView.swift; sourceTree = "<group>"; };
 		3A4D2BD2E0F08EC30EB04939 /* ProcessesDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessesDrawer.swift; sourceTree = "<group>"; };
 		3C0E18D8DBAC71B87110136F /* SplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
 		3E77365CA7E63CC467F9F5C1 /* ForgeRPC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeRPC.swift; sourceTree = "<group>"; };
+		3FC596E17C296C974E47EB55 /* ScratchRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchRow.swift; sourceTree = "<group>"; };
 		411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonsplitDebugCounters.swift; sourceTree = "<group>"; };
 		43EA0E1CD1E3F2DEB33CAB9D /* SplitDiffTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitDiffTableView.swift; sourceTree = "<group>"; };
 		447E8085460F22791A2E2002 /* GitDiffService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitDiffService.swift; sourceTree = "<group>"; };
@@ -294,6 +299,7 @@
 		CDD54FF735F21B48ED884859 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		CE0283AAF15EE234022748C7 /* TerminalTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalTab.swift; sourceTree = "<group>"; };
 		CE5A832DC1A1CA840C037625 /* TerminalAppearanceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalAppearanceStore.swift; sourceTree = "<group>"; };
+		CEFA73A07E126E121C1472B4 /* ScratchPromotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPromotion.swift; sourceTree = "<group>"; };
 		D10E6E44336CA3AE64223EDF /* SummaryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryStore.swift; sourceTree = "<group>"; };
 		D13DD0F1CF1BF5AEB2EB8042 /* PaneContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneContainerView.swift; sourceTree = "<group>"; };
 		D189E7C10808C8DFEA133A5C /* TabItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabItemView.swift; sourceTree = "<group>"; };
@@ -499,6 +505,7 @@
 			children = (
 				F2BD7C813556607AFCF0EAFB /* BranchPickerView.swift */,
 				37D513FDDCFEDCD851ADC4A6 /* PokemonDex.swift */,
+				CEFA73A07E126E121C1472B4 /* ScratchPromotion.swift */,
 				93EA6848CBC1E2DEE1295EDC /* WorkspaceCloner.swift */,
 				33009813506A712F05C01586 /* WorkspaceNaming.swift */,
 				00A33F98B22ADD7CD5183A9E /* WorkspaceWelcomeScreen.swift */,
@@ -775,6 +782,8 @@
 			isa = PBXGroup;
 			children = (
 				72C84715E19D3D7A198B19B8 /* ProjectListView.swift */,
+				35BC3B6503AA758A21B99208 /* ScratchPromoteSheet.swift */,
+				3FC596E17C296C974E47EB55 /* ScratchRow.swift */,
 				10150AB1CC6C4F8AE3423ABD /* SidebarViewController.swift */,
 			);
 			path = Sidebar;
@@ -1077,6 +1086,9 @@
 				B9210B522CAA640A2E75D1B4 /* ProjectStore.swift in Sources */,
 				EBE6970C1FAB16099C16176C /* ReviewStore.swift in Sources */,
 				6A3DE35686696B1253DA0735 /* SafeTooltip.swift in Sources */,
+				075E4E76C3E6C7A8EC13D6E4 /* ScratchPromoteSheet.swift in Sources */,
+				D74A0B01A4F093FD9CB7AF4F /* ScratchPromotion.swift in Sources */,
+				68DF03F84175B8E5523CA4A0 /* ScratchRow.swift in Sources */,
 				D9645675D4C6E211F608B386 /* SendToAgentView.swift in Sources */,
 				5756BA39E77383BFCAF37803 /* SettingsView.swift in Sources */,
 				2822496228736C7358FF2727 /* SettingsWindowController.swift in Sources */,

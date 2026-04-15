@@ -21,11 +21,19 @@ enum WorkspaceCloner {
         progress: ((String) -> Void)? = nil,
         streamLine: ((String) -> Void)? = nil
     ) throws -> CreateResult {
-        let existingNames = ProjectStore.shared.workspaces.map(\.name)
+        let clonesDir = ForgeStore.shared.clonesDir
+        // Include existing on-disk clone dir names so a stale directory left behind doesn't collide.
+        let onDiskNames = ((try? FileManager.default.contentsOfDirectory(atPath: clonesDir.path)) ?? [])
+            .compactMap { dir -> String? in
+                // Strip the "<projectName>-" prefix when present so we compare apples-to-apples.
+                let prefix = "\(projectName)-"
+                return dir.hasPrefix(prefix) ? String(dir.dropFirst(prefix.count)) : dir
+            }
+        let existingNames = ProjectStore.shared.workspaces.map(\.name) + onDiskNames
         let name = WorkspaceNaming.generateUnique(existing: existingNames)
 
         let destDirName = "\(projectName)-\(name)"
-        let destPath = ForgeStore.shared.clonesDir.appendingPathComponent(destDirName).path
+        let destPath = clonesDir.appendingPathComponent(destDirName).path
 
         progress?("Cloning repository…")
         let result = try cloneProject(source: projectPath, dest: destPath)
@@ -97,6 +105,66 @@ enum WorkspaceCloner {
             workspace: workspace,
             setupFailed: setupResult?.success == false ? setupResult : nil
         )
+    }
+
+    // MARK: - Create Scratch
+
+    /// Create a scratch project + workspace pair at `~/.forge/scratch/<name>/`.
+    /// Skips CoW cloning, parent-branch checkout, remote setup, and forge.json lifecycle.
+    /// Returns the workspace; the caller pairs it with a `Project { kind: .scratch }` at the same path.
+    static func createScratch(progress: ((String) -> Void)? = nil) throws -> (workspace: Workspace, name: String, branch: String, path: String) {
+        let scratchDir = ForgeStore.shared.scratchDir
+        // Treat both in-memory names AND existing on-disk directories as taken — guards against
+        // stale dirs left behind by crashes or external tinkering.
+        let onDiskNames = (try? FileManager.default.contentsOfDirectory(atPath: scratchDir.path)) ?? []
+        let existingNames = ProjectStore.shared.projects.map(\.name)
+            + ProjectStore.shared.workspaces.map(\.name)
+            + onDiskNames
+        let name = WorkspaceNaming.generateUnique(existing: existingNames)
+        let destPath = scratchDir.appendingPathComponent(name).path
+
+        guard !FileManager.default.fileExists(atPath: destPath) else {
+            throw NSError(
+                domain: NSCocoaErrorDomain,
+                code: NSFileWriteFileExistsError,
+                userInfo: [NSLocalizedDescriptionKey: "Scratch directory already exists: \(destPath)"]
+            )
+        }
+
+        progress?("Creating directory…")
+        try FileManager.default.createDirectory(atPath: destPath, withIntermediateDirectories: true)
+
+        progress?("Initializing git repository…")
+        try runGitOrThrow(in: destPath, args: ["init"])
+
+        // Pre-seed Codex trust before any agent runs
+        AgentSetup.shared.trustCodexProject(path: destPath)
+
+        // Capture the actual default branch (respects user's init.defaultBranch)
+        let branch = Git.shared.currentBranch(in: destPath) ?? "main"
+
+        // Ensure user.email / user.name are set so the empty commit can be authored
+        let (hasEmail, _) = runGitSync(in: destPath, args: ["config", "user.email"])
+        if !hasEmail {
+            _ = runGitSync(in: destPath, args: ["config", "user.email", "scratch@forge.local"])
+        }
+        let (hasName, _) = runGitSync(in: destPath, args: ["config", "user.name"])
+        if !hasName {
+            _ = runGitSync(in: destPath, args: ["config", "user.name", "Forge Scratch"])
+        }
+
+        progress?("Creating initial commit…")
+        try runGitOrThrow(in: destPath, args: ["commit", "--allow-empty", "-m", "Initial scratch commit"])
+
+        let workspace = Workspace(
+            projectID: UUID(), // placeholder — replaced by caller with the paired project's ID
+            name: name,
+            path: destPath,
+            branch: branch,
+            parentBranch: branch,
+            fullClone: false
+        )
+        return (workspace, name, branch, destPath)
     }
 
     private static func checkoutWorkspaceBaseBranch(in repositoryPath: String, parentBranch: String) throws {
