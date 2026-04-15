@@ -75,9 +75,7 @@ enum TerminalSendText: ForgeRPCMethod {
         guard let text = params["text"] as? String else {
             throw ForgeRPCError.invalidParams("'text' is required")
         }
-        guard let view = TerminalCache.shared.view(for: sid) else {
-            throw ForgeRPCError.notFound("No terminal for session \(sid.uuidString)")
-        }
+        let view = try resolveOrMaterialize(sessionID: sid)
         view.sendInput(text)
         return ["ok": true]
     }
@@ -101,12 +99,10 @@ enum TerminalSendKey: ForgeRPCMethod {
         guard let key = params["key"] as? String, !key.isEmpty else {
             throw ForgeRPCError.invalidParams("'key' is required")
         }
-        guard let view = TerminalCache.shared.view(for: sid) else {
-            throw ForgeRPCError.notFound("No terminal for session \(sid.uuidString)")
-        }
         guard let sequence = Self.keySequence(for: key) else {
             throw ForgeRPCError.invalidParams("Unknown key: \(key)")
         }
+        let view = try resolveOrMaterialize(sessionID: sid)
         view.sendInput(sequence)
         return ["ok": true]
     }
@@ -171,4 +167,22 @@ enum TerminalOpenAgent: ForgeRPCMethod {
         )
         return ["ok": true]
     }
+}
+
+// MARK: - Helpers
+
+/// Look up the terminal view for a session, materialising it (creating the
+/// `GhosttyTerminalView` and starting the shell) if it hasn't been rendered
+/// yet. Used by `terminal.send_text` / `terminal.send_key` so agents can drive
+/// background-workspace terminals without the user having to open that tab
+/// first. Throws `not_found` only when the session ID itself is unknown.
+@MainActor
+private func resolveOrMaterialize(sessionID: UUID) throws -> GhosttyTerminalView {
+    if let existing = TerminalCache.shared.view(for: sessionID) {
+        return existing
+    }
+    guard let session = TerminalSessionManager.shared.session(for: sessionID) else {
+        throw ForgeRPCError.notFound("No session \(sessionID.uuidString)")
+    }
+    return TerminalCache.shared.terminalView(for: session)
 }
