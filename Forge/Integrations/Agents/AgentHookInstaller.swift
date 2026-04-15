@@ -14,6 +14,21 @@ struct AgentHookInstaller {
     /// Substring used to identify a hook command as Forge-managed.
     let ownershipMarker: String
 
+    /// Additional substrings that mark hook entries as Forge-owned. Used to
+    /// recognise legacy formats so reinstall cleans them up even after we've
+    /// changed the primary marker string.
+    let legacyMarkers: [String]
+
+    init(ownershipMarker: String, legacyMarkers: [String] = []) {
+        self.ownershipMarker = ownershipMarker
+        self.legacyMarkers = legacyMarkers
+    }
+
+    private func commandIsOwned(_ command: String) -> Bool {
+        if command.contains(ownershipMarker) { return true }
+        return legacyMarkers.contains { command.contains($0) }
+    }
+
     /// Inspect the settings file and report whether any Forge-managed hook is present.
     func isInstalled(settingsURL: URL) -> Bool {
         guard let settings = readSettings(at: settingsURL),
@@ -87,7 +102,7 @@ struct AgentHookInstaller {
         guard let entries = group["hooks"] as? [[String: Any]] else { return false }
         return entries.contains { entry in
             guard let command = entry["command"] as? String else { return false }
-            return command.contains(ownershipMarker)
+            return commandIsOwned(command)
         }
     }
 

@@ -246,6 +246,13 @@ enum ShellEnvironment {
             env["FORGE_HISTFILE"] = (historyDir as NSString).appendingPathComponent("\(sessionID.uuidString)")
         }
 
+        // Expose workspace/project scope so CLI commands (and agent hooks) can
+        // identify where they're running without round-tripping through the app.
+        if let workspace {
+            env["FORGE_WORKSPACE_ID"] = workspace.id.uuidString
+            env["FORGE_PROJECT_ID"] = workspace.projectID.uuidString
+        }
+
         // Shell integration via ZDOTDIR injection (zsh) or PROMPT_COMMAND (bash)
         let integrationDir = shellIntegrationDir
         env["FORGE_SHELL_INTEGRATION_DIR"] = integrationDir

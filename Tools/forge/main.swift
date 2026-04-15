@@ -15,21 +15,6 @@ guard args.count >= 2 else {
 let subargs = Array(args.dropFirst(2))
 
 switch args[1] {
-// Legacy fire-and-forget hooks (used by installed agent hook scripts)
-case "event":
-    guard subargs.count >= 2 else {
-        FileHandle.standardError.write(Data("Usage: forge event <agent> <event_type>\n".utf8))
-        exit(1)
-    }
-    sendEvent(agent: subargs[0], eventType: subargs[1])
-
-case "open-agent":
-    guard let command = subargs.first else {
-        FileHandle.standardError.write(Data("Usage: forge open-agent <agent-command>\n".utf8))
-        exit(1)
-    }
-    openAgent(command: command)
-
 // Universal escape hatch
 case "rpc":
     guard let method = subargs.first else {
@@ -82,77 +67,6 @@ default:
     exit(1)
 }
 
-// MARK: - Event
-
-func sendEvent(agent: String, eventType: String) {
-    let socketPath = ProcessInfo.processInfo.environment["FORGE_SOCKET"]
-        ?? NSHomeDirectory() + "/.forge/state/forge.sock"
-    let sessionID = ProcessInfo.processInfo.environment["FORGE_SESSION"]
-
-    // Read hook JSON payload from stdin
-    var stdinData = Data()
-    let handle = FileHandle.standardInput
-    while true {
-        let chunk = handle.availableData
-        if chunk.isEmpty { break }
-        stdinData.append(chunk)
-        if stdinData.count > 131_072 { break } // 128KB limit
-    }
-
-    // Build wrapped payload
-    var payload: [String: Any] = [
-        "command": "agent_event",
-        "agent": agent,
-        "event": eventType
-    ]
-    if let sessionID {
-        payload["session"] = sessionID
-    }
-
-    // Parse stdin as JSON and attach as "data" field
-    if !stdinData.isEmpty,
-       let stdinJSON = try? JSONSerialization.jsonObject(with: stdinData)
-    {
-        payload["data"] = stdinJSON
-    }
-
-    guard let data = try? JSONSerialization.data(withJSONObject: payload),
-          var json = String(data: data, encoding: .utf8)
-    else {
-        FileHandle.standardError.write(Data("Failed to encode JSON\n".utf8))
-        exit(1)
-    }
-    json += "\n"
-
-    sendToSocket(json, socketPath: socketPath)
-}
-
-// MARK: - Open Agent
-
-func openAgent(command: String) {
-    let socketPath = ProcessInfo.processInfo.environment["FORGE_SOCKET"]
-        ?? NSHomeDirectory() + "/.forge/state/forge.sock"
-    let sessionID = ProcessInfo.processInfo.environment["FORGE_SESSION"]
-
-    var payload: [String: Any] = [
-        "command": "open_agent",
-        "agent_command": command
-    ]
-    if let sessionID {
-        payload["session"] = sessionID
-    }
-
-    guard let data = try? JSONSerialization.data(withJSONObject: payload),
-          var json = String(data: data, encoding: .utf8)
-    else {
-        FileHandle.standardError.write(Data("Failed to encode JSON\n".utf8))
-        exit(1)
-    }
-    json += "\n"
-
-    sendToSocket(json, socketPath: socketPath)
-}
-
 // MARK: - RPC
 
 /// Send a JSON-RPC request and write the response (or error) to stdout.
@@ -197,15 +111,6 @@ func sendRPC(method: String, paramsJSON: String?) {
 }
 
 // MARK: - Socket
-
-/// Fire-and-forget write. Used by hook events that don't need a response.
-func sendToSocket(_ message: String, socketPath: String) {
-    let fd = openSocket(socketPath: socketPath)
-    defer { close(fd) }
-    message.withCString { ptr in
-        _ = Darwin.write(fd, ptr, strlen(ptr))
-    }
-}
 
 /// Write a request, read a single newline-terminated response. Returns nil on
 /// transport failure (e.g. Forge not running).
@@ -253,35 +158,6 @@ func sendAndReceive(_ message: String, socketPath: String) -> String? {
         .trimmingCharacters(in: .whitespacesAndNewlines)
 }
 
-private func openSocket(socketPath: String) -> Int32 {
-    let fd = socket(AF_UNIX, SOCK_STREAM, 0)
-    guard fd >= 0 else {
-        FileHandle.standardError.write(Data("Failed to create socket\n".utf8))
-        exit(1)
-    }
-
-    var addr = sockaddr_un()
-    addr.sun_family = sa_family_t(AF_UNIX)
-    let pathBytes = socketPath.utf8CString
-    let maxLen = MemoryLayout.size(ofValue: addr.sun_path)
-    withUnsafeMutableBytes(of: &addr.sun_path) { buf in
-        for i in 0 ..< min(pathBytes.count, maxLen - 1) {
-            buf[i] = UInt8(bitPattern: pathBytes[i])
-        }
-    }
-
-    let connectResult = withUnsafePointer(to: &addr) { ptr in
-        ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) { sockPtr in
-            Darwin.connect(fd, sockPtr, socklen_t(MemoryLayout<sockaddr_un>.size))
-        }
-    }
-    guard connectResult == 0 else {
-        // Silent failure — don't break agent hooks if Forge isn't running
-        exit(0)
-    }
-    return fd
-}
-
 // MARK: - Help
 
 func printUsage() {
@@ -318,8 +194,6 @@ func printUsage() {
 
     Advanced:
       rpc <method> [json-params]        Invoke any RPC method directly
-      event <agent> <event_type>        Legacy hook forwarder (stdin -> agent_event)
-      open-agent <command>              Legacy open-agent shortcut
 
     Environment (auto-set by Forge in spawned shells):
       FORGE_SOCKET         Path to Forge socket

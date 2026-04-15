@@ -5,12 +5,22 @@ import Foundation
 class AgentSetup {
     static let shared = AgentSetup()
 
-    /// Marker comment used to identify Forge-managed hook entries.
-    static let forgeMarker = "forge event"
+    /// Marker substring used to identify Forge-managed hook entries. Matches
+    /// both the current `forge agent event` form and the legacy `forge event`
+    /// form so upgrades clean up old entries on reinstall.
+    static let forgeMarker = "forge agent event"
+
+    /// Legacy marker kept so old hook entries (pre-JSON-RPC migration) are
+    /// pruned when we reinstall. Any hook command containing this string is
+    /// treated as Forge-owned even if it pre-dates the current marker.
+    static let legacyForgeMarker = "forge event"
 
     /// Shared installer used by every agent that ships standard JSON hook settings
     /// (Claude Code, Codex). Pi/OpenCode use TypeScript bridge files instead.
-    private static let installer = AgentHookInstaller(ownershipMarker: forgeMarker)
+    private static let installer = AgentHookInstaller(
+        ownershipMarker: forgeMarker,
+        legacyMarkers: [legacyForgeMarker]
+    )
 
     private init() {}
 
@@ -63,8 +73,9 @@ class AgentSetup {
 
     /// Build hook entries — guarded by FORGE_SESSION so hooks only fire inside Forge.
     /// Uses if/then/fi (not &&) so exit code is always 0 when outside Forge.
+    /// Routes through `forge agent event` (typed RPC) since v2.
     private static func claudeHook(_ event: String) -> String {
-        "if [ -n \"$FORGE_SESSION\" ]; then forge event claude \(event); fi"
+        "if [ -n \"$FORGE_SESSION\" ]; then forge agent event claude \(event); fi"
     }
 
     /// Hook groups for Claude Code, keyed by event name.
@@ -104,7 +115,7 @@ class AgentSetup {
     }
 
     private static func codexHook(_ event: String) -> String {
-        "if [ -n \"$FORGE_SESSION\" ]; then forge event codex \(event); fi"
+        "if [ -n \"$FORGE_SESSION\" ]; then forge agent event codex \(event); fi"
     }
 
     /// Hook groups for Codex, keyed by event name.
@@ -208,7 +219,8 @@ class AgentSetup {
             try {
               const sock = net.createConnection(socketPath, () => {
                 sock.end(JSON.stringify({
-                  command: "agent_event", session, agent: "pi", event, data
+                  method: "agent.event",
+                  params: { agent: "pi", event, session_id: session, data }
                 }) + "\\n");
               });
               sock.on("error", () => {});
@@ -286,7 +298,8 @@ class AgentSetup {
             try {
               const sock = net.createConnection(socketPath, () => {
                 sock.end(JSON.stringify({
-                  command: "agent_event", session, agent: "opencode", event, data
+                  method: "agent.event",
+                  params: { agent: "opencode", event, session_id: session, data }
                 }) + "\\n");
               });
               sock.on("error", () => {});

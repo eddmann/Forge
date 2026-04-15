@@ -153,55 +153,19 @@ final class ForgeSocketServer {
 
     // MARK: - Message Processing
 
-    /// Returns a response dict to write back to the client, or nil for
-    /// fire-and-forget legacy commands that don't have a reply.
+    /// Parse a JSON-RPC envelope and return the dispatched response. All
+    /// socket traffic goes through `ForgeRPC`; there is no fire-and-forget path.
     private func processMessage(_ json: String) -> [String: Any]? {
         guard let data = json.data(using: .utf8),
               let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
         else {
             return nil
         }
-
-        // New JSON-RPC envelope: {"method": "...", "params": {...}}
-        // Dispatch synchronously on main so we can write the response before the
-        // client's connection times out / we close the fd.
-        if dict["method"] is String {
-            return DispatchQueue.main.sync {
-                MainActor.assumeIsolated {
-                    ForgeRPC.dispatch(envelope: dict)
-                }
+        return DispatchQueue.main.sync {
+            MainActor.assumeIsolated {
+                ForgeRPC.dispatch(envelope: dict)
             }
         }
-
-        // Legacy envelope: {"command": "...", ...} — no response expected.
-        guard let command = dict["command"] as? String else { return nil }
-        let sessionID = (dict["session"] as? String).flatMap { UUID(uuidString: $0) }
-
-        switch command {
-        case "agent_event":
-            guard let agent = dict["agent"] as? String,
-                  let event = dict["event"] as? String
-            else { return nil }
-            let eventData = dict["data"] as? [String: Any] ?? [:]
-            DispatchQueue.main.async {
-                AgentEventStore.shared.handleAgentEvent(
-                    sessionID: sessionID,
-                    agent: agent,
-                    event: event,
-                    data: eventData
-                )
-            }
-
-        case "open_agent":
-            guard let agentCommand = dict["agent_command"] as? String else { return nil }
-            DispatchQueue.main.async {
-                Self.openAgentTab(agentCommand: agentCommand, sessionID: sessionID)
-            }
-
-        default:
-            break
-        }
-        return nil
     }
 
     private static func writeResponse(_ response: [String: Any], to fd: Int32) {
@@ -213,33 +177,6 @@ final class ForgeSocketServer {
         line += "\n"
         line.withCString { ptr in
             _ = Darwin.write(fd, ptr, strlen(ptr))
-        }
-    }
-
-    // MARK: - Open Agent Tab
-
-    @MainActor
-    private static func openAgentTab(agentCommand: String, sessionID: UUID?) {
-        guard let agent = AgentStore.shared.agents.first(where: { $0.command == agentCommand }) else { return }
-
-        let store = ProjectStore.shared
-        let dir = store.effectivePath ?? NSHomeDirectory()
-        let resolved = store.activeProject.map { agent.applying(projectID: $0.id) } ?? agent
-
-        // Create the new agent tab first, then close the invoking shell tab.
-        // This ensures there is always at least one tab present.
-        TerminalSessionManager.shared.createSession(
-            workingDirectory: dir,
-            title: resolved.name,
-            launchCommand: resolved.fullCommand,
-            closeOnExit: true,
-            projectID: store.activeProjectID,
-            workspaceID: store.activeWorkspaceID,
-            icon: resolved.icon
-        )
-
-        if let sessionID {
-            TerminalSessionManager.shared.closeSession(id: sessionID)
         }
     }
 
