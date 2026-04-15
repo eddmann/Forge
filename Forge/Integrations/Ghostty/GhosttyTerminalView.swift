@@ -306,6 +306,11 @@ class GhosttyTerminalView: NSView, NSTextInputClient {
         updateSurfaceSize()
     }
 
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        updateSurfaceSize()
+    }
+
     override func viewDidEndLiveResize() {
         super.viewDidEndLiveResize()
         updateSurfaceSize()
