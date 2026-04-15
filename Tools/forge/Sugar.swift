@@ -196,15 +196,15 @@ func dispatchTerminal(_ args: [String]) {
 
 func dispatchAgent(_ args: [String]) {
     guard let sub = args.first else {
-        FileHandle.standardError.write(Data("Usage: forge agent <event|status|progress|clear> [args]\n".utf8))
+        FileHandle.standardError.write(Data("Usage: forge agent event <agent> <event_type>\n".utf8))
         exit(1)
     }
     let rest = Array(args.dropFirst())
     switch sub {
     case "event":
-        // `forge agent event <agent> <event_type>` — mirrors legacy `forge event`,
-        // but routes through the new agent.event method. Reads optional JSON from
-        // stdin and attaches as `data`.
+        // `forge agent event <agent> <event_type>` — hook forwarder used by the
+        // Claude / Codex hook scripts. Reads optional JSON from stdin and
+        // attaches it as `data`.
         guard rest.count >= 2 else {
             FileHandle.standardError.write(Data("Usage: forge agent event <agent> <event_type>\n".utf8))
             exit(1)
@@ -227,56 +227,6 @@ func dispatchAgent(_ args: [String]) {
             params["data"] = parsed
         }
         callMethod("agent.event", params: params)
-
-    case "status":
-        guard let text = firstPositional(rest) else {
-            FileHandle.standardError.write(Data("Usage: forge agent status <text> [--session ID]\n".utf8))
-            exit(1)
-        }
-        var params = scopeParams(rest)
-        params.removeValue(forKey: "workspace_id")
-        params.removeValue(forKey: "project_id")
-        if params["session_id"] == nil {
-            FileHandle.standardError.write(Data("agent status requires --session or $FORGE_SESSION\n".utf8))
-            exit(1)
-        }
-        params["text"] = text
-        callMethod("agent.set_status", params: params)
-
-    case "progress":
-        guard let pctStr = firstPositional(rest), let pct = Int(pctStr) else {
-            FileHandle.standardError.write(Data("Usage: forge agent progress <0-100> [--session ID]\n".utf8))
-            exit(1)
-        }
-        var params = scopeParams(rest)
-        params.removeValue(forKey: "workspace_id")
-        params.removeValue(forKey: "project_id")
-        if params["session_id"] == nil {
-            FileHandle.standardError.write(Data("agent progress requires --session or $FORGE_SESSION\n".utf8))
-            exit(1)
-        }
-        params["percent"] = pct
-        callMethod("agent.set_progress", params: params)
-
-    case "clear":
-        guard let what = firstPositional(rest) else {
-            FileHandle.standardError.write(Data("Usage: forge agent clear <status|progress> [--session ID]\n".utf8))
-            exit(1)
-        }
-        var params = scopeParams(rest)
-        params.removeValue(forKey: "workspace_id")
-        params.removeValue(forKey: "project_id")
-        if params["session_id"] == nil {
-            FileHandle.standardError.write(Data("agent clear requires --session or $FORGE_SESSION\n".utf8))
-            exit(1)
-        }
-        switch what {
-        case "status": callMethod("agent.clear_status", params: params)
-        case "progress": callMethod("agent.clear_progress", params: params)
-        default:
-            FileHandle.standardError.write(Data("agent clear: unknown target '\(what)' (status|progress)\n".utf8))
-            exit(1)
-        }
 
     default:
         FileHandle.standardError.write(Data("Unknown agent subcommand: \(sub)\n".utf8))

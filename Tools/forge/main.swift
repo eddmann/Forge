@@ -188,9 +188,6 @@ func printUsage() {
 
     Agent:
       agent event <agent> <event_type>            Forward hook event (reads JSON stdin)
-      agent status <text>                         Push presence string
-      agent progress <0-100>                      Push progress percent
-      agent clear <status|progress>               Clear pushed state
 
     Advanced:
       rpc <method> [json-params]        Invoke any RPC method directly

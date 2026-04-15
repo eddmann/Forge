@@ -78,11 +78,7 @@ enum ForgeRPC {
         TerminalSendKey.name: TerminalSendKey.self,
         TerminalOpenAgent.name: TerminalOpenAgent.self,
         // agent.*
-        AgentEvent.name: AgentEvent.self,
-        AgentSetStatus.name: AgentSetStatus.self,
-        AgentClearStatus.name: AgentClearStatus.self,
-        AgentSetProgress.name: AgentSetProgress.self,
-        AgentClearProgress.name: AgentClearProgress.self
+        AgentEvent.name: AgentEvent.self
     ]
 
     /// Dispatch a parsed JSON-RPC envelope. Returns the wire response dict that

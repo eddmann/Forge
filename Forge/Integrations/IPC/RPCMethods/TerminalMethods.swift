@@ -28,8 +28,6 @@ enum TerminalList: ForgeRPCMethod {
                     "activity": activity ?? NSNull()
                 ]
                 dict["workspace_id"] = tab.workspaceID?.uuidString ?? NSNull()
-                dict["pushed_status"] = state?.pushedStatus ?? NSNull()
-                dict["pushed_progress"] = state?.pushedProgress ?? NSNull()
                 out.append(dict)
             }
         }

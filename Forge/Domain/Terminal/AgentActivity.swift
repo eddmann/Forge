@@ -28,14 +28,6 @@ struct AgentSessionState {
     var agentSessionID: String?
     var transcriptPath: String?
     var permissionDetail: String?
-
-    /// Free-text status string pushed by the agent via `agent.set_status`. Not
-    /// inferred from hook events — explicitly set. Cleared with
-    /// `agent.clear_status`.
-    var pushedStatus: String?
-
-    /// 0–100 progress percent pushed by the agent via `agent.set_progress`.
-    var pushedProgress: Int?
 }
 
 // MARK: - SwiftUI Status Dot

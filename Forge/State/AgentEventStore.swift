@@ -187,34 +187,6 @@ class AgentEventStore: ObservableObject {
         }
     }
 
-    // MARK: - Pushed Status / Progress (from agent.* RPC methods)
-
-    /// Set an agent-pushed status string for the tab containing the given session.
-    /// Creates the session state lazily if none exists yet.
-    func setPushedStatus(sessionID: UUID, agent: String, text: String?) {
-        guard let tabID = resolveTabID(sessionID: sessionID) else { return }
-        if stateByTab[tabID] == nil {
-            stateByTab[tabID] = AgentSessionState(agent: agent)
-        }
-        stateByTab[tabID]?.pushedStatus = text
-    }
-
-    /// Set an agent-pushed progress percent (0–100, clamped) for the tab
-    /// containing the given session.
-    func setPushedProgress(sessionID: UUID, agent: String, percent: Int?) {
-        guard let tabID = resolveTabID(sessionID: sessionID) else { return }
-        if stateByTab[tabID] == nil {
-            stateByTab[tabID] = AgentSessionState(agent: agent)
-        }
-        let clamped = percent.map { max(0, min(100, $0)) }
-        stateByTab[tabID]?.pushedProgress = clamped
-    }
-
-    /// Look up the tab ID that owns a session, or nil if the session is unknown.
-    func tabID(forSession sessionID: UUID) -> UUID? {
-        resolveTabID(sessionID: sessionID)
-    }
-
     // MARK: - Session Resolution
 
     private func resolveTabID(sessionID: UUID?) -> UUID? {
