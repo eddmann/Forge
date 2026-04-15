@@ -8,8 +8,11 @@ import Foundation
 /// ```
 ///
 /// Forge identifies its own hook entries by substring-matching `ownershipMarker`
-/// against the `command` field. Install/uninstall preserves any user-authored
-/// hooks; only Forge-owned entries are pruned before our hooks are added back.
+/// against the `command` field. Callers should embed a sentinel (e.g. a trailing
+/// `# __forge_managed__` comment) into every command they install so the marker
+/// cannot collide with a user-authored command. Install/uninstall preserves any
+/// user-authored hooks; only Forge-owned entries are pruned before our hooks
+/// are added back.
 struct AgentHookInstaller {
     /// Substring used to identify a hook command as Forge-managed.
     let ownershipMarker: String

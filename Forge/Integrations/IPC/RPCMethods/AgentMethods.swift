@@ -11,7 +11,7 @@ import Foundation
 enum AgentEvent: ForgeRPCMethod {
     static let name = "agent.event"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         guard let agent = params["agent"] as? String else {
             throw ForgeRPCError.invalidParams("'agent' is required")
         }

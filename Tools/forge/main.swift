@@ -9,7 +9,7 @@ let args = CommandLine.arguments
 
 guard args.count >= 2 else {
     printUsage()
-    exit(1)
+    exit(2)
 }
 
 let subargs = Array(args.dropFirst(2))
@@ -19,7 +19,7 @@ switch args[1] {
 case "rpc":
     guard let method = subargs.first else {
         FileHandle.standardError.write(Data("Usage: forge rpc <method> [json-params]\n".utf8))
-        exit(1)
+        exit(2)
     }
     sendRPC(method: method, paramsJSON: subargs.count >= 2 ? subargs[1] : nil)
 
@@ -64,13 +64,19 @@ case "--help", "-h", "help":
 default:
     FileHandle.standardError.write(Data("Unknown command: \(args[1])\n".utf8))
     printUsage()
-    exit(1)
+    exit(2)
 }
 
 // MARK: - RPC
 
 /// Send a JSON-RPC request and write the response (or error) to stdout.
-/// Exits non-zero on RPC error or transport failure so scripts can branch.
+///
+/// Exit codes:
+///   0 — success (`ok: true`)
+///   1 — server returned an RPC error (`ok: false`)
+///   2 — local input was bad (caller already exited 2 for arg validation; this
+///       function uses 2 only for params that fail to encode)
+///   3 — transport failure (Forge not running, socket unreachable, no reply)
 func sendRPC(method: String, paramsJSON: String?) {
     let socketPath = ProcessInfo.processInfo.environment["FORGE_SOCKET"]
         ?? NSHomeDirectory() + "/.forge/state/forge.sock"
@@ -81,7 +87,7 @@ func sendRPC(method: String, paramsJSON: String?) {
               let parsed = try? JSONSerialization.jsonObject(with: data)
         else {
             FileHandle.standardError.write(Data("Invalid JSON in params\n".utf8))
-            exit(1)
+            exit(2)
         }
         envelope["params"] = parsed
     }
@@ -90,13 +96,13 @@ func sendRPC(method: String, paramsJSON: String?) {
           var requestLine = String(data: requestData, encoding: .utf8)
     else {
         FileHandle.standardError.write(Data("Failed to encode request\n".utf8))
-        exit(1)
+        exit(2)
     }
     requestLine += "\n"
 
     guard let responseLine = sendAndReceive(requestLine, socketPath: socketPath) else {
-        FileHandle.standardError.write(Data("No response from Forge (is it running?)\n".utf8))
-        exit(1)
+        FileHandle.standardError.write(Data("forge: no response from daemon (is Forge running?)\n".utf8))
+        exit(3)
     }
 
     // Print response as-is (already JSON) and set exit code from "ok" field.
@@ -106,6 +112,12 @@ func sendRPC(method: String, paramsJSON: String?) {
        let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
        (dict["ok"] as? Bool) == false
     {
+        // Surface a one-line summary on stderr so `forge … >/dev/null` still
+        // shows what went wrong. Stdout still has the full JSON envelope.
+        let error = dict["error"] as? [String: Any]
+        let code = (error?["code"] as? String) ?? "error"
+        let message = (error?["message"] as? String) ?? "(no message)"
+        FileHandle.standardError.write(Data("forge: \(code): \(message)\n".utf8))
         exit(1)
     }
 }
@@ -200,6 +212,12 @@ func printUsage() {
 
     Global flags (where meaningful):
       --session ID --workspace ID --project ID    Override env-var scope
+
+    Exit codes:
+      0   success
+      1   server returned an RPC error (also written to stderr as `forge: <code>: <msg>`)
+      2   bad local input (unknown subcommand, missing flag, invalid JSON params)
+      3   transport failure (Forge not running, socket unreachable)
 
     """
     FileHandle.standardError.write(Data(usage.utf8))

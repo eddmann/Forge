@@ -5,7 +5,9 @@ import Foundation
 /// Methods are dispatched on the main actor since most of them touch app state
 /// (`ProjectStore`, `TerminalSessionManager`, `AgentStore`, etc.) — keeping the
 /// dispatch site `@MainActor` removes the need for ad-hoc dispatching inside
-/// every handler. Long-running work should hop off-main inside the handler.
+/// every handler. `handle` is `async` so long-running handlers can suspend
+/// (e.g. `await Task.detached { ... }.value`) without pinning the main thread
+/// for their entire duration.
 @MainActor
 protocol ForgeRPCMethod {
     /// Dotted method name as it appears on the wire (e.g. `"system.ping"`).
@@ -13,7 +15,7 @@ protocol ForgeRPCMethod {
 
     /// Process the request params and return the result payload. Throw
     /// `ForgeRPCError` for client-visible failures.
-    static func handle(params: [String: Any]) throws -> [String: Any]
+    static func handle(params: [String: Any]) async throws -> [String: Any]
 }
 
 /// Stable, client-visible error codes. New codes can be added without breaking
@@ -83,7 +85,7 @@ enum ForgeRPC {
 
     /// Dispatch a parsed JSON-RPC envelope. Returns the wire response dict that
     /// should be written back to the client.
-    static func dispatch(envelope: [String: Any]) -> [String: Any] {
+    static func dispatch(envelope: [String: Any]) async -> [String: Any] {
         guard let method = envelope["method"] as? String else {
             return errorResponse(.invalidParams("Missing 'method' field"))
         }
@@ -92,7 +94,7 @@ enum ForgeRPC {
         }
         let params = envelope["params"] as? [String: Any] ?? [:]
         do {
-            let result = try handler.handle(params: params)
+            let result = try await handler.handle(params: params)
             return ["ok": true, "result": result]
         } catch let error as ForgeRPCError {
             return errorResponse(error)

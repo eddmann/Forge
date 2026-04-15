@@ -6,7 +6,7 @@ import Foundation
 enum WorkspaceList: ForgeRPCMethod {
     static let name = "workspace.list"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         let store = ProjectStore.shared
         let filterProject = (params["project_id"] as? String).flatMap(UUID.init(uuidString:))
 
@@ -33,7 +33,7 @@ enum WorkspaceList: ForgeRPCMethod {
 enum WorkspaceCurrent: ForgeRPCMethod {
     static let name = "workspace.current"
 
-    static func handle(params _: [String: Any]) throws -> [String: Any] {
+    static func handle(params _: [String: Any]) async throws -> [String: Any] {
         guard let ws = ProjectStore.shared.activeWorkspace else {
             return ["workspace": NSNull()]
         }
@@ -59,7 +59,7 @@ enum WorkspaceCurrent: ForgeRPCMethod {
 enum WorkspaceSelect: ForgeRPCMethod {
     static let name = "workspace.select"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         guard let idString = params["workspace_id"] as? String,
               let id = UUID(uuidString: idString)
         else {

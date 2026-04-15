@@ -9,7 +9,7 @@ import Foundation
 enum TerminalList: ForgeRPCMethod {
     static let name = "terminal.list"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         let filterWorkspace = (params["workspace_id"] as? String).flatMap(UUID.init(uuidString:))
         var out: [[String: Any]] = []
         for tab in TerminalSessionManager.shared.tabs {
@@ -45,10 +45,11 @@ enum TerminalList: ForgeRPCMethod {
 enum TerminalReadScreen: ForgeRPCMethod {
     static let name = "terminal.read_screen"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         guard let sid = (params["session_id"] as? String).flatMap(UUID.init(uuidString:)) else {
             throw ForgeRPCError.invalidParams("'session_id' is required")
         }
+        try requireScope(sessionID: sid, params: params)
         guard let view = TerminalCache.shared.view(for: sid) else {
             throw ForgeRPCError.notFound("No terminal for session \(sid.uuidString)")
         }
@@ -68,13 +69,14 @@ enum TerminalReadScreen: ForgeRPCMethod {
 enum TerminalSendText: ForgeRPCMethod {
     static let name = "terminal.send_text"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         guard let sid = (params["session_id"] as? String).flatMap(UUID.init(uuidString:)) else {
             throw ForgeRPCError.invalidParams("'session_id' is required")
         }
         guard let text = params["text"] as? String else {
             throw ForgeRPCError.invalidParams("'text' is required")
         }
+        try requireScope(sessionID: sid, params: params)
         let view = try resolveOrMaterialize(sessionID: sid)
         view.sendInput(text)
         return ["ok": true]
@@ -92,7 +94,7 @@ enum TerminalSendText: ForgeRPCMethod {
 enum TerminalSendKey: ForgeRPCMethod {
     static let name = "terminal.send_key"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         guard let sid = (params["session_id"] as? String).flatMap(UUID.init(uuidString:)) else {
             throw ForgeRPCError.invalidParams("'session_id' is required")
         }
@@ -102,6 +104,7 @@ enum TerminalSendKey: ForgeRPCMethod {
         guard let sequence = Self.keySequence(for: key) else {
             throw ForgeRPCError.invalidParams("Unknown key: \(key)")
         }
+        try requireScope(sessionID: sid, params: params)
         let view = try resolveOrMaterialize(sessionID: sid)
         view.sendInput(sequence)
         return ["ok": true]
@@ -145,7 +148,7 @@ enum TerminalSendKey: ForgeRPCMethod {
 enum TerminalOpenAgent: ForgeRPCMethod {
     static let name = "terminal.open_agent"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         guard let agentCommand = params["agent_command"] as? String else {
             throw ForgeRPCError.invalidParams("'agent_command' is required")
         }
@@ -170,6 +173,36 @@ enum TerminalOpenAgent: ForgeRPCMethod {
 }
 
 // MARK: - Helpers
+
+/// If the caller passed `workspace_id` and/or `project_id`, verify the session
+/// belongs to that scope. No-op when neither param is present, so callers that
+/// only know a session ID still work. Guards against confused-deputy mistakes
+/// where a hook script holds a stale `FORGE_SESSION` and ends up driving a
+/// terminal in a different workspace than it intended.
+@MainActor
+private func requireScope(sessionID: UUID, params: [String: Any]) throws {
+    let expectedWorkspace = (params["workspace_id"] as? String).flatMap(UUID.init(uuidString:))
+    let expectedProject = (params["project_id"] as? String).flatMap(UUID.init(uuidString:))
+    guard expectedWorkspace != nil || expectedProject != nil else { return }
+
+    guard let tab = TerminalSessionManager.shared.tabs.first(where: {
+        $0.paneManager?.allSessionIDs.contains(sessionID) == true
+            || $0.sessionIDs.contains(sessionID)
+    }) else {
+        throw ForgeRPCError.notFound("No session \(sessionID.uuidString)")
+    }
+
+    if let expectedWorkspace, tab.workspaceID != expectedWorkspace {
+        throw ForgeRPCError.invalidParams(
+            "Session \(sessionID.uuidString) does not belong to workspace \(expectedWorkspace.uuidString)"
+        )
+    }
+    if let expectedProject, tab.projectID != expectedProject {
+        throw ForgeRPCError.invalidParams(
+            "Session \(sessionID.uuidString) does not belong to project \(expectedProject.uuidString)"
+        )
+    }
+}
 
 /// Look up the terminal view for a session, materialising it (creating the
 /// `GhosttyTerminalView` and starting the shell) if it hasn't been rendered

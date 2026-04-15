@@ -5,21 +5,21 @@ import Foundation
 class AgentSetup {
     static let shared = AgentSetup()
 
-    /// Marker substring used to identify Forge-managed hook entries. Matches
-    /// both the current `forge agent event` form and the legacy `forge event`
-    /// form so upgrades clean up old entries on reinstall.
-    static let forgeMarker = "forge agent event"
+    /// Sentinel appended to every Forge-managed hook command. Chosen so it
+    /// cannot plausibly appear in a user-authored command, which lets the
+    /// installer identify its own entries by substring without false positives.
+    static let forgeMarker = "# __forge_managed__"
 
-    /// Legacy marker kept so old hook entries (pre-JSON-RPC migration) are
-    /// pruned when we reinstall. Any hook command containing this string is
-    /// treated as Forge-owned even if it pre-dates the current marker.
-    static let legacyForgeMarker = "forge event"
+    /// Legacy markers kept so hook entries written by older Forge builds are
+    /// pruned when we reinstall. Any hook command containing one of these
+    /// substrings is treated as Forge-owned even if it pre-dates the sentinel.
+    static let legacyForgeMarkers = ["forge agent event", "forge event"]
 
     /// Shared installer used by every agent that ships standard JSON hook settings
     /// (Claude Code, Codex). Pi/OpenCode use TypeScript bridge files instead.
     private static let installer = AgentHookInstaller(
         ownershipMarker: forgeMarker,
-        legacyMarkers: [legacyForgeMarker]
+        legacyMarkers: legacyForgeMarkers
     )
 
     private init() {}
@@ -75,7 +75,7 @@ class AgentSetup {
     /// Uses if/then/fi (not &&) so exit code is always 0 when outside Forge.
     /// Routes through `forge agent event` (typed RPC) since v2.
     private static func claudeHook(_ event: String) -> String {
-        "if [ -n \"$FORGE_SESSION\" ]; then forge agent event claude \(event); fi"
+        "if [ -n \"$FORGE_SESSION\" ]; then forge agent event claude \(event); fi \(forgeMarker)"
     }
 
     /// Hook groups for Claude Code, keyed by event name.
@@ -115,7 +115,7 @@ class AgentSetup {
     }
 
     private static func codexHook(_ event: String) -> String {
-        "if [ -n \"$FORGE_SESSION\" ]; then forge agent event codex \(event); fi"
+        "if [ -n \"$FORGE_SESSION\" ]; then forge agent event codex \(event); fi \(forgeMarker)"
     }
 
     /// Hook groups for Codex, keyed by event name.

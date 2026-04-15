@@ -6,7 +6,7 @@ import Foundation
 enum SystemPing: ForgeRPCMethod {
     static let name = "system.ping"
 
-    static func handle(params _: [String: Any]) throws -> [String: Any] {
+    static func handle(params _: [String: Any]) async throws -> [String: Any] {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
         let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "0"
         return [
@@ -26,7 +26,7 @@ enum SystemPing: ForgeRPCMethod {
 enum SystemIdentify: ForgeRPCMethod {
     static let name = "system.identify"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         let store = ProjectStore.shared
 
         // Resolve session
@@ -88,7 +88,7 @@ enum SystemIdentify: ForgeRPCMethod {
 enum SystemCapabilities: ForgeRPCMethod {
     static let name = "system.capabilities"
 
-    static func handle(params _: [String: Any]) throws -> [String: Any] {
+    static func handle(params _: [String: Any]) async throws -> [String: Any] {
         [
             "protocol_version": ForgeRPC.protocolVersion,
             "methods": ForgeRPC.methods.keys.sorted()

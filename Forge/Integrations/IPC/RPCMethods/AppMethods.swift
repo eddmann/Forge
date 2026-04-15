@@ -12,7 +12,7 @@ import UserNotifications
 enum AppNotify: ForgeRPCMethod {
     static let name = "app.notify"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         guard let title = params["title"] as? String, !title.isEmpty else {
             throw ForgeRPCError.invalidParams("'title' is required")
         }
@@ -38,7 +38,7 @@ enum AppNotify: ForgeRPCMethod {
             content: content,
             trigger: nil
         )
-        UNUserNotificationCenter.current().add(request)
+        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
 
         return ["ok": true]
     }
@@ -54,7 +54,7 @@ enum AppNotify: ForgeRPCMethod {
 enum AppTree: ForgeRPCMethod {
     static let name = "app.tree"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         let store = ProjectStore.shared
         let filterWorkspace = (params["workspace_id"] as? String).flatMap(UUID.init(uuidString:))
 
@@ -118,7 +118,7 @@ enum AppTree: ForgeRPCMethod {
 enum AppLog: ForgeRPCMethod {
     static let name = "app.log"
 
-    static func handle(params: [String: Any]) throws -> [String: Any] {
+    static func handle(params: [String: Any]) async throws -> [String: Any] {
         guard let message = params["message"] as? String, !message.isEmpty else {
             throw ForgeRPCError.invalidParams("'message' is required")
         }

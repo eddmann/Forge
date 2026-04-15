@@ -13,7 +13,7 @@ func callMethod(_ method: String, params: [String: Any]) {
               let s = String(data: data, encoding: .utf8)
         else {
             FileHandle.standardError.write(Data("Failed to encode params\n".utf8))
-            exit(1)
+            exit(2)
         }
         json = s
     }
@@ -71,7 +71,7 @@ func parseNotifyArgs(_ args: [String]) -> [String: Any] {
         params["title"] = title
     } else {
         FileHandle.standardError.write(Data("notify requires --title\n".utf8))
-        exit(1)
+        exit(2)
     }
     if let subtitle = optionValue(args, "--subtitle") { params["subtitle"] = subtitle }
     if let body = optionValue(args, "--body") { params["body"] = body }
@@ -81,7 +81,7 @@ func parseNotifyArgs(_ args: [String]) -> [String: Any] {
 func parseLogArgs(_ args: [String]) -> [String: Any] {
     guard let message = firstPositional(args) else {
         FileHandle.standardError.write(Data("Usage: forge log <message> [--level info|warn|error] [--workspace ID]\n".utf8))
-        exit(1)
+        exit(2)
     }
     var params: [String: Any] = ["message": message]
     if let level = optionValue(args, "--level") { params["level"] = level }
@@ -96,7 +96,7 @@ func parseLogArgs(_ args: [String]) -> [String: Any] {
 func dispatchWorkspace(_ args: [String]) {
     guard let sub = args.first else {
         FileHandle.standardError.write(Data("Usage: forge workspace <list|current|select> [args]\n".utf8))
-        exit(1)
+        exit(2)
     }
     let rest = Array(args.dropFirst())
     switch sub {
@@ -111,12 +111,12 @@ func dispatchWorkspace(_ args: [String]) {
     case "select":
         guard let id = firstPositional(rest) else {
             FileHandle.standardError.write(Data("Usage: forge workspace select <workspace-id>\n".utf8))
-            exit(1)
+            exit(2)
         }
         callMethod("workspace.select", params: ["workspace_id": id])
     default:
         FileHandle.standardError.write(Data("Unknown workspace subcommand: \(sub)\n".utf8))
-        exit(1)
+        exit(2)
     }
 }
 
@@ -125,7 +125,7 @@ func dispatchWorkspace(_ args: [String]) {
 func dispatchTerminal(_ args: [String]) {
     guard let sub = args.first else {
         FileHandle.standardError.write(Data("Usage: forge terminal <list|read|send|send-key|open-agent> [args]\n".utf8))
-        exit(1)
+        exit(2)
     }
     let rest = Array(args.dropFirst())
     switch sub {
@@ -140,55 +140,49 @@ func dispatchTerminal(_ args: [String]) {
         var params = scopeParams(rest)
         if params["session_id"] == nil {
             FileHandle.standardError.write(Data("terminal read requires --session or $FORGE_SESSION\n".utf8))
-            exit(1)
+            exit(2)
         }
         if let linesArg = optionValue(rest, "--lines"), let n = Int(linesArg) {
             params["lines"] = n
         }
-        params.removeValue(forKey: "workspace_id")
-        params.removeValue(forKey: "project_id")
         callMethod("terminal.read_screen", params: params)
 
     case "send":
         guard let text = firstPositional(rest) else {
             FileHandle.standardError.write(Data("Usage: forge terminal send <text> [--session ID]\n".utf8))
-            exit(1)
+            exit(2)
         }
         var params = scopeParams(rest)
         params["text"] = text
-        params.removeValue(forKey: "workspace_id")
-        params.removeValue(forKey: "project_id")
         if params["session_id"] == nil {
             FileHandle.standardError.write(Data("terminal send requires --session or $FORGE_SESSION\n".utf8))
-            exit(1)
+            exit(2)
         }
         callMethod("terminal.send_text", params: params)
 
     case "send-key":
         guard let key = firstPositional(rest) else {
             FileHandle.standardError.write(Data("Usage: forge terminal send-key <key> [--session ID]\n".utf8))
-            exit(1)
+            exit(2)
         }
         var params = scopeParams(rest)
         params["key"] = key
-        params.removeValue(forKey: "workspace_id")
-        params.removeValue(forKey: "project_id")
         if params["session_id"] == nil {
             FileHandle.standardError.write(Data("terminal send-key requires --session or $FORGE_SESSION\n".utf8))
-            exit(1)
+            exit(2)
         }
         callMethod("terminal.send_key", params: params)
 
     case "open-agent":
         guard let cmd = firstPositional(rest) else {
             FileHandle.standardError.write(Data("Usage: forge terminal open-agent <agent-command>\n".utf8))
-            exit(1)
+            exit(2)
         }
         callMethod("terminal.open_agent", params: ["agent_command": cmd])
 
     default:
         FileHandle.standardError.write(Data("Unknown terminal subcommand: \(sub)\n".utf8))
-        exit(1)
+        exit(2)
     }
 }
 
@@ -197,7 +191,7 @@ func dispatchTerminal(_ args: [String]) {
 func dispatchAgent(_ args: [String]) {
     guard let sub = args.first else {
         FileHandle.standardError.write(Data("Usage: forge agent event <agent> <event_type>\n".utf8))
-        exit(1)
+        exit(2)
     }
     let rest = Array(args.dropFirst())
     switch sub {
@@ -207,7 +201,7 @@ func dispatchAgent(_ args: [String]) {
         // attaches it as `data`.
         guard rest.count >= 2 else {
             FileHandle.standardError.write(Data("Usage: forge agent event <agent> <event_type>\n".utf8))
-            exit(1)
+            exit(2)
         }
         var params: [String: Any] = ["agent": rest[0], "event": rest[1]]
         if let sid = ProcessInfo.processInfo.environment["FORGE_SESSION"] {
@@ -230,6 +224,6 @@ func dispatchAgent(_ args: [String]) {
 
     default:
         FileHandle.standardError.write(Data("Unknown agent subcommand: \(sub)\n".utf8))
-        exit(1)
+        exit(2)
     }
 }

@@ -117,8 +117,6 @@ final class ForgeSocketServer {
     // MARK: - Client Handler
 
     private func handleClient(_ fd: Int32) {
-        defer { close(fd) }
-
         // Set read timeout (5 seconds)
         var timeout = timeval(tv_sec: 5, tv_usec: 0)
         setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
@@ -135,36 +133,30 @@ final class ForgeSocketServer {
             if accumulated.contains(0x0A) { break }
 
             // Prevent oversized messages
-            if accumulated.count > 131_072 { return }
+            if accumulated.count > 131_072 {
+                close(fd)
+                return
+            }
         }
 
         guard !accumulated.isEmpty,
               let line = String(data: accumulated, encoding: .utf8)?
               .trimmingCharacters(in: .whitespacesAndNewlines),
-              !line.isEmpty
+              !line.isEmpty,
+              let data = line.data(using: .utf8),
+              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
         else {
+            close(fd)
             return
         }
 
-        if let response = processMessage(line) {
+        // Hand the fd off to an async Task so the worker thread is freed
+        // immediately. The Task hops to MainActor inside `ForgeRPC.dispatch`,
+        // writes the response, and closes the fd.
+        Task {
+            let response = await ForgeRPC.dispatch(envelope: dict)
             Self.writeResponse(response, to: fd)
-        }
-    }
-
-    // MARK: - Message Processing
-
-    /// Parse a JSON-RPC envelope and return the dispatched response. All
-    /// socket traffic goes through `ForgeRPC`; there is no fire-and-forget path.
-    private func processMessage(_ json: String) -> [String: Any]? {
-        guard let data = json.data(using: .utf8),
-              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else {
-            return nil
-        }
-        return DispatchQueue.main.sync {
-            MainActor.assumeIsolated {
-                ForgeRPC.dispatch(envelope: dict)
-            }
+            close(fd)
         }
     }
 
