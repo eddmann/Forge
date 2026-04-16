@@ -37,6 +37,23 @@ final class GitDiffService {
         }
     }
 
+    /// Fetches the file contents at the given endpoint as UTF-8 text.
+    /// Returns nil when the file is missing, binary, or non-UTF-8.
+    func fileBlob(in repoPath: String, endpoint: GitDiffEndpoint, path: String) -> String? {
+        switch endpoint {
+        case .workingTree:
+            let absolute = (repoPath as NSString).appendingPathComponent(path)
+            guard let data = try? Data(contentsOf: URL(fileURLWithPath: absolute)) else { return nil }
+            return String(data: data, encoding: .utf8)
+        case .index:
+            let result = client.run(in: repoPath, args: ["show", ":\(path)"])
+            return result.success ? result.stdout : nil
+        case let .revision(rev):
+            let result = client.run(in: repoPath, args: ["show", "\(rev):\(path)"])
+            return result.success ? result.stdout : nil
+        }
+    }
+
     private func makeArgs(for request: GitDiffRequest) -> [String] {
         var args = [
             "diff",

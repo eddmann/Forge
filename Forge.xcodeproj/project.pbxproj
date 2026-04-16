@@ -7,10 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01D12049F608E1283BD1597F /* TreeSitterJavaScript in Frameworks */ = {isa = PBXBuildFile; productRef = D39AE27644910B479CDB2B5B /* TreeSitterJavaScript */; };
 		0567477E6F65BE0C1AE6043F /* FuzzyMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFE8F3B9F661EEE7E768E66C /* FuzzyMatch.swift */; };
+		05C96E467E743790C36C002E /* TreeSitterTypeScript in Frameworks */ = {isa = PBXBuildFile; productRef = E30BF3A2E351EF3D154BFE99 /* TreeSitterTypeScript */; };
 		075E4E76C3E6C7A8EC13D6E4 /* ScratchPromoteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35BC3B6503AA758A21B99208 /* ScratchPromoteSheet.swift */; };
 		07E751BB3DB8C5A551D114AD /* CommandPaletteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1BCD87FD2A8EFF1229D24CB /* CommandPaletteViewModel.swift */; };
 		0C401CA4784BC5616BB7AA5D /* AgentReviewPayloadBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */; };
+		0D7B00F2909F3F5D9B685736 /* TreeSitterJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 0334ED998EF54BD6E92234F4 /* TreeSitterJSON */; };
 		10ABE7EA8B508FD50BC72C8D /* ProcessManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D2846837C3C3B77437CA2B0 /* ProcessManager.swift */; };
 		14CB2C84FC65B925A953F23E /* AgentEventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71607C511F2A39E630507479 /* AgentEventStore.swift */; };
 		186B0FFC225E49680C7A1400 /* ExternalEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17988CA2EA98D7A6396E2B91 /* ExternalEditor.swift */; };
@@ -45,6 +48,7 @@
 		467529F0AC7B7CE258F5BBE4 /* DemoStateFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A6CD1CBB80B47266E1EF60 /* DemoStateFactory.swift */; };
 		47D58A9420DF78510F52BBF7 /* WorkspaceGitWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8663DB06DC2E7319D471DFB9 /* WorkspaceGitWatcher.swift */; };
 		4C793C7041A31A190944A901 /* UnifiedDiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED7ECF021E249100D45C7B2 /* UnifiedDiffView.swift */; };
+		4C9C6B8A5D1A074DE32F7E91 /* TreeSitterGo in Frameworks */ = {isa = PBXBuildFile; productRef = 946C670C4C1F11C8ABAFB12C /* TreeSitterGo */; };
 		4E353DD84E747CCAAC3E9A85 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749EB54C1D9FD07119776AA4 /* AppDelegate.swift */; };
 		4E5B37050E49C380D5DDC77A /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE29E80CC2891CE39E9AA50 /* MainSplitViewController.swift */; };
 		4F96F61957F72017DFCF2068 /* SplitState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E76234D32CE8896741114CD /* SplitState.swift */; };
@@ -53,11 +57,16 @@
 		5250AFE57FA4E85444DAF169 /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10150AB1CC6C4F8AE3423ABD /* SidebarViewController.swift */; };
 		56CF6611305E42E7DE701ACD /* WorkspaceDiffList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B74FE47A67DD9F4A0C7684B /* WorkspaceDiffList.swift */; };
 		5756BA39E77383BFCAF37803 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F3839390BDE8DD11221E196 /* SettingsView.swift */; };
+		581E8E83E0E09FCC128BD646 /* TreeSitterRust in Frameworks */ = {isa = PBXBuildFile; productRef = 69822E6B7CC2D2016A42BE79 /* TreeSitterRust */; };
 		5B2ADA71AF99EE2B0D9A802A /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E28C3575AE17D6490A76432 /* Workspace.swift */; };
 		5D01EFD91635AEE66ECBE336 /* TerminalSearchState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB882B7AABD6216C7D71011 /* TerminalSearchState.swift */; };
+		5E45070F9EA3C6438A9B60E6 /* SwiftTreeSitterLayer in Frameworks */ = {isa = PBXBuildFile; productRef = F6CD250A582057012E3B4C8F /* SwiftTreeSitterLayer */; };
+		5E809F8D83CC60556A7F02E1 /* TreeSitterPHP in Frameworks */ = {isa = PBXBuildFile; productRef = 3158160B13A09D03F7361C0E /* TreeSitterPHP */; };
+		60326C0C3C213AC40E9655B9 /* TreeSitterPython in Frameworks */ = {isa = PBXBuildFile; productRef = 9874189270C78CD9B811BD61 /* TreeSitterPython */; };
 		61EAB7F9E8DBF4632D654669 /* BonsplitController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7519165D08DFDF8192EA8F7C /* BonsplitController.swift */; };
 		6301D6142F066E246ADA5117 /* SplitContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAE0ABB6ABB278D6F5E9C44 /* SplitContainerView.swift */; };
 		636833B4508AD5E5520B0E57 /* TerminalSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AB6E0D7CF405B9EC9F6F64 /* TerminalSessionManager.swift */; };
+		65479D68CBF8D185F12B9995 /* DiffLineRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD709927FD51E5567C30C76 /* DiffLineRenderer.swift */; };
 		65F9F7C24F4FE3635F0B936C /* ForgeConfigPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF0A769B8CB474623AE8F74 /* ForgeConfigPrompts.swift */; };
 		660EC2752004FADA5827C386 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99751F6A0C8860A70146FB8D /* WelcomeView.swift */; };
 		6620650A4F8E1CB27057FE5B /* TerminalSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03D48F43AB138181D6CD761 /* TerminalSession.swift */; };
@@ -82,16 +91,18 @@
 		77AE960A4776D5A0A52AD199 /* CommandPaletteItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D2513A6B4EB6E2718B01CE /* CommandPaletteItem.swift */; };
 		792DB5B7CE3CD212E63347F3 /* JetBrainsMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 95065E956C5E585DBC654744 /* JetBrainsMono-Regular.ttf */; };
 		794D28BAC34D00D30FCF7FAA /* SystemMethods.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D72BC927E95BBB0E8A2219 /* SystemMethods.swift */; };
+		7CAD507CE02CD9804599F167 /* SyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C1272E337E2E9F7EA90FD4 /* SyntaxHighlighter.swift */; };
 		824C90E0DE7F062B5BE0702B /* ToastPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA171C5EE0F3CF9830676149 /* ToastPanel.swift */; };
 		8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67BA06145706D19DBE2AB0DB /* InspectorViewController.swift */; };
 		83C38DE811797FDEC108A310 /* StatusBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB6C83CAC1F911908568BD7 /* StatusBarController.swift */; };
 		86A50B11CBBEA542AE8CE2D4 /* DiffTableTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0826627C87E49427EB6B8F26 /* DiffTableTypes.swift */; };
 		87DE037B3A7130EABAEEA4FC /* GitUnifiedDiffParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1F198AEAF81458760BDA443 /* GitUnifiedDiffParser.swift */; };
-		8932C47CE7A9158D452B4E4E /* WordDiffLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */; };
 		8B4C5CAD6ACD54E118395D79 /* SplitNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E38DEBE74BC535C5E3A88E5 /* SplitNodeView.swift */; };
+		8DF4C5DCCF16E812C509A004 /* LanguageRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A88C07EE360DD48F7C65EE9 /* LanguageRegistry.swift */; };
 		90987ACFDEBC83E0342A4D16 /* ForgeRPC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E77365CA7E63CC467F9F5C1 /* ForgeRPC.swift */; };
 		95668F7CED1D165D912E2656 /* AgentInfoPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A787E3249CE42C1FC81D9E9A /* AgentInfoPopoverView.swift */; };
 		958919E7AFE933A2ECE729BE /* FileStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D557D56D0DBFDC04108086ED /* FileStatus.swift */; };
+		9BE4AF0CE2D8C39146ACB604 /* TreeSitterBash in Frameworks */ = {isa = PBXBuildFile; productRef = 36281D49EC56A5688D1968F7 /* TreeSitterBash */; };
 		9BF204E729543B6E9E689976 /* TerminalAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A330C61E147E9935FB2584 /* TerminalAppearance.swift */; };
 		9CF85EDE6491F76948C7C1F6 /* ActivityLogStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E062060F229D0DEFE19EFDA3 /* ActivityLogStore.swift */; };
 		9EC89A28301B55CD351004C8 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E18D8DBAC71B87110136F /* SplitViewController.swift */; };
@@ -110,11 +121,13 @@
 		B2B4FD154A101B336B2366C3 /* CommandPaletteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678513C7ACB1E46831448273 /* CommandPaletteView.swift */; };
 		B2C65263AB86E25FD03ED68E /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1D2E8F62597C740B62B4D0 /* Project.swift */; };
 		B4074675E659D561A121BCC9 /* SplitDiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B68C999B71210CCBAAC317 /* SplitDiffView.swift */; };
+		B46252EEB1B64DC19B6365D7 /* TreeSitterSwift in Frameworks */ = {isa = PBXBuildFile; productRef = F6891DA452609EAFF1B4F3FE /* TreeSitterSwift */; };
 		B6C05E6C34DD83B11063FB87 /* FileStatusRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF2655CE07FECC563390787 /* FileStatusRow.swift */; };
 		B7070FB12D059250F93792F8 /* DiffTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F12DDCB35F9733A5846460 /* DiffTabView.swift */; };
 		B7AEDCC3748C5C2C8E4699E4 /* AgentCapabilityParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E49E4582AFF44F5057030E3 /* AgentCapabilityParser.swift */; };
 		B9210B522CAA640A2E75D1B4 /* ProjectStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A918DA6D12D11F5510C604BB /* ProjectStore.swift */; };
 		B9859F0953678386516F55D4 /* TabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94FE53F98FC4ED53EBACE627 /* TabBarView.swift */; };
+		BA852465AAB1B090A1C76702 /* TreeSitterCSS in Frameworks */ = {isa = PBXBuildFile; productRef = 4C24497E341F2BEB895B5446 /* TreeSitterCSS */; };
 		BB210A8945249596BB6F051F /* ActivitySnapshotCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9964C3D3A979B915F2434DAF /* ActivitySnapshotCommand.swift */; };
 		BBD8AE2D99990E0BE2681B70 /* TabBarMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC6EBE2DB0CD7EAFE14307F /* TabBarMetrics.swift */; };
 		BDFE5633A7BD7DE5713ED754 /* TerminalSearchOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AA38CFD1009E5B845E6970 /* TerminalSearchOverlay.swift */; };
@@ -124,6 +137,8 @@
 		C8EE75452F5337ABC30CAAFE /* BonsplitDebugCounters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 411278BCDF581B05520C9CC6 /* BonsplitDebugCounters.swift */; };
 		CADD824CA25F9BC7DC4C07CF /* DemoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A3380FD3C5B17393F3CCCB /* DemoData.swift */; };
 		CC902EED542F094CEFCC2F78 /* libghostty.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F9518B116ACF472BAE659D2 /* libghostty.a */; };
+		CF19AD09D56BDB92BE69D929 /* TreeSitterMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = 3C9ECE0D9D30B69C2882657E /* TreeSitterMarkdown */; };
+		CFEBF02977CA59AC928C09BD /* HighlightPalette.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDD27F2034B5210FFE13BB78 /* HighlightPalette.swift */; };
 		D1DBD1B8EB86A36CF4401295 /* DiffLineCells.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF77C8CF7F58E9C58A7E0C74 /* DiffLineCells.swift */; };
 		D22DD4E346A00578FC2AB34A /* AgentActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = E462273D87AE64CBBE7EB1F3 /* AgentActivity.swift */; };
 		D3AC14E880180F1AEA725ABD /* TabDragPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4F0F389914743FA021ED2E /* TabDragPreview.swift */; };
@@ -135,6 +150,7 @@
 		D9329A95BC037EA8F5E7C659 /* GhosttyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3624BDB8FD61A57C38FA30C /* GhosttyApp.swift */; };
 		D9645675D4C6E211F608B386 /* SendToAgentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBE28FC6D3D03BEE225978 /* SendToAgentView.swift */; };
 		DAB078E282A2AEC5CE9E5284 /* ChangesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868FBDD017F6B9CA822F6A7D /* ChangesViewModel.swift */; };
+		DD1FDB5BD21A2D6E5035D4D9 /* SwiftTreeSitter in Frameworks */ = {isa = PBXBuildFile; productRef = 647198830965DFBA5B0DC68E /* SwiftTreeSitter */; };
 		DD6DF706C2BB39C33D15BE82 /* ProjectListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C84715E19D3D7A198B19B8 /* ProjectListView.swift */; };
 		DDAF563F120C7056CFF05B45 /* InspectorStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD57395E80A40A56655E491F /* InspectorStateStore.swift */; };
 		DE18EFF881E8F22355D76103 /* TabItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324C6BF661A3B57C7A0FE4DC /* TabItem.swift */; };
@@ -153,6 +169,7 @@
 		EB14AF51A502923B533D3ABE /* DebugEventLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A913D1CB5E730CFBA223F25D /* DebugEventLog.swift */; };
 		EBE6970C1FAB16099C16176C /* ReviewStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C30B829376599F48CCB5C7 /* ReviewStore.swift */; };
 		ECC026CA6E87EFC21793377A /* CommitCountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B205456E82CD816617F8385 /* CommitCountStore.swift */; };
+		ECF014EE21B775B9C90D4566 /* SyntaxHighlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = C43E5AEBF1CB84D216ADB76F /* SyntaxHighlight.swift */; };
 		F069631560DBF89B5EE297D2 /* PortAllocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF08E543DA7D94198C6296D /* PortAllocator.swift */; };
 		F07F1370F96DC83D03EFC104 /* TabItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D189E7C10808C8DFEA133A5C /* TabItemView.swift */; };
 		F3153553CB31A6997A3F936F /* ForgeCLIInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D7AB481543402B43A8E777 /* ForgeCLIInstaller.swift */; };
@@ -160,8 +177,10 @@
 		F4F6CC41FF265C9DA098D17E /* WorkspaceNaming.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33009813506A712F05C01586 /* WorkspaceNaming.swift */; };
 		F5B0165ECE06BC459D782E71 /* LayoutSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6962054AB32C0DF336214C6 /* LayoutSnapshot.swift */; };
 		F93FF39D3D7CEB1B46F970C2 /* PokemonDex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D513FDDCFEDCD851ADC4A6 /* PokemonDex.swift */; };
+		FA2697FEDDE2E7761759B37E /* TreeSitterYAML in Frameworks */ = {isa = PBXBuildFile; productRef = C5DA6EE59022E9424224F986 /* TreeSitterYAML */; };
 		FAC454390C347F8C1D33EB1F /* SummaryLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 027D11694354B37A74D44611 /* SummaryLog.swift */; };
 		FB4440F0A92FCE49B7117580 /* ProcessGitClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66919BFBD1A6FF892D421033 /* ProcessGitClient.swift */; };
+		FC4F42EA776B816EE918E006 /* TreeSitterHTML in Frameworks */ = {isa = PBXBuildFile; productRef = 7559392BF0BC7DB0A8274EEF /* TreeSitterHTML */; };
 		FE99752BC2E4275E55557926 /* ghostty in Resources */ = {isa = PBXBuildFile; fileRef = B9E4187EE35799D24A79EF0B /* ghostty */; };
 		FEA9631053250363C9EEEC9A /* SplitViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58123122FDD0E29B7DBF9352 /* SplitViewContainer.swift */; };
 /* End PBXBuildFile section */
@@ -208,6 +227,7 @@
 		33009813506A712F05C01586 /* WorkspaceNaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceNaming.swift; sourceTree = "<group>"; };
 		33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentReviewPayloadBuilder.swift; sourceTree = "<group>"; };
 		35BC3B6503AA758A21B99208 /* ScratchPromoteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScratchPromoteSheet.swift; sourceTree = "<group>"; };
+		35C1272E337E2E9F7EA90FD4 /* SyntaxHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlighter.swift; sourceTree = "<group>"; };
 		37D513FDDCFEDCD851ADC4A6 /* PokemonDex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokemonDex.swift; sourceTree = "<group>"; };
 		39F12DDCB35F9733A5846460 /* DiffTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffTabView.swift; sourceTree = "<group>"; };
 		3A4D2BD2E0F08EC30EB04939 /* ProcessesDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessesDrawer.swift; sourceTree = "<group>"; };
@@ -227,7 +247,6 @@
 		58123122FDD0E29B7DBF9352 /* SplitViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewContainer.swift; sourceTree = "<group>"; };
 		58D7AB481543402B43A8E777 /* ForgeCLIInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeCLIInstaller.swift; sourceTree = "<group>"; };
 		599DA552088BBBFB7EB9191C /* CommandDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandDiscovery.swift; sourceTree = "<group>"; };
-		59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDiffLineView.swift; sourceTree = "<group>"; };
 		5B74FE47A67DD9F4A0C7684B /* WorkspaceDiffList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceDiffList.swift; sourceTree = "<group>"; };
 		5F9518B116ACF472BAE659D2 /* libghostty.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libghostty.a; path = "Dependencies/GhosttyKit.xcframework/macos-arm64_x86_64/libghostty.a"; sourceTree = "<group>"; };
 		5FDA55941BDB098A23EAE9CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -257,6 +276,7 @@
 		868FBDD017F6B9CA822F6A7D /* ChangesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangesViewModel.swift; sourceTree = "<group>"; };
 		8836627A63A5FC5785B35DB2 /* ModalToastPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalToastPanel.swift; sourceTree = "<group>"; };
 		8A1D2E8F62597C740B62B4D0 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
+		8A88C07EE360DD48F7C65EE9 /* LanguageRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageRegistry.swift; sourceTree = "<group>"; };
 		8A90616935E4BDC25E834E9B /* ForgeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeStore.swift; sourceTree = "<group>"; };
 		8BBFCA5701CEE5E34D6C159E /* SplitNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitNode.swift; sourceTree = "<group>"; };
 		8CFD8D52036236C912F9A75B /* MainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowController.swift; sourceTree = "<group>"; };
@@ -295,6 +315,7 @@
 		C27615076A6D6DC12ADBB86E /* DiffViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffViewModel.swift; sourceTree = "<group>"; };
 		C2B68C999B71210CCBAAC317 /* SplitDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitDiffView.swift; sourceTree = "<group>"; };
 		C422675759830D50E1003A2B /* ForgeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgeConfig.swift; sourceTree = "<group>"; };
+		C43E5AEBF1CB84D216ADB76F /* SyntaxHighlight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlight.swift; sourceTree = "<group>"; };
 		CA4F0F389914743FA021ED2E /* TabDragPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabDragPreview.swift; sourceTree = "<group>"; };
 		CDD54FF735F21B48ED884859 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		CE0283AAF15EE234022748C7 /* TerminalTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalTab.swift; sourceTree = "<group>"; };
@@ -333,8 +354,10 @@
 		F3624BDB8FD61A57C38FA30C /* GhosttyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyApp.swift; sourceTree = "<group>"; };
 		F6BE7F290D41BF2C34D83F4A /* DemoMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMode.swift; sourceTree = "<group>"; };
 		F8ADAE09E2AF777777761B7F /* PaneID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaneID.swift; sourceTree = "<group>"; };
+		FAD709927FD51E5567C30C76 /* DiffLineRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffLineRenderer.swift; sourceTree = "<group>"; };
 		FCB6C83CAC1F911908568BD7 /* StatusBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarController.swift; sourceTree = "<group>"; };
 		FCB98837939F9B485797E3A7 /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
+		FDD27F2034B5210FFE13BB78 /* HighlightPalette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HighlightPalette.swift; sourceTree = "<group>"; };
 		FDE1F53D3088D83C929C6089 /* AgentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentStore.swift; sourceTree = "<group>"; };
 		FEF08E543DA7D94198C6296D /* PortAllocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortAllocator.swift; sourceTree = "<group>"; };
 		FFE8F3B9F661EEE7E768E66C /* FuzzyMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FuzzyMatch.swift; sourceTree = "<group>"; };
@@ -346,6 +369,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				CC902EED542F094CEFCC2F78 /* libghostty.a in Frameworks */,
+				DD1FDB5BD21A2D6E5035D4D9 /* SwiftTreeSitter in Frameworks */,
+				5E45070F9EA3C6438A9B60E6 /* SwiftTreeSitterLayer in Frameworks */,
+				B46252EEB1B64DC19B6365D7 /* TreeSitterSwift in Frameworks */,
+				05C96E467E743790C36C002E /* TreeSitterTypeScript in Frameworks */,
+				01D12049F608E1283BD1597F /* TreeSitterJavaScript in Frameworks */,
+				60326C0C3C213AC40E9655B9 /* TreeSitterPython in Frameworks */,
+				4C9C6B8A5D1A074DE32F7E91 /* TreeSitterGo in Frameworks */,
+				581E8E83E0E09FCC128BD646 /* TreeSitterRust in Frameworks */,
+				0D7B00F2909F3F5D9B685736 /* TreeSitterJSON in Frameworks */,
+				FA2697FEDDE2E7761759B37E /* TreeSitterYAML in Frameworks */,
+				FC4F42EA776B816EE918E006 /* TreeSitterHTML in Frameworks */,
+				BA852465AAB1B090A1C76702 /* TreeSitterCSS in Frameworks */,
+				CF19AD09D56BDB92BE69D929 /* TreeSitterMarkdown in Frameworks */,
+				9BE4AF0CE2D8C39146ACB604 /* TreeSitterBash in Frameworks */,
+				5E809F8D83CC60556A7F02E1 /* TreeSitterPHP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -580,6 +618,7 @@
 				33E5277126C3752E88629D7E /* AgentReviewPayloadBuilder.swift */,
 				D557D56D0DBFDC04108086ED /* FileStatus.swift */,
 				D50575BD258BDA402F95EE53 /* GitDiffModels.swift */,
+				C43E5AEBF1CB84D216ADB76F /* SyntaxHighlight.swift */,
 				A1CA93EABEB76A8CDDB0D8A4 /* WorkspaceCommit.swift */,
 			);
 			path = Git;
@@ -597,6 +636,17 @@
 				16CBFE7A0F60D63CBB4B6E17 /* TabID.swift */,
 			);
 			path = Types;
+			sourceTree = "<group>";
+		};
+		83CB17BF81B6F2089EE0228A /* Highlighting */ = {
+			isa = PBXGroup;
+			children = (
+				FAD709927FD51E5567C30C76 /* DiffLineRenderer.swift */,
+				FDD27F2034B5210FFE13BB78 /* HighlightPalette.swift */,
+				8A88C07EE360DD48F7C65EE9 /* LanguageRegistry.swift */,
+				35C1272E337E2E9F7EA90FD4 /* SyntaxHighlighter.swift */,
+			);
+			path = Highlighting;
 			sourceTree = "<group>";
 		};
 		8558CAA6C457F4A3486CCA90 /* Inspector */ = {
@@ -699,7 +749,6 @@
 				EAF4160F9DB818FD7AEC50FE /* UnifiedDiffTableView.swift */,
 				8ED7ECF021E249100D45C7B2 /* UnifiedDiffView.swift */,
 				D8B6352ABACD0556576E6674 /* WordDiff.swift */,
-				59D46BAB3BAA9116C6FF7242 /* WordDiffLineView.swift */,
 				DF55908F3EC2563907180BB6 /* WorkspaceDiffViewModel.swift */,
 			);
 			path = Git;
@@ -711,6 +760,7 @@
 				AA3944EF80CF723DBBB01291 /* Activity */,
 				34E8869DDE042D5BA1A87195 /* CommandPalette */,
 				AD521890B3327BF9207A1521 /* Git */,
+				83CB17BF81B6F2089EE0228A /* Highlighting */,
 				8558CAA6C457F4A3486CCA90 /* Inspector */,
 				181B6A137B2C6AE5B9BFACFF /* Processes */,
 				A9F5995E185AFFE38D92DC5A /* Projects */,
@@ -916,6 +966,21 @@
 			);
 			name = Forge;
 			packageProductDependencies = (
+				647198830965DFBA5B0DC68E /* SwiftTreeSitter */,
+				F6CD250A582057012E3B4C8F /* SwiftTreeSitterLayer */,
+				F6891DA452609EAFF1B4F3FE /* TreeSitterSwift */,
+				E30BF3A2E351EF3D154BFE99 /* TreeSitterTypeScript */,
+				D39AE27644910B479CDB2B5B /* TreeSitterJavaScript */,
+				9874189270C78CD9B811BD61 /* TreeSitterPython */,
+				946C670C4C1F11C8ABAFB12C /* TreeSitterGo */,
+				69822E6B7CC2D2016A42BE79 /* TreeSitterRust */,
+				0334ED998EF54BD6E92234F4 /* TreeSitterJSON */,
+				C5DA6EE59022E9424224F986 /* TreeSitterYAML */,
+				7559392BF0BC7DB0A8274EEF /* TreeSitterHTML */,
+				4C24497E341F2BEB895B5446 /* TreeSitterCSS */,
+				3C9ECE0D9D30B69C2882657E /* TreeSitterMarkdown */,
+				36281D49EC56A5688D1968F7 /* TreeSitterBash */,
+				3158160B13A09D03F7361C0E /* TreeSitterPHP */,
 			);
 			productName = Forge;
 			productReference = EAD57FE43439B2C292022C07 /* Forge.app */;
@@ -940,6 +1005,22 @@
 			);
 			mainGroup = EFCB33EBE3812EE38333409F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				69855E317AC90691AED9A478 /* XCRemoteSwiftPackageReference "swift-tree-sitter" */,
+				EBCEEAD0C40D6ECFACD55C7C /* XCRemoteSwiftPackageReference "tree-sitter-bash" */,
+				A01D1518C9B236D1B71ED28B /* XCRemoteSwiftPackageReference "tree-sitter-css" */,
+				D3E496CC2E6C1AE091B0DAC5 /* XCRemoteSwiftPackageReference "tree-sitter-go" */,
+				8A7A4D5E6E8C9E1B2D836BDD /* XCRemoteSwiftPackageReference "tree-sitter-html" */,
+				A3C483C1D3D9B1FDE490DBBA /* XCRemoteSwiftPackageReference "tree-sitter-json" */,
+				D74573306CE58015FE9847D8 /* XCRemoteSwiftPackageReference "tree-sitter-javascript" */,
+				ACA69725AD1EF84557DDA66E /* XCRemoteSwiftPackageReference "tree-sitter-markdown" */,
+				D7B3B58EBC36C156AC266EE1 /* XCRemoteSwiftPackageReference "tree-sitter-php" */,
+				9CEB1B0EF1FED6F617D9D558 /* XCRemoteSwiftPackageReference "tree-sitter-python" */,
+				23B03EF4038CC0496FF093BF /* XCRemoteSwiftPackageReference "tree-sitter-rust" */,
+				DCB301960AA8913F7B963DD2 /* XCRemoteSwiftPackageReference "tree-sitter-swift" */,
+				FA3CAA572FB255FAF2747604 /* XCRemoteSwiftPackageReference "tree-sitter-typescript" */,
+				F4B3DB5AB65AF0FD55DD5C2C /* XCRemoteSwiftPackageReference "tree-sitter-yaml" */,
+			);
 			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1043,6 +1124,7 @@
 				467529F0AC7B7CE258F5BBE4 /* DemoStateFactory.swift in Sources */,
 				D7D7672CD9D4E1F85F7D0167 /* DiffInlineViews.swift in Sources */,
 				D1DBD1B8EB86A36CF4401295 /* DiffLineCells.swift in Sources */,
+				65479D68CBF8D185F12B9995 /* DiffLineRenderer.swift in Sources */,
 				B7070FB12D059250F93792F8 /* DiffTabView.swift in Sources */,
 				86A50B11CBBEA542AE8CE2D4 /* DiffTableTypes.swift in Sources */,
 				5050EFE698D87918D89621C2 /* DiffViewModel.swift in Sources */,
@@ -1064,9 +1146,11 @@
 				DF49C321DAD4350EFE68125A /* GitDiffModels.swift in Sources */,
 				32AA8DE2E57C810B1FC02B29 /* GitDiffService.swift in Sources */,
 				87DE037B3A7130EABAEEA4FC /* GitUnifiedDiffParser.swift in Sources */,
+				CFEBF02977CA59AC928C09BD /* HighlightPalette.swift in Sources */,
 				DDAF563F120C7056CFF05B45 /* InspectorStateStore.swift in Sources */,
 				3FF161D6FC74BF72BACE1CF4 /* InspectorView.swift in Sources */,
 				8370DC371BD02180128566B5 /* InspectorViewController.swift in Sources */,
+				8DF4C5DCCF16E812C509A004 /* LanguageRegistry.swift in Sources */,
 				F5B0165ECE06BC459D782E71 /* LayoutSnapshot.swift in Sources */,
 				4E5B37050E49C380D5DDC77A /* MainSplitViewController.swift in Sources */,
 				B2A94F3E550AC00F336C7D1D /* MainWindowController.swift in Sources */,
@@ -1110,6 +1194,8 @@
 				FAC454390C347F8C1D33EB1F /* SummaryLog.swift in Sources */,
 				D80AF7ED304AE0FCA3C5E84F /* SummaryScheduler.swift in Sources */,
 				69BA6066822D2EC3ECF04AAA /* SummaryStore.swift in Sources */,
+				ECF014EE21B775B9C90D4566 /* SyntaxHighlight.swift in Sources */,
+				7CAD507CE02CD9804599F167 /* SyntaxHighlighter.swift in Sources */,
 				794D28BAC34D00D30FCF7FAA /* SystemMethods.swift in Sources */,
 				440BF1A6FAD5DDC760BD501E /* Tab.swift in Sources */,
 				2D45B233B746EEEEFB436AEF /* TabBarColors.swift in Sources */,
@@ -1140,7 +1226,6 @@
 				4C793C7041A31A190944A901 /* UnifiedDiffView.swift in Sources */,
 				660EC2752004FADA5827C386 /* WelcomeView.swift in Sources */,
 				E4733A69B65CD74E31153FA1 /* WordDiff.swift in Sources */,
-				8932C47CE7A9158D452B4E4E /* WordDiffLineView.swift in Sources */,
 				5B2ADA71AF99EE2B0D9A802A /* Workspace.swift in Sources */,
 				6D10E1C247D18BA59E04D540 /* WorkspaceCloner.swift in Sources */,
 				2B397FF767CF6F8ADE761955 /* WorkspaceCommit.swift in Sources */,
@@ -1450,6 +1535,199 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		23B03EF4038CC0496FF093BF /* XCRemoteSwiftPackageReference "tree-sitter-rust" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-rust";
+			requirement = {
+				kind = exactVersion;
+				version = 0.24.2;
+			};
+		};
+		69855E317AC90691AED9A478 /* XCRemoteSwiftPackageReference "swift-tree-sitter" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/swift-tree-sitter";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.10.0;
+			};
+		};
+		8A7A4D5E6E8C9E1B2D836BDD /* XCRemoteSwiftPackageReference "tree-sitter-html" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-html";
+			requirement = {
+				kind = exactVersion;
+				version = 0.23.2;
+			};
+		};
+		9CEB1B0EF1FED6F617D9D558 /* XCRemoteSwiftPackageReference "tree-sitter-python" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-python";
+			requirement = {
+				kind = exactVersion;
+				version = 0.23.6;
+			};
+		};
+		A01D1518C9B236D1B71ED28B /* XCRemoteSwiftPackageReference "tree-sitter-css" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-css";
+			requirement = {
+				kind = exactVersion;
+				version = 0.23.2;
+			};
+		};
+		A3C483C1D3D9B1FDE490DBBA /* XCRemoteSwiftPackageReference "tree-sitter-json" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-json";
+			requirement = {
+				kind = exactVersion;
+				version = 0.24.8;
+			};
+		};
+		ACA69725AD1EF84557DDA66E /* XCRemoteSwiftPackageReference "tree-sitter-markdown" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MDeiml/tree-sitter-markdown";
+			requirement = {
+				kind = exactVersion;
+				version = 0.5.3;
+			};
+		};
+		D3E496CC2E6C1AE091B0DAC5 /* XCRemoteSwiftPackageReference "tree-sitter-go" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-go";
+			requirement = {
+				kind = exactVersion;
+				version = 0.25.0;
+			};
+		};
+		D74573306CE58015FE9847D8 /* XCRemoteSwiftPackageReference "tree-sitter-javascript" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-javascript";
+			requirement = {
+				kind = exactVersion;
+				version = 0.23.1;
+			};
+		};
+		D7B3B58EBC36C156AC266EE1 /* XCRemoteSwiftPackageReference "tree-sitter-php" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-php";
+			requirement = {
+				kind = exactVersion;
+				version = 0.24.2;
+			};
+		};
+		DCB301960AA8913F7B963DD2 /* XCRemoteSwiftPackageReference "tree-sitter-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/alex-pinkus/tree-sitter-swift";
+			requirement = {
+				branch = "with-generated-files";
+				kind = branch;
+			};
+		};
+		EBCEEAD0C40D6ECFACD55C7C /* XCRemoteSwiftPackageReference "tree-sitter-bash" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-bash";
+			requirement = {
+				kind = exactVersion;
+				version = 0.25.1;
+			};
+		};
+		F4B3DB5AB65AF0FD55DD5C2C /* XCRemoteSwiftPackageReference "tree-sitter-yaml" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter-grammars/tree-sitter-yaml";
+			requirement = {
+				kind = exactVersion;
+				version = 0.7.0;
+			};
+		};
+		FA3CAA572FB255FAF2747604 /* XCRemoteSwiftPackageReference "tree-sitter-typescript" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tree-sitter/tree-sitter-typescript";
+			requirement = {
+				kind = exactVersion;
+				version = 0.23.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0334ED998EF54BD6E92234F4 /* TreeSitterJSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A3C483C1D3D9B1FDE490DBBA /* XCRemoteSwiftPackageReference "tree-sitter-json" */;
+			productName = TreeSitterJSON;
+		};
+		3158160B13A09D03F7361C0E /* TreeSitterPHP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D7B3B58EBC36C156AC266EE1 /* XCRemoteSwiftPackageReference "tree-sitter-php" */;
+			productName = TreeSitterPHP;
+		};
+		36281D49EC56A5688D1968F7 /* TreeSitterBash */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EBCEEAD0C40D6ECFACD55C7C /* XCRemoteSwiftPackageReference "tree-sitter-bash" */;
+			productName = TreeSitterBash;
+		};
+		3C9ECE0D9D30B69C2882657E /* TreeSitterMarkdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ACA69725AD1EF84557DDA66E /* XCRemoteSwiftPackageReference "tree-sitter-markdown" */;
+			productName = TreeSitterMarkdown;
+		};
+		4C24497E341F2BEB895B5446 /* TreeSitterCSS */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A01D1518C9B236D1B71ED28B /* XCRemoteSwiftPackageReference "tree-sitter-css" */;
+			productName = TreeSitterCSS;
+		};
+		647198830965DFBA5B0DC68E /* SwiftTreeSitter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 69855E317AC90691AED9A478 /* XCRemoteSwiftPackageReference "swift-tree-sitter" */;
+			productName = SwiftTreeSitter;
+		};
+		69822E6B7CC2D2016A42BE79 /* TreeSitterRust */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 23B03EF4038CC0496FF093BF /* XCRemoteSwiftPackageReference "tree-sitter-rust" */;
+			productName = TreeSitterRust;
+		};
+		7559392BF0BC7DB0A8274EEF /* TreeSitterHTML */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8A7A4D5E6E8C9E1B2D836BDD /* XCRemoteSwiftPackageReference "tree-sitter-html" */;
+			productName = TreeSitterHTML;
+		};
+		946C670C4C1F11C8ABAFB12C /* TreeSitterGo */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D3E496CC2E6C1AE091B0DAC5 /* XCRemoteSwiftPackageReference "tree-sitter-go" */;
+			productName = TreeSitterGo;
+		};
+		9874189270C78CD9B811BD61 /* TreeSitterPython */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9CEB1B0EF1FED6F617D9D558 /* XCRemoteSwiftPackageReference "tree-sitter-python" */;
+			productName = TreeSitterPython;
+		};
+		C5DA6EE59022E9424224F986 /* TreeSitterYAML */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F4B3DB5AB65AF0FD55DD5C2C /* XCRemoteSwiftPackageReference "tree-sitter-yaml" */;
+			productName = TreeSitterYAML;
+		};
+		D39AE27644910B479CDB2B5B /* TreeSitterJavaScript */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D74573306CE58015FE9847D8 /* XCRemoteSwiftPackageReference "tree-sitter-javascript" */;
+			productName = TreeSitterJavaScript;
+		};
+		E30BF3A2E351EF3D154BFE99 /* TreeSitterTypeScript */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA3CAA572FB255FAF2747604 /* XCRemoteSwiftPackageReference "tree-sitter-typescript" */;
+			productName = TreeSitterTypeScript;
+		};
+		F6891DA452609EAFF1B4F3FE /* TreeSitterSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DCB301960AA8913F7B963DD2 /* XCRemoteSwiftPackageReference "tree-sitter-swift" */;
+			productName = TreeSitterSwift;
+		};
+		F6CD250A582057012E3B4C8F /* SwiftTreeSitterLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 69855E317AC90691AED9A478 /* XCRemoteSwiftPackageReference "swift-tree-sitter" */;
+			productName = SwiftTreeSitterLayer;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DD0290201C0E580E7A86156E /* Project object */;
 }

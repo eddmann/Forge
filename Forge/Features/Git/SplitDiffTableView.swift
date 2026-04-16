@@ -72,6 +72,7 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
         private var lastScrolledHunkIndex: Int?
         private var lastRowIdentities: [String] = []
         private var lastFontSize: CGFloat = 0
+        private var lastHighlights: FileHighlights = .empty
 
         init(parent: SplitDiffTableView) {
             self.parent = parent
@@ -96,11 +97,12 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
             tableView?.recomputeMaxCodeWidth()
 
             let newIdentities = rows.map(\.identity)
-            if newIdentities != lastRowIdentities || config.fontSize != lastFontSize {
+            if newIdentities != lastRowIdentities || config.fontSize != lastFontSize || config.highlights != lastHighlights {
                 tableView?.splitLeftOffset = 0
                 tableView?.splitRightOffset = 0
                 lastRowIdentities = newIdentities
                 lastFontSize = config.fontSize
+                lastHighlights = config.highlights
                 tableView?.reloadData()
             }
         }
@@ -155,9 +157,12 @@ struct SplitDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
                 ) as? SplitLineCellView ?? SplitLineCellView()
                 cell.identifier = SplitLineCellView.reuseIdentifier
 
+                let leftTokens = left.map { tokensFor(line: $0, highlights: config.highlights) } ?? []
+                let rightTokens = right.map { tokensFor(line: $0, highlights: config.highlights) } ?? []
                 cell.configure(
                     left: left, right: right,
                     leftWordDiffs: leftWordDiffs, rightWordDiffs: rightWordDiffs,
+                    leftTokens: leftTokens, rightTokens: rightTokens,
                     fontSize: config.fontSize,
                     showCommentButton: config.showCommentButtons,
                     onComment: { [weak self] line, side in

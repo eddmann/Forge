@@ -630,6 +630,7 @@ final class UnifiedLineCellView: NSView {
     func configure(
         line: GitDiffLine,
         wordDiffs: [WordDiffSegment]?,
+        tokens: [HighlightToken],
         fontSize: CGFloat,
         showCommentButton: Bool,
         onComment: @escaping () -> Void
@@ -651,13 +652,9 @@ final class UnifiedLineCellView: NSView {
         prefixField.stringValue = line.prefix
         prefixField.textColor = prefixColor(for: line.kind)
 
-        if let segments = wordDiffs {
-            contentField.attributedStringValue = WordDiffLineView.attributedString(segments: segments, fontSize: fontSize)
-        } else {
-            contentField.font = font
-            contentField.textColor = .labelColor
-            contentField.stringValue = line.text
-        }
+        contentField.attributedStringValue = DiffLineRenderer.attributedString(
+            text: line.text, font: font, tokens: tokens, wordDiffs: wordDiffs
+        )
 
         // Background color
         wantsLayer = true
@@ -901,6 +898,7 @@ final class SplitHalfCellView: NSView {
         side: AgentReviewCommentSide,
         fontSize: CGFloat,
         wordDiffs: [WordDiffSegment]?,
+        tokens: [HighlightToken],
         showCommentButton: Bool,
         onComment: @escaping () -> Void
     ) {
@@ -924,13 +922,9 @@ final class SplitHalfCellView: NSView {
         lineNumberField.font = smallFont
         lineNumberField.stringValue = (side == .old ? line.oldLineNumber : line.newLineNumber).map { String($0) } ?? ""
 
-        if let segments = wordDiffs {
-            contentField.attributedStringValue = WordDiffLineView.attributedString(segments: segments, fontSize: fontSize)
-        } else {
-            contentField.font = font
-            contentField.textColor = .labelColor
-            contentField.stringValue = line.text
-        }
+        contentField.attributedStringValue = DiffLineRenderer.attributedString(
+            text: line.text, font: font, tokens: tokens, wordDiffs: wordDiffs
+        )
 
         wantsLayer = true
         layer?.backgroundColor = splitBackgroundColor(for: line.kind).cgColor
@@ -1013,18 +1007,22 @@ final class SplitLineCellView: NSView {
         right: GitDiffLine?,
         leftWordDiffs: [WordDiffSegment]?,
         rightWordDiffs: [WordDiffSegment]?,
+        leftTokens: [HighlightToken],
+        rightTokens: [HighlightToken],
         fontSize: CGFloat,
         showCommentButton: Bool,
         onComment: @escaping (GitDiffLine, AgentReviewCommentSide) -> Void
     ) {
         leftHalf.configure(
             line: left, side: .old, fontSize: fontSize,
-            wordDiffs: leftWordDiffs, showCommentButton: showCommentButton,
+            wordDiffs: leftWordDiffs, tokens: leftTokens,
+            showCommentButton: showCommentButton,
             onComment: { if let left { onComment(left, .old) } }
         )
         rightHalf.configure(
             line: right, side: .new, fontSize: fontSize,
-            wordDiffs: rightWordDiffs, showCommentButton: showCommentButton,
+            wordDiffs: rightWordDiffs, tokens: rightTokens,
+            showCommentButton: showCommentButton,
             onComment: { if let right { onComment(right, .new) } }
         )
     }

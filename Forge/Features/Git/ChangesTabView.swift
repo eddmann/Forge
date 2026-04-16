@@ -330,6 +330,7 @@ struct ChangesUnifiedFileView: View {
                 showCommentButtons: !hasDraft,
                 draftAnchorLineID: viewModel.draftComment?.anchorLineID,
                 currentHunkIndex: nil,
+                highlights: viewModel.fileHighlights[fp] ?? .empty,
                 onComment: { line, side in
                     let num = (side == .old ? line.oldLineNumber : line.newLineNumber) ?? 0
                     viewModel.beginComment(
@@ -403,6 +404,7 @@ struct ChangesSplitFileView: View {
                 showCommentButtons: !hasDraft,
                 draftAnchorLineID: viewModel.draftComment?.anchorLineID,
                 currentHunkIndex: nil,
+                highlights: viewModel.fileHighlights[fp] ?? .empty,
                 onComment: { line, side in
                     let num = (side == .old ? line.oldLineNumber : line.newLineNumber) ?? 0
                     viewModel.beginComment(

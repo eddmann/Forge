@@ -53,6 +53,7 @@ final class DiffViewModel: ObservableObject {
     @Published var currentHunkIndex = 0
     @Published var draftComment: DraftCommentState?
     @Published var contextExpanded = false
+    @Published var fileHighlights: FileHighlights = .empty
 
     private let diffService = GitDiffService.shared
 
@@ -89,9 +90,30 @@ final class DiffViewModel: ObservableObject {
                     self.diff = diffResult.files.first(where: {
                         ($0.newPath ?? $0.oldPath) == self.filePath
                     }) ?? diffResult.files.first
+                    self.loadHighlights(base: request.base, head: request.head)
                 case let .failure(err):
                     self.error = err.localizedDescription
                 }
+            }
+        }
+    }
+
+    private func loadHighlights(base: GitDiffEndpoint, head: GitDiffEndpoint) {
+        guard let diff, !diff.isBinary else {
+            fileHighlights = .empty
+            return
+        }
+        let repo = repoPath
+        let oldPath = diff.oldPath
+        let newPath = diff.newPath
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let oldBlob = oldPath.flatMap { GitDiffService.shared.fileBlob(in: repo, endpoint: base, path: $0) }
+            let newBlob = newPath.flatMap { GitDiffService.shared.fileBlob(in: repo, endpoint: head, path: $0) }
+            SyntaxHighlighter.shared.highlight(
+                oldBlob: oldBlob, oldPath: oldPath,
+                newBlob: newBlob, newPath: newPath
+            ) { highlights in
+                self?.fileHighlights = highlights
             }
         }
     }
@@ -296,6 +318,12 @@ final class DiffViewModel: ObservableObject {
                     patch: diffLines.map { "+\($0.text)" }.joined(separator: "\n")
                 )
                 self.isLoading = false
+                SyntaxHighlighter.shared.highlight(
+                    oldBlob: nil, oldPath: nil,
+                    newBlob: content, newPath: self.filePath
+                ) { [weak self] highlights in
+                    self?.fileHighlights = highlights
+                }
             }
         }
     }

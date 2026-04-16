@@ -20,6 +20,7 @@ struct UnifiedDiffView: View {
                 showCommentButtons: !hasDraft,
                 draftAnchorLineID: viewModel.draftComment?.anchorLineID,
                 currentHunkIndex: viewModel.currentHunkIndex,
+                highlights: viewModel.fileHighlights,
                 onComment: { line, side in
                     let num = (side == .old ? line.oldLineNumber : line.newLineNumber) ?? 0
                     viewModel.beginComment(

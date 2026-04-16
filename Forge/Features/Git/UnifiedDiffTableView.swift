@@ -71,6 +71,7 @@ struct UnifiedDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
         private var lastScrolledHunkIndex: Int?
         private var lastRowIdentities: [String] = []
         private var lastFontSize: CGFloat = 0
+        private var lastHighlights: FileHighlights = .empty
 
         init(parent: UnifiedDiffTableView) {
             self.parent = parent
@@ -95,10 +96,11 @@ struct UnifiedDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
             tableView?.recomputeMaxCodeWidth()
 
             let newIdentities = rows.map(\.identity)
-            if newIdentities != lastRowIdentities || config.fontSize != lastFontSize {
+            if newIdentities != lastRowIdentities || config.fontSize != lastFontSize || config.highlights != lastHighlights {
                 tableView?.horizontalOffset = 0
                 lastRowIdentities = newIdentities
                 lastFontSize = config.fontSize
+                lastHighlights = config.highlights
                 tableView?.reloadData()
             }
         }
@@ -153,8 +155,9 @@ struct UnifiedDiffTableView<Host: DiffCommentHost>: NSViewRepresentable {
                 ) as? UnifiedLineCellView ?? UnifiedLineCellView()
                 cell.identifier = UnifiedLineCellView.reuseIdentifier
 
+                let tokens = tokensFor(line: line, highlights: config.highlights)
                 cell.configure(
-                    line: line, wordDiffs: wordDiffs,
+                    line: line, wordDiffs: wordDiffs, tokens: tokens,
                     fontSize: config.fontSize,
                     showCommentButton: config.showCommentButtons,
                     onComment: { [weak self] in

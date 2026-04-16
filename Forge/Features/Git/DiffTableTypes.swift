@@ -56,6 +56,28 @@ enum DiffRow {
     }
 }
 
+// MARK: - Highlight lookup
+
+/// Looks up syntax highlight tokens for a diff line. Pure context lines map onto whichever
+/// side has a line number (preferring new). Removed lines use the old-side mapping; added
+/// lines use the new-side mapping.
+func tokensFor(line: GitDiffLine, highlights: FileHighlights) -> [HighlightToken] {
+    switch line.kind {
+    case .added:
+        guard let n = line.newLineNumber else { return [] }
+        return highlights.newSide[n]?.tokens ?? []
+    case .removed:
+        guard let n = line.oldLineNumber else { return [] }
+        return highlights.oldSide[n]?.tokens ?? []
+    case .context:
+        if let n = line.newLineNumber, let lh = highlights.newSide[n] { return lh.tokens }
+        if let n = line.oldLineNumber, let lh = highlights.oldSide[n] { return lh.tokens }
+        return []
+    case .noNewlineMarker:
+        return []
+    }
+}
+
 // MARK: - DiffTableConfig
 
 /// ViewModel-agnostic configuration passed to NSTableView representables.
@@ -67,6 +89,7 @@ struct DiffTableConfig {
     let showCommentButtons: Bool
     let draftAnchorLineID: String?
     let currentHunkIndex: Int?
+    let highlights: FileHighlights
     let onComment: (GitDiffLine, AgentReviewCommentSide) -> Void
     let onStageHunk: ((GitDiffHunk) -> Void)?
     let onUnstageHunk: ((GitDiffHunk) -> Void)?

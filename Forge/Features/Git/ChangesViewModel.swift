@@ -11,8 +11,13 @@ final class ChangesViewModel: ObservableObject {
     let branchDiffRequest: GitDiffRequest?
 
     @Published var fileDiffs: [GitFileDiff] = [] {
-        didSet { recomputeAutoCollapsedLargeFiles() }
+        didSet {
+            recomputeAutoCollapsedLargeFiles()
+            loadHighlights()
+        }
     }
+
+    @Published var fileHighlights: [String: FileHighlights] = [:]
 
     @Published var isLoading = true
     @Published var error: String?
@@ -265,6 +270,29 @@ final class ChangesViewModel: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func loadHighlights() {
+        let snapshot = fileDiffs
+        let repo = repoPath
+        let baseEndpoint: GitDiffEndpoint = branchDiffRequest?.base ?? .revision("HEAD")
+        let headEndpoint: GitDiffEndpoint = branchDiffRequest?.head ?? .workingTree
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            for diff in snapshot {
+                guard !diff.isBinary else { continue }
+                let key = diff.newPath ?? diff.oldPath ?? ""
+                guard !key.isEmpty else { continue }
+                let oldBlob = diff.oldPath.flatMap { GitDiffService.shared.fileBlob(in: repo, endpoint: baseEndpoint, path: $0) }
+                let newBlob = diff.newPath.flatMap { GitDiffService.shared.fileBlob(in: repo, endpoint: headEndpoint, path: $0) }
+                SyntaxHighlighter.shared.highlight(
+                    oldBlob: oldBlob, oldPath: diff.oldPath,
+                    newBlob: newBlob, newPath: diff.newPath
+                ) { [weak self] highlights in
+                    guard let self else { return }
+                    fileHighlights[key] = highlights
+                }
+            }
+        }
+    }
 
     private func recomputeAutoCollapsedLargeFiles() {
         var large: Set<String> = []
