@@ -5,6 +5,17 @@ import Foundation
 /// Run an RPC method with a typed params dict. Same exit-code behaviour as
 /// `forge rpc`: 1 if the response has `"ok": false`, 0 otherwise.
 func callMethod(_ method: String, params: [String: Any]) {
+    sendMethod(method, params: params, emitResponse: true)
+}
+
+/// Run an RPC method but suppress the success envelope on stdout. Used by
+/// hook-forwarding commands where any stdout content is interpreted by the
+/// caller as hook output rather than transport metadata.
+func callMethodQuietly(_ method: String, params: [String: Any]) {
+    sendMethod(method, params: params, emitResponse: false)
+}
+
+private func sendMethod(_ method: String, params: [String: Any], emitResponse: Bool) {
     let json: String?
     if params.isEmpty {
         json = nil
@@ -17,7 +28,7 @@ func callMethod(_ method: String, params: [String: Any]) {
         }
         json = s
     }
-    sendRPC(method: method, paramsJSON: json)
+    sendRPC(method: method, paramsJSON: json, emitResponse: emitResponse)
 }
 
 /// Extract `--flag value` from an argument list; returns the value or nil.
@@ -220,7 +231,7 @@ func dispatchAgent(_ args: [String]) {
         {
             params["data"] = parsed
         }
-        callMethod("agent.event", params: params)
+        callMethodQuietly("agent.event", params: params)
 
     default:
         FileHandle.standardError.write(Data("Unknown agent subcommand: \(sub)\n".utf8))

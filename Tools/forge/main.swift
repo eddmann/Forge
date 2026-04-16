@@ -69,7 +69,7 @@ default:
 
 // MARK: - RPC
 
-/// Send a JSON-RPC request and write the response (or error) to stdout.
+/// Send a JSON-RPC request and optionally write the response to stdout.
 ///
 /// Exit codes:
 ///   0 — success (`ok: true`)
@@ -77,7 +77,7 @@ default:
 ///   2 — local input was bad (caller already exited 2 for arg validation; this
 ///       function uses 2 only for params that fail to encode)
 ///   3 — transport failure (Forge not running, socket unreachable, no reply)
-func sendRPC(method: String, paramsJSON: String?) {
+func sendRPC(method: String, paramsJSON: String?, emitResponse: Bool = true) {
     let socketPath = ProcessInfo.processInfo.environment["FORGE_SOCKET"]
         ?? NSHomeDirectory() + "/.forge/state/forge.sock"
 
@@ -105,8 +105,10 @@ func sendRPC(method: String, paramsJSON: String?) {
         exit(3)
     }
 
-    // Print response as-is (already JSON) and set exit code from "ok" field.
-    FileHandle.standardOutput.write(Data((responseLine + "\n").utf8))
+    if emitResponse {
+        // Print response as-is (already JSON) and set exit code from "ok" field.
+        FileHandle.standardOutput.write(Data((responseLine + "\n").utf8))
+    }
 
     if let data = responseLine.data(using: .utf8),
        let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
