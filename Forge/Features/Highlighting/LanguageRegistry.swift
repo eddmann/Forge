@@ -97,7 +97,7 @@ enum LanguageRegistry {
         case .css: tree_sitter_css()
         case .markdown: tree_sitter_markdown()
         case .bash: tree_sitter_bash()
-        case .php: tree_sitter_php()
+        case .php: tree_sitter_php_only()
         }
         guard let pointer else { return nil }
         return Language(language: pointer)
