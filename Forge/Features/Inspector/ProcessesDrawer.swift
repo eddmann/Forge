@@ -80,29 +80,21 @@ struct ProcessesDrawer: View {
 
             // Expandable process list
             if expanded {
-                if processManager.processes.isEmpty {
-                    Text("No processes configured")
-                        .font(.system(size: 12))
-                        .foregroundColor(Color(nsColor: .tertiaryLabelColor))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 1) {
-                            ForEach(processManager.processes) { process in
-                                ProcessRow(
-                                    process: process,
-                                    onStart: { processManager.start(process.id) },
-                                    onStop: { processManager.stop(process.id) },
-                                    onRestart: { processManager.restart(process.id) }
-                                )
-                            }
+                ScrollView {
+                    LazyVStack(spacing: 1) {
+                        ForEach(processManager.processes) { process in
+                            ProcessRow(
+                                process: process,
+                                onStart: { processManager.start(process.id) },
+                                onStop: { processManager.stop(process.id) },
+                                onRestart: { processManager.restart(process.id) }
+                            )
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.bottom, 8)
                     }
-                    .frame(maxHeight: 360)
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 8)
                 }
+                .frame(maxHeight: 360)
             }
         }
         .background(Color(nsColor: .controlBackgroundColor))

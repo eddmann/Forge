@@ -75,17 +75,21 @@ struct InspectorView: View {
             .clipped()
 
             // Processes drawer pinned above commands
-            ProcessesDrawer(
-                expanded: processesExpandedBinding,
-                processManager: processManager
-            )
+            if !processManager.processes.isEmpty {
+                ProcessesDrawer(
+                    expanded: processesExpandedBinding,
+                    processManager: processManager
+                )
+            }
 
             // Commands drawer pinned to bottom
-            CommandsDrawer(
-                expanded: commandsExpandedBinding,
-                commands: commands,
-                onRun: runCommand
-            )
+            if !commands.isEmpty {
+                CommandsDrawer(
+                    expanded: commandsExpandedBinding,
+                    commands: commands,
+                    onRun: runCommand
+                )
+            }
         }
         .background(.clear)
         .onAppear {
@@ -279,24 +283,16 @@ private struct CommandsDrawer: View {
 
             // Expandable command list
             if expanded {
-                if commands.isEmpty {
-                    Text("No commands found")
-                        .font(.system(size: 12))
-                        .foregroundColor(Color(nsColor: .tertiaryLabelColor))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                } else {
-                    ScrollView {
-                        LazyVStack(spacing: 1) {
-                            ForEach(commands) { command in
-                                DrawerCommandRow(command: command, onRun: { onRun(command) })
-                            }
+                ScrollView {
+                    LazyVStack(spacing: 1) {
+                        ForEach(commands) { command in
+                            DrawerCommandRow(command: command, onRun: { onRun(command) })
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.bottom, 8)
                     }
-                    .frame(maxHeight: 280)
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 8)
                 }
+                .frame(maxHeight: 280)
             }
         }
         .background(Color(nsColor: .controlBackgroundColor))
