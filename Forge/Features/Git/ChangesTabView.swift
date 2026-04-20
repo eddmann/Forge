@@ -124,12 +124,37 @@ struct ChangesTabView: View {
 
             Spacer()
 
-            // Expand / Collapse context
+            // Expand / Collapse all files (show/hide file diffs)
+            if !viewModel.fileDiffs.isEmpty {
+                let hasCollapsed = viewModel.hasCollapsedFiles
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        if hasCollapsed {
+                            viewModel.expandAllFiles()
+                        } else {
+                            viewModel.collapseAllFiles()
+                        }
+                    }
+                }) {
+                    HStack(spacing: 3) {
+                        Image(systemName: hasCollapsed ? "chevron.down" : "chevron.right")
+                            .font(.system(size: 10, weight: .semibold))
+                        Text(hasCollapsed ? "Expand Files" : "Collapse Files")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                }
+                .buttonStyle(.borderless)
+                .help(hasCollapsed ? "Show all file diffs" : "Hide all file diffs")
+
+                Divider().frame(height: 16)
+            }
+
+            // Expand / Collapse hunk context (full file vs. hunks only)
             Button(action: { viewModel.toggleContextExpansion() }) {
                 HStack(spacing: 3) {
                     Image(systemName: viewModel.contextExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
                         .font(.system(size: 10))
-                    Text(viewModel.contextExpanded ? "Collapse" : "Expand")
+                    Text(viewModel.contextExpanded ? "Hunks Only" : "Full Context")
                         .font(.system(size: 11, weight: .medium))
                 }
             }

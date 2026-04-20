@@ -146,6 +146,23 @@ final class ChangesViewModel: ObservableObject {
         reload()
     }
 
+    // MARK: - Bulk Collapse / Expand
+
+    var hasCollapsedFiles: Bool {
+        !collapsedFiles.isEmpty || !autoCollapsedLargeFiles.isEmpty
+    }
+
+    func expandAllFiles() {
+        collapsedFiles.removeAll()
+        autoCollapsedLargeFiles.removeAll()
+    }
+
+    func collapseAllFiles() {
+        let allPaths = fileDiffs.compactMap { $0.newPath ?? $0.oldPath }.filter { !$0.isEmpty }
+        collapsedFiles = Set(allPaths)
+        autoCollapsedLargeFiles.removeAll()
+    }
+
     // MARK: - Scroll To File
 
     private func listenForScrollRequests(notification: Notification.Name) {
