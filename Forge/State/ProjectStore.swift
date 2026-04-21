@@ -31,8 +31,10 @@ class ProjectStore: ObservableObject {
     }
 
     private var saveWorkItem: DispatchWorkItem?
+    private var selectionSaveWorkItem: DispatchWorkItem?
     private var selectionCallbacksEnabled = false
     private let activityThrottleInterval: TimeInterval = 30
+    private let selectionPersistenceDebounceInterval: TimeInterval = 0.2
 
     var activeProject: Project? {
         guard let id = activeProjectID else { return nil }
@@ -128,10 +130,20 @@ class ProjectStore: ObservableObject {
         #if DEBUG
             if isDemo { return }
         #endif
-        ForgeStore.shared.updateStateFields { state in
-            state.activeProjectID = self.activeProjectID
-            state.activeWorkspaceID = self.activeWorkspaceID
+        selectionSaveWorkItem?.cancel()
+        let projectID = activeProjectID
+        let workspaceID = activeWorkspaceID
+        let item = DispatchWorkItem {
+            ForgeStore.shared.updateStateFields { state in
+                state.activeProjectID = projectID
+                state.activeWorkspaceID = workspaceID
+            }
         }
+        selectionSaveWorkItem = item
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + selectionPersistenceDebounceInterval,
+            execute: item
+        )
     }
 
     // MARK: - Editor Detection

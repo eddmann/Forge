@@ -20,7 +20,10 @@ final class WorkspaceDiffViewModel: ObservableObject {
     private let diffService = GitDiffService.shared
     private var refreshTimer: Timer?
     private var lastHeadSHA: String?
+    private var refreshGeneration = 0
+    private var lastFetchAtByRepo: [String: Date] = [:]
     private var cancellables = Set<AnyCancellable>()
+    private let fetchThrottleInterval: TimeInterval = 60
 
     private var workspace: Workspace? {
         ProjectStore.shared.activeWorkspace
@@ -82,23 +85,52 @@ final class WorkspaceDiffViewModel: ObservableObject {
         }
 
         let parentRef = "origin/\(workspace.parentBranch)"
-
-        // Check if HEAD has changed — skip redundant work
-        let headResult = Git.shared.run(in: repoPath, args: ["rev-parse", "HEAD"])
-        let currentHead = headResult.trimmedOutput
-        if headResult.success, currentHead == lastHeadSHA, !fileDiffs.isEmpty {
-            return
-        }
-
+        let workspaceID = workspace.id
+        refreshGeneration += 1
+        let generation = refreshGeneration
         isLoading = fileDiffs.isEmpty
         error = nil
 
-        // Fetch from project so origin/<parentBranch> is current
-        Git.shared.runAsync(in: repoPath, args: ["fetch", "origin", "--no-tags"]) { [weak self] _ in
-            // Find merge-base against origin/<parentBranch>
+        Git.shared.runAsync(in: repoPath, args: ["rev-parse", "HEAD"]) { [weak self] headResult in
+            Task { @MainActor in
+                guard let self else { return }
+                guard self.isCurrentRefresh(generation, repoPath: repoPath, workspaceID: workspaceID) else { return }
+
+                guard headResult.success else {
+                    self.isLoading = false
+                    self.error = headResult.trimmedOutput
+                    return
+                }
+
+                let currentHead = headResult.trimmedOutput
+                if currentHead == self.lastHeadSHA, !self.fileDiffs.isEmpty {
+                    self.isLoading = false
+                    return
+                }
+
+                self.loadWorkspaceDiff(
+                    repoPath: repoPath,
+                    parentRef: parentRef,
+                    currentHead: currentHead,
+                    workspaceID: workspaceID,
+                    generation: generation
+                )
+            }
+        }
+    }
+
+    private func loadWorkspaceDiff(
+        repoPath: String,
+        parentRef: String,
+        currentHead: String,
+        workspaceID: UUID,
+        generation: Int
+    ) {
+        let continueLoading = { [weak self] in
             Git.shared.runAsync(in: repoPath, args: ["merge-base", parentRef, "HEAD"]) { mergeBaseResult in
                 Task { @MainActor in
                     guard let self else { return }
+                    guard self.isCurrentRefresh(generation, repoPath: repoPath, workspaceID: workspaceID) else { return }
 
                     guard mergeBaseResult.success else {
                         self.isLoading = false
@@ -107,19 +139,46 @@ final class WorkspaceDiffViewModel: ObservableObject {
                     }
 
                     let mergeBase = mergeBaseResult.trimmedOutput
-                    self.loadDiffs(repoPath: repoPath, mergeBase: mergeBase)
-                    self.loadCommits(repoPath: repoPath, parentRef: parentRef, currentHead: currentHead)
+                    self.loadDiffs(
+                        repoPath: repoPath,
+                        mergeBase: mergeBase,
+                        workspaceID: workspaceID,
+                        generation: generation
+                    )
+                    self.loadCommits(
+                        repoPath: repoPath,
+                        parentRef: parentRef,
+                        currentHead: currentHead,
+                        workspaceID: workspaceID,
+                        generation: generation
+                    )
                 }
             }
         }
+
+        if shouldFetch(repoPath: repoPath) {
+            lastFetchAtByRepo[repoPath] = Date()
+            Git.shared.runAsync(in: repoPath, args: ["fetch", "origin", "--no-tags"]) { _ in
+                continueLoading()
+            }
+            return
+        }
+
+        continueLoading()
     }
 
     // MARK: - Load Diffs
 
-    private func loadDiffs(repoPath: String, mergeBase: String) {
+    private func loadDiffs(
+        repoPath: String,
+        mergeBase: String,
+        workspaceID: UUID,
+        generation: Int
+    ) {
         diffService.diffAsync(in: repoPath, request: .between(mergeBase, "HEAD")) { [weak self] result in
             Task { @MainActor in
                 guard let self else { return }
+                guard self.isCurrentRefresh(generation, repoPath: repoPath, workspaceID: workspaceID) else { return }
                 self.isLoading = false
 
                 switch result {
@@ -135,19 +194,37 @@ final class WorkspaceDiffViewModel: ObservableObject {
 
     // MARK: - Load Commits
 
-    private func loadCommits(repoPath: String, parentRef: String, currentHead: String) {
+    private func loadCommits(
+        repoPath: String,
+        parentRef: String,
+        currentHead: String,
+        workspaceID: UUID,
+        generation: Int
+    ) {
         Git.shared.runAsync(
             in: repoPath,
             args: ["log", "\(parentRef)..HEAD", "--format=%H%n%s%n%an%n%aI", "--reverse"]
         ) { [weak self] result in
             Task { @MainActor in
                 guard let self else { return }
+                guard self.isCurrentRefresh(generation, repoPath: repoPath, workspaceID: workspaceID) else { return }
                 if result.success {
                     self.commits = WorkspaceCommit.parse(from: result.trimmedOutput)
                     self.lastHeadSHA = currentHead
                 }
             }
         }
+    }
+
+    private func shouldFetch(repoPath: String) -> Bool {
+        guard let lastFetchAt = lastFetchAtByRepo[repoPath] else { return true }
+        return Date().timeIntervalSince(lastFetchAt) >= fetchThrottleInterval
+    }
+
+    private func isCurrentRefresh(_ generation: Int, repoPath: String, workspaceID: UUID) -> Bool {
+        generation == refreshGeneration
+            && self.repoPath == repoPath
+            && workspace?.id == workspaceID
     }
 
     #if DEBUG

@@ -12,6 +12,7 @@ struct InspectorView: View {
     @ObservedObject private var processManager = ProcessManager.shared
     @ObservedObject private var inspectorState = InspectorStateStore.shared
     @State private var commands: [ProjectCommand] = []
+    @State private var commandDiscoveryTask: Task<Void, Never>?
 
     private var activeTab: InspectorTab {
         let tab = InspectorTab(rawValue: inspectorState.current.activeTab) ?? .working
@@ -103,6 +104,7 @@ struct InspectorView: View {
             }
         }
         .onDisappear {
+            commandDiscoveryTask?.cancel()
             StatusViewModel.shared.saveToInspectorState()
             inspectorState.persist()
             StatusViewModel.shared.stopAutoRefresh()
@@ -110,18 +112,11 @@ struct InspectorView: View {
         }
         .onChange(of: store.activeProjectID) { _, _ in
             discoverCommands()
-            Task { @MainActor in
-                StatusViewModel.shared.refresh()
-            }
         }
         .onChange(of: store.activeWorkspaceID) { _, _ in
             discoverCommands()
             loadProcesses()
-            Task { @MainActor in
-                StatusViewModel.shared.refresh()
-                WorkspaceDiffViewModel.shared.refresh()
-                inspectorState.persist()
-            }
+            inspectorState.persist()
         }
         .onChange(of: store.configReloadTrigger) { _, _ in
             discoverCommands()
@@ -130,12 +125,28 @@ struct InspectorView: View {
     }
 
     private func discoverCommands() {
+        commandDiscoveryTask?.cancel()
         guard let project = store.activeProject else {
             commands = []
             return
         }
         let path = store.effectivePath ?? project.path
-        commands = discoverProjectCommands(at: path)
+        let expectedProjectID = project.id
+        let expectedWorkspaceID = store.activeWorkspaceID
+
+        commandDiscoveryTask = Task {
+            let discovered = await Task.detached(priority: .userInitiated) {
+                discoverProjectCommands(at: path)
+            }.value
+
+            guard !Task.isCancelled else { return }
+            guard store.activeProjectID == expectedProjectID,
+                  store.activeWorkspaceID == expectedWorkspaceID,
+                  (store.effectivePath ?? store.activeProject?.path) == path
+            else { return }
+
+            commands = discovered
+        }
     }
 
     private func loadProcesses() {
