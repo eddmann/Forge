@@ -88,6 +88,12 @@ struct ProcessSnapshot {
 class ProcessManager: ObservableObject {
     static let shared = ProcessManager()
 
+    private struct LoadedProcessConfig {
+        let processes: [ManagedProcess]
+        let composeFilePath: String?
+        let composeWorkingDirectory: String?
+    }
+
     @Published var processes: [ManagedProcess] = []
     private var runningProcesses: [UUID: Process] = [:]
     private var outputPipes: [UUID: Pipe] = [:]
@@ -110,6 +116,8 @@ class ProcessManager: ObservableObject {
     private var workspaceName: String?
     private var projectName: String?
     private var allocatedPorts: [String: Int] = [:]
+    private var configGeneration = 0
+    private let configLoadQueue = DispatchQueue(label: "forge.process-config-load", qos: .utility)
 
     /// Build the base environment for running processes in this workspace.
     /// Matches what a workspace shell terminal would see.
@@ -166,82 +174,38 @@ class ProcessManager: ObservableObject {
 
     /// Load processes from forge.json for the given workspace path.
     func loadConfig(from workspacePath: String, allocatedPorts: [String: Int], portDetails: [String: String] = [:], scopeKey: String? = nil, workspaceName: String? = nil, projectName: String? = nil) {
-        // Save outgoing workspace's process state
         saveCurrentState()
+        stopSyncTimer()
+        configGeneration += 1
+        let generation = configGeneration
         activeScopeKey = scopeKey
         self.allocatedPorts = allocatedPorts
         self.workspaceName = workspaceName
         self.projectName = projectName
-        var loaded: [ManagedProcess] = []
-
-        guard let config = ForgeConfig.load(from: workspacePath) else {
+        let restoredCachedState = scopeKey.map { restoreCachedState(forKey: $0) } ?? false
+        if !restoredCachedState {
             processes = []
-            return
         }
+        composeFilePath = nil
+        composeWorkingDirectory = nil
 
-        // Standalone processes
-        if let processConfigs = config.processes {
-            for (name, processConfig) in processConfigs.sorted(by: { $0.key < $1.key }) {
-                let dir = if let relativeDir = processConfig.dir {
-                    (workspacePath as NSString).appendingPathComponent(relativeDir)
-                } else {
-                    workspacePath
-                }
-
-                // Resolve which port this process uses by checking its env vars against allocated ports
-                let resolved = resolvePort(for: processConfig, allocatedPorts: allocatedPorts, portDetails: portDetails)
-
-                var proc = ManagedProcess(
-                    name: name,
-                    command: processConfig.command,
-                    workingDirectory: dir,
-                    source: .process,
-                    autoStart: processConfig.autoStart,
-                    autoRestart: processConfig.autoRestart,
-                    env: processConfig.env ?? [:]
-                )
-                proc.port = resolved?.port
-                proc.portDetail = resolved?.detail
-                loaded.append(proc)
+        configLoadQueue.async { [weak self] in
+            guard let self else { return }
+            let loadedConfig = buildLoadedConfig(
+                from: workspacePath,
+                allocatedPorts: allocatedPorts,
+                portDetails: portDetails
+            )
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                guard configGeneration == generation, activeScopeKey == scopeKey else { return }
+                composeFilePath = loadedConfig.composeFilePath
+                composeWorkingDirectory = loadedConfig.composeWorkingDirectory
+                processes = loadedConfig.processes
+                syncState(expectedGeneration: generation)
+                startSyncTimer()
             }
         }
-
-        // Docker Compose services
-        if let compose = config.compose {
-            let composeFile = (workspacePath as NSString).appendingPathComponent(compose.file)
-            if FileManager.default.fileExists(atPath: composeFile) {
-                composeFilePath = composeFile
-                composeWorkingDirectory = workspacePath
-
-                let services = discoverComposeServices(at: composeFile, filter: compose.services)
-                for service in services {
-                    var proc = ManagedProcess(
-                        name: service,
-                        command: "docker compose -f \(compose.file) up \(service)",
-                        workingDirectory: workspacePath,
-                        source: .docker,
-                        autoStart: compose.autoStart,
-                        autoRestart: false,
-                        env: [:]
-                    )
-                    // Try to find a port for this service from allocated ports
-                    proc.port = nil // Docker ports resolved at runtime
-                    loaded.append(proc)
-                }
-            } else {
-                composeFilePath = nil
-                composeWorkingDirectory = nil
-            }
-        } else {
-            composeFilePath = nil
-            composeWorkingDirectory = nil
-        }
-
-        processes = loaded
-
-        // Sync process state immediately and start periodic polling
-        syncState()
-        startSyncTimer()
     }
 
     /// Start a specific process by ID.
@@ -359,6 +323,7 @@ class ProcessManager: ObservableObject {
     /// Clear all processes (e.g. when switching workspaces).
     func clear() {
         saveCurrentState()
+        configGeneration += 1
         stopAll()
         stopSyncTimer()
         processes.removeAll()
@@ -409,7 +374,7 @@ class ProcessManager: ObservableObject {
             withTimeInterval: Self.dockerSyncInterval,
             repeats: true
         ) { [weak self] _ in
-            self?.syncState()
+            self?.syncState(expectedGeneration: self?.configGeneration)
         }
     }
 
@@ -420,12 +385,17 @@ class ProcessManager: ObservableObject {
 
     /// Refresh the status of all processes to match actual system state.
     func syncState() {
-        syncStandaloneProcesses()
-        syncDockerState()
+        syncState(expectedGeneration: configGeneration)
+    }
+
+    private func syncState(expectedGeneration: Int?) {
+        syncStandaloneProcesses(expectedGeneration: expectedGeneration)
+        syncDockerState(expectedGeneration: expectedGeneration)
     }
 
     /// Check managed standalone processes and update status if they've exited externally.
-    private func syncStandaloneProcesses() {
+    private func syncStandaloneProcesses(expectedGeneration: Int?) {
+        guard isCurrentGeneration(expectedGeneration) else { return }
         for i in processes.indices where processes[i].source == .process {
             let id = processes[i].id
             if let process = runningProcesses[id] {
@@ -439,11 +409,13 @@ class ProcessManager: ObservableObject {
     }
 
     /// Query `docker compose ps` and update docker service statuses to match actual container state.
-    private func syncDockerState() {
+    private func syncDockerState(expectedGeneration: Int?) {
+        guard isCurrentGeneration(expectedGeneration) else { return }
         guard let composeFile = composeFilePath,
               let workDir = composeWorkingDirectory else { return }
 
         let env = workspaceEnvironment()
+        let generation = expectedGeneration ?? configGeneration
         DispatchQueue.global(qos: .utility).async { [weak self] in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/sh")
@@ -484,6 +456,10 @@ class ProcessManager: ObservableObject {
 
             DispatchQueue.main.async {
                 guard let self else { return }
+                guard self.isCurrentGeneration(generation),
+                      self.composeFilePath == composeFile,
+                      self.composeWorkingDirectory == workDir
+                else { return }
                 for i in self.processes.indices where self.processes[i].source == .docker {
                     let name = self.processes[i].name
                     let managedByUs = self.runningProcesses[self.processes[i].id] != nil
@@ -500,6 +476,75 @@ class ProcessManager: ObservableObject {
                 }
             }
         }
+    }
+
+    private func buildLoadedConfig(from workspacePath: String, allocatedPorts: [String: Int], portDetails: [String: String]) -> LoadedProcessConfig {
+        guard let config = ForgeConfig.load(from: workspacePath) else {
+            return LoadedProcessConfig(processes: [], composeFilePath: nil, composeWorkingDirectory: nil)
+        }
+
+        var loaded: [ManagedProcess] = []
+        var composeFilePath: String?
+        var composeWorkingDirectory: String?
+
+        if let processConfigs = config.processes {
+            for (name, processConfig) in processConfigs.sorted(by: { $0.key < $1.key }) {
+                let dir = if let relativeDir = processConfig.dir {
+                    (workspacePath as NSString).appendingPathComponent(relativeDir)
+                } else {
+                    workspacePath
+                }
+
+                let resolved = resolvePort(for: processConfig, allocatedPorts: allocatedPorts, portDetails: portDetails)
+
+                var proc = ManagedProcess(
+                    name: name,
+                    command: processConfig.command,
+                    workingDirectory: dir,
+                    source: .process,
+                    autoStart: processConfig.autoStart,
+                    autoRestart: processConfig.autoRestart,
+                    env: processConfig.env ?? [:]
+                )
+                proc.port = resolved?.port
+                proc.portDetail = resolved?.detail
+                loaded.append(proc)
+            }
+        }
+
+        if let compose = config.compose {
+            let resolvedComposeFile = (workspacePath as NSString).appendingPathComponent(compose.file)
+            if FileManager.default.fileExists(atPath: resolvedComposeFile) {
+                composeFilePath = resolvedComposeFile
+                composeWorkingDirectory = workspacePath
+
+                let services = discoverComposeServices(at: resolvedComposeFile, filter: compose.services)
+                for service in services {
+                    var proc = ManagedProcess(
+                        name: service,
+                        command: "docker compose -f \(compose.file) up \(service)",
+                        workingDirectory: workspacePath,
+                        source: .docker,
+                        autoStart: compose.autoStart,
+                        autoRestart: false,
+                        env: [:]
+                    )
+                    proc.port = nil
+                    loaded.append(proc)
+                }
+            }
+        }
+
+        return LoadedProcessConfig(
+            processes: loaded,
+            composeFilePath: composeFilePath,
+            composeWorkingDirectory: composeWorkingDirectory
+        )
+    }
+
+    private func isCurrentGeneration(_ generation: Int?) -> Bool {
+        guard let generation else { return true }
+        return generation == configGeneration
     }
 
     // MARK: - Compose Discovery

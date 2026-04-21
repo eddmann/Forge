@@ -25,6 +25,7 @@ final class StatusViewModel: ObservableObject {
 
     private var refreshTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
+    private var refreshGeneration = 0
 
     /// Tracks the previous workspace scope for saving state on switch.
     private var previousProjectID: UUID?
@@ -38,28 +39,20 @@ final class StatusViewModel: ObservableObject {
         previousProjectID = ProjectStore.shared.activeProjectID
         previousWorkspaceID = ProjectStore.shared.activeWorkspaceID
 
-        // Refresh when project/workspace changes (deferred to avoid publishing during view updates)
+        // Coalesce project/workspace selection changes into a single refresh cycle.
         ProjectStore.shared.$activeProjectID
+            .combineLatest(ProjectStore.shared.$activeWorkspaceID)
             .dropFirst()
-            .sink { [weak self] _ in
-                Task { @MainActor in self?.refresh() }
-            }
-            .store(in: &cancellables)
-
-        ProjectStore.shared.$activeWorkspaceID
-            .dropFirst()
-            .sink { [weak self] newID in
+            .debounce(for: .milliseconds(50), scheduler: DispatchQueue.main)
+            .sink { [weak self] newProjectID, newWorkspaceID in
                 Task { @MainActor in
                     guard let self else { return }
-                    // Save state under the previous workspace scope
                     self.saveToInspectorState(
                         projectID: self.previousProjectID,
                         workspaceID: self.previousWorkspaceID
                     )
-                    // Update tracking
-                    self.previousProjectID = ProjectStore.shared.activeProjectID
-                    self.previousWorkspaceID = newID
-                    // Restore from the new workspace scope
+                    self.previousProjectID = newProjectID
+                    self.previousWorkspaceID = newWorkspaceID
                     self.restoreFromInspectorState()
                     self.refresh()
                 }
@@ -135,6 +128,7 @@ final class StatusViewModel: ObservableObject {
     func stopAutoRefresh() {
         refreshTimer?.invalidate()
         refreshTimer = nil
+        invalidateRefreshes()
     }
 
     // MARK: - Refresh
@@ -143,18 +137,25 @@ final class StatusViewModel: ObservableObject {
         #if DEBUG
             if ProjectStore.shared.isDemo { return }
         #endif
+        let generation = nextRefreshGeneration()
         guard !isBusy else { return }
         guard let repoPath else {
-            statuses = []
-            grouped = [:]
-            currentBranch = nil
+            clearRefreshState()
             return
         }
+        let projectID = ProjectStore.shared.activeProjectID
+        let workspaceID = ProjectStore.shared.activeWorkspaceID
 
         // Fetch status
         Git.shared.runAsync(in: repoPath, args: ["status", "--porcelain"]) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self else { return }
+                guard self.isCurrentRefresh(
+                    generation,
+                    repoPath: repoPath,
+                    projectID: projectID,
+                    workspaceID: workspaceID
+                ) else { return }
                 if result.success {
                     self.statuses = FileStatus.parse(porcelain: result.stdout)
                     self.grouped = FileStatus.categorize(self.statuses)
@@ -166,6 +167,12 @@ final class StatusViewModel: ObservableObject {
         Git.shared.runAsync(in: repoPath, args: ["rev-parse", "--abbrev-ref", "HEAD"]) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self else { return }
+                guard self.isCurrentRefresh(
+                    generation,
+                    repoPath: repoPath,
+                    projectID: projectID,
+                    workspaceID: workspaceID
+                ) else { return }
                 if result.success {
                     let branch = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
                     self.currentBranch = branch.isEmpty ? nil : branch
@@ -178,6 +185,12 @@ final class StatusViewModel: ObservableObject {
         Git.shared.runAsync(in: repoPath, args: ["log", "-1", "--format=%B"]) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self else { return }
+                guard self.isCurrentRefresh(
+                    generation,
+                    repoPath: repoPath,
+                    projectID: projectID,
+                    workspaceID: workspaceID
+                ) else { return }
                 if result.success {
                     self.lastCommitMessage = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
                 }
@@ -188,6 +201,12 @@ final class StatusViewModel: ObservableObject {
         Git.shared.runAsync(in: repoPath, args: ["rev-list", "--left-right", "--count", "HEAD...@{upstream}"]) { [weak self] result in
             DispatchQueue.main.async {
                 guard let self else { return }
+                guard self.isCurrentRefresh(
+                    generation,
+                    repoPath: repoPath,
+                    projectID: projectID,
+                    workspaceID: workspaceID
+                ) else { return }
                 if result.success {
                     self.hasUpstream = true
                     let parts = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\t")
@@ -200,6 +219,33 @@ final class StatusViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    private func nextRefreshGeneration() -> Int {
+        refreshGeneration += 1
+        return refreshGeneration
+    }
+
+    private func invalidateRefreshes() {
+        refreshGeneration += 1
+    }
+
+    private func isCurrentRefresh(_ generation: Int, repoPath: String, projectID: UUID?, workspaceID: UUID?) -> Bool {
+        generation == refreshGeneration
+            && self.repoPath == repoPath
+            && ProjectStore.shared.activeProjectID == projectID
+            && ProjectStore.shared.activeWorkspaceID == workspaceID
+    }
+
+    private func clearRefreshState() {
+        statuses = []
+        grouped = [:]
+        currentBranch = nil
+        lastCommitMessage = nil
+        ahead = 0
+        behind = 0
+        hasUpstream = false
+        ProjectStore.shared.currentBranch = ""
     }
 
     // MARK: - Selection
