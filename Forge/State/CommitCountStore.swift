@@ -7,55 +7,97 @@ import Foundation
 class CommitCountStore: ObservableObject {
     static let shared = CommitCountStore()
 
+    private struct WorkspaceSnapshot: Equatable {
+        let path: String
+        let parentBranch: String
+        let status: Workspace.Status
+        let isScratch: Bool
+    }
+
     @Published private(set) var countByWorkspace: [UUID: Int] = [:]
 
     private var cancellables = Set<AnyCancellable>()
+    private var trackedWorkspaces: [UUID: WorkspaceSnapshot] = [:]
+    private var inFlightWorkspaceIDs: Set<UUID> = []
+    private let refreshQueue = DispatchQueue(label: "forge.commit-count-refresh", qos: .utility)
 
     private init() {
-        // Refresh counts when the workspace list changes
+        // Refresh counts when the workspace list changes, but only for changed workspaces.
         ProjectStore.shared.$workspaces
-            .dropFirst()
             .debounce(for: .seconds(1), scheduler: DispatchQueue.main)
-            .sink { [weak self] _ in self?.refreshAll() }
+            .sink { [weak self] workspaces in self?.syncWorkspaces(workspaces) }
             .store(in: &cancellables)
 
-        // Also refresh when git status changes (new commits)
-        StatusViewModel.shared.$ahead
+        // Refresh the selected workspace's count when the user switches scope.
+        ProjectStore.shared.$activeWorkspaceID
             .dropFirst()
-            .sink { [weak self] _ in self?.refreshAll() }
+            .removeDuplicates()
+            .sink { [weak self] _ in self?.refreshActiveWorkspace() }
             .store(in: &cancellables)
 
-        refreshAll()
+        // HEAD watchers may fire often; only refresh the active workspace and debounce bursts.
+        ProjectStore.shared.$gitRefreshTrigger
+            .dropFirst()
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshActiveWorkspace() }
+            .store(in: &cancellables)
     }
 
-    func refreshAll() {
-        let workspaces = ProjectStore.shared.workspaces.filter { $0.status == .active }
-        for workspace in workspaces {
-            refreshCount(for: workspace)
-        }
-        // Clean up removed workspaces
-        let activeIDs = Set(workspaces.map(\.id))
+    private func syncWorkspaces(_ workspaces: [Workspace]) {
+        let activeWorkspaces = workspaces.filter { $0.status == .active }
+        let activeIDs = Set(activeWorkspaces.map(\.id))
+
         for key in countByWorkspace.keys where !activeIDs.contains(key) {
             countByWorkspace.removeValue(forKey: key)
         }
+        trackedWorkspaces = trackedWorkspaces.filter { activeIDs.contains($0.key) }
+        inFlightWorkspaceIDs.formIntersection(activeIDs)
+
+        for workspace in activeWorkspaces {
+            let snapshot = snapshot(for: workspace)
+            let existingSnapshot = trackedWorkspaces[workspace.id]
+            trackedWorkspaces[workspace.id] = snapshot
+            if existingSnapshot != snapshot || countByWorkspace[workspace.id] == nil {
+                refreshCount(for: workspace, snapshot: snapshot)
+            }
+        }
     }
 
-    private func refreshCount(for workspace: Workspace) {
+    private func refreshActiveWorkspace() {
+        guard let workspace = ProjectStore.shared.activeWorkspace, workspace.status == .active else { return }
+        let snapshot = snapshot(for: workspace)
+        trackedWorkspaces[workspace.id] = snapshot
+        refreshCount(for: workspace, snapshot: snapshot)
+    }
+
+    private func snapshot(for workspace: Workspace) -> WorkspaceSnapshot {
+        WorkspaceSnapshot(
+            path: workspace.path,
+            parentBranch: workspace.parentBranch,
+            status: workspace.status,
+            isScratch: workspace.isScratch
+        )
+    }
+
+    private func refreshCount(for workspace: Workspace, snapshot: WorkspaceSnapshot) {
         // Scratch projects have no remote / parent branch — short-circuit.
-        if workspace.isScratch {
+        if snapshot.isScratch {
             countByWorkspace[workspace.id] = 0
             return
         }
 
-        let path = workspace.path
-        let parentBranch = workspace.parentBranch
         let wsID = workspace.id
+        guard !inFlightWorkspaceIDs.contains(wsID) else { return }
+        inFlightWorkspaceIDs.insert(wsID)
 
-        DispatchQueue.global(qos: .utility).async {
-            let result = Git.shared.run(in: path, args: ["rev-list", "--count", "origin/\(parentBranch)..HEAD"])
-            guard result.success, let count = Int(result.trimmedOutput) else { return }
+        refreshQueue.async {
+            let result = Git.shared.run(in: snapshot.path, args: ["rev-list", "--count", "origin/\(snapshot.parentBranch)..HEAD"])
             DispatchQueue.main.async { [weak self] in
-                self?.countByWorkspace[wsID] = count
+                guard let self else { return }
+                inFlightWorkspaceIDs.remove(wsID)
+                guard trackedWorkspaces[wsID] == snapshot else { return }
+                guard result.success, let count = Int(result.trimmedOutput) else { return }
+                countByWorkspace[wsID] = count
             }
         }
     }
