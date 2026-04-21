@@ -35,9 +35,11 @@ class CommitCountStore: ObservableObject {
             .sink { [weak self] _ in self?.refreshActiveWorkspace() }
             .store(in: &cancellables)
 
-        // HEAD watchers may fire often; only refresh the active workspace and debounce bursts.
-        ProjectStore.shared.$gitRefreshTrigger
+        // Recompute the selected workspace count when the active repo head changes.
+        RepoGitStateStore.shared.$activeSnapshot
             .dropFirst()
+            .compactMap { $0?.headSHA }
+            .removeDuplicates()
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in self?.refreshActiveWorkspace() }
             .store(in: &cancellables)

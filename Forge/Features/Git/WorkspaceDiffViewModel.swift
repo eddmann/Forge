@@ -43,6 +43,16 @@ final class WorkspaceDiffViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+
+        RepoGitStateStore.shared.$activeSnapshot
+            .compactMap { $0?.headSHA }
+            .removeDuplicates()
+            .sink { [weak self] _ in
+                Task { @MainActor in
+                    self?.refresh()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     // MARK: - Auto Refresh
@@ -90,33 +100,24 @@ final class WorkspaceDiffViewModel: ObservableObject {
         let generation = refreshGeneration
         isLoading = fileDiffs.isEmpty
         error = nil
-
-        Git.shared.runAsync(in: repoPath, args: ["rev-parse", "HEAD"]) { [weak self] headResult in
-            Task { @MainActor in
-                guard let self else { return }
-                guard self.isCurrentRefresh(generation, repoPath: repoPath, workspaceID: workspaceID) else { return }
-
-                guard headResult.success else {
-                    self.isLoading = false
-                    self.error = headResult.trimmedOutput
-                    return
-                }
-
-                let currentHead = headResult.trimmedOutput
-                if currentHead == self.lastHeadSHA, !self.fileDiffs.isEmpty {
-                    self.isLoading = false
-                    return
-                }
-
-                self.loadWorkspaceDiff(
-                    repoPath: repoPath,
-                    parentRef: parentRef,
-                    currentHead: currentHead,
-                    workspaceID: workspaceID,
-                    generation: generation
-                )
-            }
+        guard let currentHead = RepoGitStateStore.shared.snapshot(for: repoPath)?.headSHA else {
+            RepoGitStateStore.shared.refreshActiveRepo(force: true)
+            isLoading = false
+            return
         }
+
+        if currentHead == lastHeadSHA, !fileDiffs.isEmpty {
+            isLoading = false
+            return
+        }
+
+        loadWorkspaceDiff(
+            repoPath: repoPath,
+            parentRef: parentRef,
+            currentHead: currentHead,
+            workspaceID: workspaceID,
+            generation: generation
+        )
     }
 
     private func loadWorkspaceDiff(

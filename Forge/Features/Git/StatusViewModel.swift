@@ -2,6 +2,174 @@ import Combine
 import Foundation
 import SwiftUI
 
+struct RepoGitSnapshot {
+    let repoPath: String
+    let statuses: [FileStatus]
+    let grouped: [WorkingTreeGroup: [FileStatus]]
+    let currentBranch: String?
+    let headSHA: String?
+    let lastCommitMessage: String?
+    let ahead: Int
+    let behind: Int
+    let hasUpstream: Bool
+}
+
+@MainActor
+final class RepoGitStateStore: ObservableObject {
+    static let shared = RepoGitStateStore()
+
+    private struct InFlightRefresh {
+        let id: UUID
+        let task: Task<RepoGitSnapshot, Never>
+    }
+
+    @Published private(set) var activeRepoPath: String?
+    @Published private(set) var activeSnapshot: RepoGitSnapshot?
+
+    private var snapshotsByRepoPath: [String: RepoGitSnapshot] = [:]
+    private var inFlightRefreshes: [String: InFlightRefresh] = [:]
+    private var refreshTimer: Timer?
+    private var cancellables = Set<AnyCancellable>()
+
+    private init() {
+        ProjectStore.shared.$activeProjectID
+            .combineLatest(ProjectStore.shared.$activeWorkspaceID)
+            .dropFirst()
+            .debounce(for: .milliseconds(50), scheduler: DispatchQueue.main)
+            .sink { [weak self] _, _ in
+                self?.activateCurrentRepo()
+            }
+            .store(in: &cancellables)
+
+        ProjectStore.shared.$gitRefreshTrigger
+            .dropFirst()
+            .debounce(for: .milliseconds(250), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.refreshActiveRepo(force: true)
+            }
+            .store(in: &cancellables)
+    }
+
+    func startAutoRefresh(interval: TimeInterval = 3.0) {
+        stopAutoRefresh()
+        activateCurrentRepo()
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.refreshActiveRepo()
+            }
+        }
+    }
+
+    func stopAutoRefresh() {
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+    }
+
+    func refreshActiveRepo(force: Bool = false) {
+        guard let repoPath = activeRepoPath ?? currentRepoPath() else {
+            activeRepoPath = nil
+            activeSnapshot = nil
+            return
+        }
+
+        if !force, let refresh = inFlightRefreshes[repoPath] {
+            applyRefreshTask(refresh, for: repoPath)
+            return
+        }
+
+        let refresh = InFlightRefresh(
+            id: UUID(),
+            task: Task.detached(priority: .utility) {
+                Self.loadSnapshot(repoPath: repoPath)
+            }
+        )
+        inFlightRefreshes[repoPath] = refresh
+        applyRefreshTask(refresh, for: repoPath)
+    }
+
+    func snapshot(for repoPath: String) -> RepoGitSnapshot? {
+        if activeRepoPath == repoPath, let activeSnapshot {
+            return activeSnapshot
+        }
+        return snapshotsByRepoPath[repoPath]
+    }
+
+    private func activateCurrentRepo() {
+        guard let repoPath = currentRepoPath() else {
+            activeRepoPath = nil
+            activeSnapshot = nil
+            return
+        }
+        activeRepoPath = repoPath
+        activeSnapshot = snapshotsByRepoPath[repoPath]
+        refreshActiveRepo(force: true)
+    }
+
+    private func applyRefreshTask(_ refresh: InFlightRefresh, for repoPath: String) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let snapshot = await refresh.task.value
+            guard inFlightRefreshes[repoPath]?.id == refresh.id else { return }
+            inFlightRefreshes.removeValue(forKey: repoPath)
+            snapshotsByRepoPath[repoPath] = snapshot
+            guard activeRepoPath == repoPath else { return }
+            activeSnapshot = snapshot
+        }
+    }
+
+    private func currentRepoPath() -> String? {
+        ProjectStore.shared.effectiveRootPath ?? ProjectStore.shared.activeProject?.path
+    }
+
+    private nonisolated static func loadSnapshot(repoPath: String) -> RepoGitSnapshot {
+        let statusResult = Git.shared.run(in: repoPath, args: ["status", "--porcelain"])
+        let branchResult = Git.shared.run(in: repoPath, args: ["rev-parse", "--abbrev-ref", "HEAD"])
+        let headResult = Git.shared.run(in: repoPath, args: ["rev-parse", "HEAD"])
+        let lastCommitResult = Git.shared.run(in: repoPath, args: ["log", "-1", "--format=%B"])
+        let aheadBehindResult = Git.shared.run(in: repoPath, args: ["rev-list", "--left-right", "--count", "HEAD...@{upstream}"])
+
+        let statuses = statusResult.success ? FileStatus.parse(porcelain: statusResult.stdout) : []
+        let grouped = FileStatus.categorize(statuses)
+        let currentBranch = branchResult.success
+            ? branchResult.stdout.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+            : nil
+        let headSHA = headResult.success
+            ? headResult.stdout.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+            : nil
+        let lastCommitMessage = lastCommitResult.success
+            ? lastCommitResult.stdout.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+            : nil
+
+        var ahead = 0
+        var behind = 0
+        var hasUpstream = false
+        if aheadBehindResult.success {
+            hasUpstream = true
+            let parts = aheadBehindResult.stdout.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\t")
+            ahead = parts.count > 0 ? Int(parts[0]) ?? 0 : 0
+            behind = parts.count > 1 ? Int(parts[1]) ?? 0 : 0
+        }
+
+        return RepoGitSnapshot(
+            repoPath: repoPath,
+            statuses: statuses,
+            grouped: grouped,
+            currentBranch: currentBranch,
+            headSHA: headSHA,
+            lastCommitMessage: lastCommitMessage,
+            ahead: ahead,
+            behind: behind,
+            hasUpstream: hasUpstream
+        )
+    }
+}
+
+private extension String {
+    var nilIfEmpty: String? {
+        isEmpty ? nil : self
+    }
+}
+
 @MainActor
 final class StatusViewModel: ObservableObject {
     static let shared = StatusViewModel()
@@ -23,14 +191,11 @@ final class StatusViewModel: ObservableObject {
 
     // MARK: - Private
 
-    private var refreshTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
-    private var refreshGeneration = 0
 
     /// Tracks the previous workspace scope for saving state on switch.
     private var previousProjectID: UUID?
     private var previousWorkspaceID: UUID?
-
     private var repoPath: String? {
         ProjectStore.shared.effectiveRootPath ?? ProjectStore.shared.activeProject?.path
     }
@@ -54,8 +219,22 @@ final class StatusViewModel: ObservableObject {
                     self.previousProjectID = newProjectID
                     self.previousWorkspaceID = newWorkspaceID
                     self.restoreFromInspectorState()
-                    self.refresh()
                 }
+            }
+            .store(in: &cancellables)
+
+        RepoGitStateStore.shared.$activeRepoPath
+            .dropFirst()
+            .sink { [weak self] repoPath in
+                guard repoPath == nil else { return }
+                self?.clearRefreshState()
+            }
+            .store(in: &cancellables)
+
+        RepoGitStateStore.shared.$activeSnapshot
+            .compactMap { $0 }
+            .sink { [weak self] snapshot in
+                self?.apply(snapshot: snapshot)
             }
             .store(in: &cancellables)
     }
@@ -116,19 +295,11 @@ final class StatusViewModel: ObservableObject {
         #if DEBUG
             if ProjectStore.shared.isDemo { return }
         #endif
-        stopAutoRefresh()
-        refresh()
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.refresh()
-            }
-        }
+        RepoGitStateStore.shared.startAutoRefresh(interval: interval)
     }
 
     func stopAutoRefresh() {
-        refreshTimer?.invalidate()
-        refreshTimer = nil
-        invalidateRefreshes()
+        RepoGitStateStore.shared.stopAutoRefresh()
     }
 
     // MARK: - Refresh
@@ -137,104 +308,8 @@ final class StatusViewModel: ObservableObject {
         #if DEBUG
             if ProjectStore.shared.isDemo { return }
         #endif
-        let generation = nextRefreshGeneration()
         guard !isBusy else { return }
-        guard let repoPath else {
-            clearRefreshState()
-            return
-        }
-        let projectID = ProjectStore.shared.activeProjectID
-        let workspaceID = ProjectStore.shared.activeWorkspaceID
-
-        // Fetch status
-        Git.shared.runAsync(in: repoPath, args: ["status", "--porcelain"]) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                guard self.isCurrentRefresh(
-                    generation,
-                    repoPath: repoPath,
-                    projectID: projectID,
-                    workspaceID: workspaceID
-                ) else { return }
-                if result.success {
-                    self.statuses = FileStatus.parse(porcelain: result.stdout)
-                    self.grouped = FileStatus.categorize(self.statuses)
-                }
-            }
-        }
-
-        // Fetch branch info
-        Git.shared.runAsync(in: repoPath, args: ["rev-parse", "--abbrev-ref", "HEAD"]) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                guard self.isCurrentRefresh(
-                    generation,
-                    repoPath: repoPath,
-                    projectID: projectID,
-                    workspaceID: workspaceID
-                ) else { return }
-                if result.success {
-                    let branch = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
-                    self.currentBranch = branch.isEmpty ? nil : branch
-                    ProjectStore.shared.currentBranch = branch
-                }
-            }
-        }
-
-        // Fetch last commit message (for amend)
-        Git.shared.runAsync(in: repoPath, args: ["log", "-1", "--format=%B"]) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                guard self.isCurrentRefresh(
-                    generation,
-                    repoPath: repoPath,
-                    projectID: projectID,
-                    workspaceID: workspaceID
-                ) else { return }
-                if result.success {
-                    self.lastCommitMessage = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
-                }
-            }
-        }
-
-        // Fetch ahead/behind
-        Git.shared.runAsync(in: repoPath, args: ["rev-list", "--left-right", "--count", "HEAD...@{upstream}"]) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                guard self.isCurrentRefresh(
-                    generation,
-                    repoPath: repoPath,
-                    projectID: projectID,
-                    workspaceID: workspaceID
-                ) else { return }
-                if result.success {
-                    self.hasUpstream = true
-                    let parts = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines).split(separator: "\t")
-                    self.ahead = parts.count > 0 ? Int(parts[0]) ?? 0 : 0
-                    self.behind = parts.count > 1 ? Int(parts[1]) ?? 0 : 0
-                } else {
-                    self.hasUpstream = false
-                    self.ahead = 0
-                    self.behind = 0
-                }
-            }
-        }
-    }
-
-    private func nextRefreshGeneration() -> Int {
-        refreshGeneration += 1
-        return refreshGeneration
-    }
-
-    private func invalidateRefreshes() {
-        refreshGeneration += 1
-    }
-
-    private func isCurrentRefresh(_ generation: Int, repoPath: String, projectID: UUID?, workspaceID: UUID?) -> Bool {
-        generation == refreshGeneration
-            && self.repoPath == repoPath
-            && ProjectStore.shared.activeProjectID == projectID
-            && ProjectStore.shared.activeWorkspaceID == workspaceID
+        RepoGitStateStore.shared.refreshActiveRepo(force: true)
     }
 
     private func clearRefreshState() {
@@ -246,6 +321,19 @@ final class StatusViewModel: ObservableObject {
         behind = 0
         hasUpstream = false
         ProjectStore.shared.currentBranch = ""
+    }
+
+    private func apply(snapshot: RepoGitSnapshot) {
+        let expectedRepoPath = ProjectStore.shared.effectiveRootPath ?? ProjectStore.shared.activeProject?.path
+        guard snapshot.repoPath == expectedRepoPath else { return }
+        statuses = snapshot.statuses
+        grouped = snapshot.grouped
+        currentBranch = snapshot.currentBranch
+        lastCommitMessage = snapshot.lastCommitMessage
+        ahead = snapshot.ahead
+        behind = snapshot.behind
+        hasUpstream = snapshot.hasUpstream
+        ProjectStore.shared.currentBranch = snapshot.currentBranch ?? ""
     }
 
     // MARK: - Selection
