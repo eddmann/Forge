@@ -100,8 +100,15 @@ final class RepoGitStateStore: ObservableObject {
             activeSnapshot = nil
             return
         }
-        activeRepoPath = repoPath
-        activeSnapshot = snapshotsByRepoPath[repoPath]
+        if activeRepoPath != repoPath {
+            // Path changed (workspace/project switch). Don't republish the
+            // cached snapshot — it was captured for a different working tree
+            // and applying it would clobber the per-workspace state that
+            // StatusViewModel restores from InspectorStateStore. Wait for
+            // the fresh refresh.
+            activeRepoPath = repoPath
+            activeSnapshot = nil
+        }
         refreshActiveRepo(force: true)
     }
 

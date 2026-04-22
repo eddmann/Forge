@@ -38,8 +38,15 @@ final class WorkspaceDiffViewModel: ObservableObject {
             .dropFirst()
             .sink { [weak self] _ in
                 Task { @MainActor in
-                    self?.lastHeadSHA = nil
-                    self?.refresh()
+                    guard let self else { return }
+                    // Drop the previous workspace's diffs immediately so the
+                    // loading state shows instead of stale content while the
+                    // new workspace's diff loads.
+                    self.lastHeadSHA = nil
+                    self.fileDiffs = []
+                    self.commits = []
+                    self.stats = nil
+                    self.refresh()
                 }
             }
             .store(in: &cancellables)
